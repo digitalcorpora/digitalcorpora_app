@@ -1,0 +1,4 @@
+.tiny {
+    color: grey;
+    font-size: 8pt;
+}

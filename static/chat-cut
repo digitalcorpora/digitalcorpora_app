@@ -1,0 +1,32 @@
+    $("#but1").click( function() {
+	var line = $("#text1").val(); 
+	console.log( line );
+	appendLine( line );
+	return false; //stop event bubbling up and event propigation
+    });
+
+
+    $(".autoload").click( function(e) {
+	console.log("e=",e);
+	return true;
+    });
+    $(".autoload").keypress( function(e) {
+	if (e.charCode==13){
+	    channel = e.target.attr('id').replace("-text","");
+	    console.log("submit! channel=",channel);
+	    e.preventDefault();
+	    e.target.blur();
+	    return false;
+	}
+	return true;
+    });
+    $(".autoload").on('input', function(e) {
+	console.log('on input',e)
+	return true;
+    });
+    $(".autoload").blur( function(e) {
+	console.log("blur e=",e);
+	return true;
+    });
+    $("#status1-but").click( statusSend );
+
