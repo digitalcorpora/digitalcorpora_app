@@ -18,5 +18,10 @@ def func(path):
     import s3_gateway
     return s3_gateway.s3_app('digitalcorpora','corpora/' + path)
 
+@bottle.route('/corpora/')
+def func():
+    import s3_gateway
+    return s3_gateway.s3_app('digitalcorpora','corpora/')
+
 def app():
     return bottle.default_app()

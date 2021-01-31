@@ -22,6 +22,8 @@ from bottle import request,response
 
 server_base = ''
 DEFAULT_BUCKET='digitalcorpora'
+BYPASS_URL = 'https://digitalcorpora.s3.amazonaws.com/'
+USE_BYPASS = True
 
 def s3_list_prefix(bucket_name, path):
     """
@@ -39,7 +41,7 @@ def s3_list_prefix(bucket_name, path):
         for obj in page.get('Contents',[]):
             files.append(obj)
     if (not dirs) and (not files):
-        return f"<html><body>{path}: not found</body></html>"
+        raise FileNotFoundError(path)
 
     f = io.StringIO()
     f.write("<html><body>")
@@ -62,7 +64,10 @@ def s3_list_prefix(bucket_name, path):
         if ct==0:
             f.write("<tr><th>Name</th><th>Size</th><th>Mod Date</th></tr>")
         name = obj['Key'].split("/")[-1]
-        f.write(f"<tr><td><a href='{request.url}{name}'>{name}</a></td><td> {obj['Size']:,}</td><td>{obj['LastModified']}</td></tr>\n")
+        if USE_BYPASS:
+            f.write(f"<tr><td><a href='{BYPASS_URL+obj['Key']}'>{name}</a></td><td> {obj['Size']:,}</td><td>{obj['LastModified']}</td></tr>\n")
+        else:
+            f.write(f"<tr><td><a href='{request.url}{name}'>{name}</a></td><td> {obj['Size']:,}</td><td>{obj['LastModified']}</td></tr>\n")
     f.write("</table>\n")
     f.write("</body></html>")
     return f.getvalue()
@@ -73,8 +78,12 @@ def s3_app(bucket, path):
     """
     Fetching a file
     """
+    print("bucket=",bucket,"path=",path,file=sys.stderr)
     if path.endswith("/"):
-        return s3_list_prefix(bucket, path)
+        try:
+            return s3_list_prefix(bucket, path)
+        except FileNotFoundError as e:
+            return f"<html><body>{path}: not found</body></html>"
 
     try:
         response.content_type = mimetypes.guess_type(path)[0]
@@ -85,7 +94,12 @@ def s3_app(bucket, path):
         obj = boto3.client('s3').get_object(Bucket=bucket, Key=path)
         return obj['Body']
     except botocore.exceptions.ClientError  as e:
-        print(type(e),e,file=sys.stderr)
+        # See if it is a prefix
+        try:
+            return s3_list_prefix(bucket, path+"/")
+        except FileNotFoundError as e:
+            pass
+
         response.status=404
         return f"Error 404: File not found -- s3://{bucket}/{path}"
 
