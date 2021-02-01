@@ -17,6 +17,9 @@ import mimetypes
 import boto3
 import botocore
 import botocore.exceptions
+import logging
+import json
+import urllib.parse
 
 from bottle import request,response
 
@@ -25,14 +28,13 @@ DEFAULT_BUCKET='digitalcorpora'
 BYPASS_URL = 'https://digitalcorpora.s3.amazonaws.com/'
 USE_BYPASS = True
 
-def s3_list_prefix(bucket_name, path):
+def s3_get_dirs_files(bucket_name, path):
     """
-    Display the path in a bucket as a prefix. This is done server-server side so that it will work with wget -r.
+    Returns a list of the s3 objects of the 'dirs' and the 'files'
     """
     s3client = boto3.client('s3')
     paginator = s3client.get_paginator('list_objects_v2')
     pages = paginator.paginate(Bucket=bucket_name, Prefix=path, Delimiter='/')
-
     dirs  = []
     files = []
     for page in pages:
@@ -42,6 +44,23 @@ def s3_list_prefix(bucket_name, path):
             files.append(obj)
     if (not dirs) and (not files):
         raise FileNotFoundError(path)
+    return (dirs,files)
+
+def s3_to_link(obj):
+    """Given a s3 object, return a link to it"""
+    if 'Prefix' in obj:
+        name = obj['Prefix'].split("/")[-2]+"/"
+        return request.url + urllib.parse.quote(name)
+    elif 'Key' in obj:
+        return BYPASS_URL + urllib.parse.quote(obj['Key'])
+    else:
+        raise RuntimeError("obj: "+json.dumps(obj,default=str))
+
+def s3_list_prefix(bucket_name, path):
+    """
+    Display the path in a bucket as a prefix. This is done server-server side so that it will work with wget -r.
+    """
+    (dirs,files) = s3_get_dirs_files(bucket_name,path)
 
     f = io.StringIO()
     f.write("<html><body>")
@@ -54,8 +73,7 @@ def s3_list_prefix(bucket_name, path):
     f.write("<h2>Sub directories:</h2>")
     f.write("<ul>\n")
     for obj in dirs:
-        name = obj['Prefix'].split("/")[-2]+"/"
-        f.write(f"<li><a href='{request.url}{name}'>{name}</a></li>\n")
+        f.write(f"<li><a href='{s3_to_link(obj)}'>{name}</a></li>\n")
     f.write("</ul>\n")
 
     f.write("<h2>Downloads:</h2>")
@@ -63,11 +81,9 @@ def s3_list_prefix(bucket_name, path):
     for (ct,obj) in enumerate(files):
         if ct==0:
             f.write("<tr><th>Name</th><th>Size</th><th>Mod Date</th></tr>")
-        name = obj['Key'].split("/")[-1]
-        if USE_BYPASS:
-            f.write(f"<tr><td><a href='{BYPASS_URL+obj['Key']}'>{name}</a></td><td> {obj['Size']:,}</td><td>{obj['LastModified']}</td></tr>\n")
         else:
-            f.write(f"<tr><td><a href='{request.url}{name}'>{name}</a></td><td> {obj['Size']:,}</td><td>{obj['LastModified']}</td></tr>\n")
+            f.write(f"<tr><td><a href='{s3_to_link(obj)}'>{name}</a></td><td> "
+                    f"{obj['Size']:,}</td><td>{obj['LastModified']}</td></tr>\n")
     f.write("</table>\n")
     f.write("</body></html>")
     return f.getvalue()
@@ -78,7 +94,7 @@ def s3_app(bucket, path):
     """
     Fetching a file
     """
-    print("bucket=",bucket,"path=",path,file=sys.stderr)
+    logging.warning("bucket=%s path=%s",bucket,path)
     if path.endswith("/"):
         try:
             return s3_list_prefix(bucket, path)
