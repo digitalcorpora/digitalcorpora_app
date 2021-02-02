@@ -21,6 +21,7 @@ import logging
 import json
 import urllib.parse
 
+from os.path import abspath,dirname
 from bottle import request,response
 
 server_base = ''
@@ -28,11 +29,13 @@ DEFAULT_BUCKET='digitalcorpora'
 BYPASS_URL = 'https://digitalcorpora.s3.amazonaws.com/'
 USE_BYPASS = True
 
+IGNORE_FILES = ['.DS_Store','Icon']
+
 def s3_get_dirs_files(bucket_name, path):
     """
     Returns a list of the s3 objects of the 'dirs' and the 'files'
     """
-    s3client = boto3.client('s3')
+    s3client  = boto3.client('s3')
     paginator = s3client.get_paginator('list_objects_v2')
     pages = paginator.paginate(Bucket=bucket_name, Prefix=path, Delimiter='/')
     dirs  = []
@@ -61,6 +64,7 @@ def s3_list_prefix(bucket_name, path):
     Display the path in a bucket as a prefix. This is done server-server side so that it will work with wget -r.
     """
     (dirs,files) = s3_get_dirs_files(bucket_name,path)
+    parent = dirname(dirname(request.url))+"/"
 
     f = io.StringIO()
     f.write("<html><body>")
@@ -70,9 +74,11 @@ def s3_list_prefix(bucket_name, path):
     # prefixes from the contents.
     # cache pages due to 1000 object limit on aws api
 
-    f.write("<h2>Sub directories:</h2>")
+    f.write("<h2>Sub directories:</h2>\n")
     f.write("<ul>\n")
+    f.write(f"<li><a href='{parent}'>[Parent Directory]</a>\n")
     for obj in dirs:
+        name = obj['Prefix'].split('/')[-2]
         f.write(f"<li><a href='{s3_to_link(obj)}'>{name}</a></li>\n")
     f.write("</ul>\n")
 
@@ -81,25 +87,30 @@ def s3_list_prefix(bucket_name, path):
     for (ct,obj) in enumerate(files):
         if ct==0:
             f.write("<tr><th>Name</th><th>Size</th><th>Mod Date</th></tr>")
-        else:
-            f.write(f"<tr><td><a href='{s3_to_link(obj)}'>{name}</a></td><td> "
-                    f"{obj['Size']:,}</td><td>{obj['LastModified']}</td></tr>\n")
+        name = obj['Key'].split('/')[-1]
+        if name in IGNORE_FILES:
+            continue
+        f.write(f"<tr><td><a href='{s3_to_link(obj)}'>{name}</a></td><td> "
+                f"{obj['Size']:,}</td><td>{obj['LastModified']}</td></tr>\n")
     f.write("</table>\n")
     f.write("</body></html>")
     return f.getvalue()
 
 
-def s3_app(bucket, path):
+def s3_app(bucket, quoted_path):
 
     """
     Fetching a file
+    :param bucket: - the bucket that we are serving from
+    :param path:   - the path to display.
     """
-    logging.warning("bucket=%s path=%s",bucket,path)
+    path = urllib.parse.unquote(quoted_path)
+    logging.warning("bucket=%s quoted_path=%s path=%s",bucket,quoted_path,path)
     if path.endswith("/"):
         try:
             return s3_list_prefix(bucket, path)
         except FileNotFoundError as e:
-            return f"<html><body>{path}: not found</body></html>"
+            return f"<html><body><pre>\nquoted_path: {quoted_path}\npath: {path}\n</pre>not found</body></html>"
 
     try:
         response.content_type = mimetypes.guess_type(path)[0]
