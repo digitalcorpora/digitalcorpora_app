@@ -25,3 +25,6 @@ def test_s3_to_link(dirs_and_files):
     assert s3_to_link(dirs[0])=='http://127.0.0.1/subdir%20with-space/'
     assert s3_to_link(dirs[1])=='http://127.0.0.1/subdir1/'
     assert s3_to_link(files[0])=='https://digitalcorpora.s3.amazonaws.com/tests/file1.txt'
+
+def test_redirect():
+    """A direct download should instead redirect to Amazon"""

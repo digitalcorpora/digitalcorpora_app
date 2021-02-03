@@ -22,12 +22,13 @@ import json
 import urllib.parse
 
 from os.path import abspath,dirname
-from bottle import request,response
+from bottle import request,response,redirect
 
 server_base = ''
 DEFAULT_BUCKET='digitalcorpora'
 BYPASS_URL = 'https://digitalcorpora.s3.amazonaws.com/'
 USE_BYPASS = True
+
 
 IGNORE_FILES = ['.DS_Store','Icon']
 
@@ -97,21 +98,8 @@ def s3_list_prefix(bucket_name, path):
     return f.getvalue()
 
 
-def s3_app(bucket, quoted_path):
-
-    """
-    Fetching a file
-    :param bucket: - the bucket that we are serving from
-    :param path:   - the path to display.
-    """
-    path = urllib.parse.unquote(quoted_path)
-    logging.warning("bucket=%s quoted_path=%s path=%s",bucket,quoted_path,path)
-    if path.endswith("/"):
-        try:
-            return s3_list_prefix(bucket, path)
-        except FileNotFoundError as e:
-            return f"<html><body><pre>\nquoted_path: {quoted_path}\npath: {path}\n</pre>not found</body></html>"
-
+def proxy_download(path):
+    """Allow a download directly from this app"""
     try:
         response.content_type = mimetypes.guess_type(path)[0]
     except:
@@ -130,6 +118,25 @@ def s3_app(bucket, quoted_path):
         response.status=404
         return f"Error 404: File not found -- s3://{bucket}/{path}"
 
+def s3_app(bucket, quoted_path):
+
+    """
+    Fetching a file
+    :param bucket: - the bucket that we are serving from
+    :param path:   - the path to display.
+    """
+    path = urllib.parse.unquote(quoted_path)
+    logging.warning("bucket=%s quoted_path=%s path=%s",bucket,quoted_path,path)
+    if path.endswith("/"):
+        try:
+            return s3_list_prefix(bucket, path)
+        except FileNotFoundError as e:
+            return f"<html><body><pre>\nquoted_path: {quoted_path}\npath: {path}\n</pre>not found</body></html>"
+
+    if USE_BYPASS:
+        print("redirect to",BYPASS_URL + path,file=sys.stderr)
+        redirect(BYPASS_URL + path)
+    return proxy_download(path)
 
 
 if __name__=="__main__":
