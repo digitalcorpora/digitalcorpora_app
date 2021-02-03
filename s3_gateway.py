@@ -21,6 +21,8 @@ import logging
 import json
 import urllib.parse
 
+from botocore.exceptions import ClientError
+
 from os.path import abspath,dirname
 from bottle import request,response,redirect
 
@@ -98,28 +100,7 @@ def s3_list_prefix(bucket_name, path):
     return f.getvalue()
 
 
-def proxy_download(path):
-    """Allow a download directly from this app"""
-    try:
-        response.content_type = mimetypes.guess_type(path)[0]
-    except:
-        response.content_type = 'application/octet-stream'
-
-    try:
-        obj = boto3.client('s3').get_object(Bucket=bucket, Key=path)
-        return obj['Body']
-    except botocore.exceptions.ClientError  as e:
-        # See if it is a prefix
-        try:
-            return s3_list_prefix(bucket, path+"/")
-        except FileNotFoundError as e:
-            pass
-
-        response.status=404
-        return f"Error 404: File not found -- s3://{bucket}/{path}"
-
 def s3_app(bucket, quoted_path):
-
     """
     Fetching a file
     :param bucket: - the bucket that we are serving from
@@ -133,10 +114,31 @@ def s3_app(bucket, quoted_path):
         except FileNotFoundError as e:
             return f"<html><body><pre>\nquoted_path: {quoted_path}\npath: {path}\n</pre>not found</body></html>"
 
+    # If the path does not end with a '/' and there is object there, see if it is a prefix
+    try:
+        obj = boto3.client('s3').get_object(Bucket=bucket, Key=path)
+    except botocore.exceptions.ClientError as e:
+
+        # See if it is a directory list.
+        try:
+            return s3_list_prefix(bucket, path+"/")
+        except FileNotFoundError as e:
+            # No object and not a prefix
+            response.status=404
+            return f"Error 404: File not found -- s3://{bucket}/{path}"
+
+    # If we are using the bypass, redirect
+
     if USE_BYPASS:
         print("redirect to",BYPASS_URL + path,file=sys.stderr)
         redirect(BYPASS_URL + path)
-    return proxy_download(path)
+
+    # Otherwise download directly
+    try:
+        response.content_type = mimetypes.guess_type(path)[0]
+    except:
+        response.content_type = 'application/octet-stream'
+    return obj['Body']
 
 
 if __name__=="__main__":
