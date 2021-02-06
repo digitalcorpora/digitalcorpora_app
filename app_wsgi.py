@@ -13,15 +13,20 @@ def func(name):
 def func():
     return bottle.template("Python version {{version}}",version=sys.version)
 
+@bottle.route('/corpora/')
+def func():
+    import s3_gateway
+    return s3_gateway.s3_app('digitalcorpora','corpora/')
+
 @bottle.route('/corpora/<path:path>')
 def func(path):
     import s3_gateway
     return s3_gateway.s3_app('digitalcorpora','corpora/' + path)
 
-@bottle.route('/corpora/')
-def func():
+@bottle.route('/downloads/<path:path>')
+def f2(path):
     import s3_gateway
-    return s3_gateway.s3_app('digitalcorpora','corpora/')
+    return s3_gateway.s3_app('digitalcorpora','downloads/' + path)
 
 def app():
     return bottle.default_app()
