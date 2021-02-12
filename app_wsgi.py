@@ -3,6 +3,7 @@
 import bottle
 import sys
 import os
+from os.path import abspath,dirname
 
 @bottle.route('/hello/<name>')
 def func(name):
@@ -13,15 +14,34 @@ def func(name):
 def func():
     return bottle.template("Python version {{version}}",version=sys.version)
 
-@bottle.route('/corpora/<path:path>')
-def func(path):
-    import s3_gateway
-    return s3_gateway.s3_app('digitalcorpora','corpora/' + path)
+@bottle.route('/')
+def root():
+    return bottle.static_file('index.html', root= os.path.join(dirname(abspath(__file__)), 'static'))
 
 @bottle.route('/corpora/')
 def func():
     import s3_gateway
     return s3_gateway.s3_app('digitalcorpora','corpora/')
+
+@bottle.route('/corpora/<path:path>')
+def bottle_corpora(path):
+    import s3_gateway
+    return s3_gateway.s3_app('digitalcorpora','corpora/' + path)
+
+@bottle.route('/downloads/')
+def bottle_downloads():
+    import s3_gateway
+    return s3_gateway.s3_app('digitalcorpora','downloads/' )
+
+@bottle.route('/downloads/<path:path>')
+def bottle_downloads(path):
+    import s3_gateway
+    return s3_gateway.s3_app('digitalcorpora','downloads/' + path)
+
+@bottle.route('/robots.txt')
+def robots():
+    import s3_gateway
+    return s3_gateway.s3_app('digitalcorpora','robots.txt')
 
 def app():
     return bottle.default_app()
