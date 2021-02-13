@@ -13,10 +13,11 @@
 
     <style type="text/css">
       .post h1 { padding: 0 0 10px 0; }
-      .post h2 { padding: 0 0 2px 0;  }
-      .post h3 { padding: 10px 0 2px 0; font-size: 12pt;}
+      .post h2 { padding: 0 0 5px 0;  }
+      .post h3 { padding: 10px 0 5px 0; font-size: 12pt;}
       .post .content td.r { text-align: right;}
       .post .content td.c { text-align: center;}
+      .post .content li.subdir { font-size: 12pt;}
     </style>
   </head>
   <body class='customize-support'>
@@ -57,13 +58,22 @@
 	    <div class='post'>
 	      <div class='content'>
 		<h1>downloads.digitalcorpora.org S3 Browser</h1>
-		<h2>{{prefix}} sub-prefixes:</h2>
+		<h2><!--
+            % for path in paths:
+            -->/<a href="{{path[0]}}">{{path[1]}}</a><!--
+            % end
+            --> sub-dirs:</h2>
+
                 <ul>
                   % for d in dirs:
-                      <li><a href='{{d}}'>{{d}}</a></li>
+                      <li class='subdir'><a href='{{d}}'>{{d}}</a></li>
                   % end
                 </ul>
-		<h2>{{prefix}} files:</h2>
+		<h2><!--
+            % for path in paths:
+            -->/<a href="{{path[0]}}">{{path[1]}}</a><!--
+            % end
+            --> files:</h2>
 		<table>
 		  <thead>
 		    <tr><th>Name</th><th>Size</th><th>SHA2-256</th><th>SHA3-256</th></tr>
