@@ -9,39 +9,35 @@
     <script type='text/javascript' src='https://digitalcorpora.org/wp/wp-includes/js/jquery/jquery.min.js?ver=3.5.1' id='jquery-core-js'></script>
     <script type='text/javascript' src='https://digitalcorpora.org/wp/wp-includes/js/jquery/jquery-migrate.min.js?ver=3.3.2' id='jquery-migrate-js'></script>
     <script type='text/javascript' id='simple-banner-script-js-extra'></script>
-    <title>Digital Corpora Test Page</title>
+    <title>Digital Corpora Downloads: {{prefix}}</title>
 
     <style type="text/css">
       .post h1 { padding: 0 0 10px 0; }
-      .post h2 { padding: 0 0 2px 0; }
+      .post h2 { padding: 0 0 2px 0;  }
       .post h3 { padding: 10px 0 2px 0; font-size: 12pt;}
+      .post .content td.r { text-align: right;}
+      .post .content td.c { text-align: center;}
     </style>
   </head>
   <body class='customize-support'>
     <div id='wrap'>
       <div id='container'>
-	<!-- header START -->
 	<div id="header">
-	  <!-- banner START -->
-	  <!-- banner END -->
-
 	  <div id="caption">
 	    <h1 id="title"><a href="https://digitalcorpora.org/">Digital Corpora</a></h1>
 	    <div id="tagline">Producing the Digital Body</div>
 	  </div>
-
 	  <div class="fixed"></div>
 	</div>
-	<!-- header END -->
-
-	<!-- navigation START -->
 	<div id="navigation">
 	  <!-- menus START -->
 	  <ul id="menus">
 	    <li class="page_item"><a class="home" title="Home" href="http://digitalcorpora.org/">Home</a></li>
-	    <li class="page_item"><a href="https://digitalcorpora.org/2019-owl">2019 Owl</a></li>
-	    <li class="page_item"><a href="https://digitalcorpora.org/news">News</a></li>
-	    <li class="page_item"><a href="https://digitalcorpora.org/corpora">Corpora</a></li>
+
+            % for path in paths:
+                <li class="page_item"><a href="/{{path[0]}}">{{path[1]}}</a></li>
+            % end
+            <!-- loop here c1 -->
 	  </ul>
 	</div>
 
@@ -56,47 +52,32 @@
 	</div>
 
 	<div class="fixed"></div>
-
 	<div id='content'>
 	  <div id='main'>
 	    <div class='post'>
 	      <div class='content'>
-		<h1>S3 Browser</h1>
-		<p>Pick your poison:</p>
-		<ul>
-		  <li>Item #1</li>
-		  <li>Item #2</li>
-		</ul>
-		<h1>H1 Title</h1>
-		<p><b>Lorem Ipsum</b> is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.</p>
-		<p>There are many variations of passages of Lorem Ipsum available,
-		  but the majority have suffered alteration in some form, by
-		  injected humour, or randomised words which don't look even
-		  slightly believable. If you are going to use a passage of Lorem
-		  Ipsum, you need to be sure there isn't anything embarrassing
-		  hidden in the middle of text. All the Lorem Ipsum generators on
-		  the Internet tend to repeat predefined chunks as necessary, making
-		  this the first true generator on the Internet. It uses a
-		  dictionary of over 200 Latin words, combined with a handful of
-		  model sentence structures, to generate Lorem Ipsum which looks
-		  reasonable. The generated Lorem Ipsum is therefore always free
-		  from repetition, injected humour, or non-characteristic words
-		  etc.</p>
-		<h2>H2 Title</h2>
-		<h3>H3 Title</h3>
-		<p>Here  we have an HR:</p>
-		<hr/>
-		<p>That was fun!</p>
+		<h1>downloads.digitalcorpora.org S3 Browser</h1>
+		<h2>{{prefix}} sub-prefixes:</h2>
+                <ul>
+                  % for d in dirs:
+                      <li><a href='{{d}}'>{{d}}</a></li>
+                  % end
+                </ul>
+		<h2>{{prefix}} files:</h2>
 		<table>
 		  <thead>
-		    <tr><th>Head 1</th><th>Head 2</th></tr>
+		    <tr><th>Name</th><th>Size</th><th>SHA2-256</th><th>SHA3-256</th></tr>
 		  </thead>
 		  <tbody>
-		    <tr><td>Body1</td><td>Body2</td></tr>
-		    <tr><td>Body1</td><td>Body2</td></tr>
+                    % for f in files:
+                    <tr>
+                      <td><a href='{{f[0]}}'>{{f[1]}}</a></td>
+                      <td class='r'>{{f[2]}}</td><td class='c'>{{f[3]}}</td>
+                      <td class='c'>{{f[4]}}</td>
+                    </tr>
+                    % end
 		  </tbody>
 		  <tfoot>
-		    <tr><th>Foot 1</th><th>Foot 2</th></tr>
 		  </tfoot>
 		</table>
 	      </div>
@@ -113,7 +94,10 @@
 	  <div id="copyright">
 	    Copyright &copy; 2009-2021 Digital Corpora	</div>
 	  <div id="themeinfo">
-	    Theme by <a href="http://www.neoease.com/">NeoEase</a>. Valid <a href="http://validator.w3.org/check?uri=referer">XHTML 1.1</a> and <a href="http://jigsaw.w3.org/css-validator/check/referer?profile=css3">CSS 3</a>.	</div>
+	    Theme by <a href="http://www.neoease.com/">NeoEase</a>.
+            Valid <a href="http://validator.w3.org/check?uri=referer">XHTML 1.1</a>
+            and <a href="http://jigsaw.w3.org/css-validator/check/referer?profile=css3">CSS 3</a>.
+	  </div>
 	</div>
 	<!-- footer END -->
       </div>
