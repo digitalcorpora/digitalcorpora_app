@@ -20,6 +20,7 @@ import botocore.exceptions
 import logging
 import json
 import urllib.parse
+import os
 
 from botocore.exceptions import ClientError
 
@@ -36,7 +37,7 @@ IGNORE_FILES = ['.DS_Store','Icon']
 
 def s3_get_dirs_files(bucket_name, path):
     """
-    Returns a list of the s3 objects of the 'dirs' and the 'files'
+    Returns a tuple of the s3 objects of the 'dirs' and the 'files'
     """
     s3client  = boto3.client('s3')
     paginator = s3client.get_paginator('list_objects_v2')
@@ -62,9 +63,12 @@ def s3_to_link(obj):
     else:
         raise RuntimeError("obj: "+json.dumps(obj,default=str))
 
-def s3_list_prefix(bucket_name, path):
+def s3_list_prefix_v0(bucket_name, path):
     """
+    The original s3_list_prefix implementation: generates the HTML locally.
     Display the path in a bucket as a prefix. This is done server-server side so that it will work with wget -r.
+    :param bucket_name: the bucket to list
+    :param path: the path within the bucket (no leading /)
     """
     (dirs,files) = s3_get_dirs_files(bucket_name,path)
     parent = dirname(dirname(request.url))+"/"
@@ -89,7 +93,7 @@ def s3_list_prefix(bucket_name, path):
     f.write("<table>\n")
     for (ct,obj) in enumerate(files):
         if ct==0:
-            f.write("<tr><th>Name</th><th>Size</th><th>Mod Date</th></tr>")
+            f.write("<tr><th>Name</th><th>Size</th><th>Date Uploaded to S3</th></tr>")
         name = obj['Key'].split('/')[-1]
         if name in IGNORE_FILES:
             continue
@@ -99,7 +103,32 @@ def s3_list_prefix(bucket_name, path):
     f.write("</body></html>")
     return f.getvalue()
 
+s3_index = bottle.SimpleTemplate( open(os.path.join( dirname(__file__), "templates/s3_index.tpl")).read() )
+def s3_list_prefix_v1(bucket_name, prefix):
+    """
+    The revised s3_list_prefix implementation: uses the Bottle template system
+    to generate HTML. Get a list of the sub-prefixes (dirs) and the objects with this prefix (files),
+    and then construct the dirs[] and files[] arrays. Elements of dirs are strings (one for each prefix).
+    Elements of files[] are (url,name, size,sha256,sha3) tuples.
+    :param bucket_name: the bucket to list
+    :param path: the path within the bucket (no leading /)
+    """
+    path = '/'
+    paths = []
+    for part in prefix.split('/')[:-1]:
+        part += '/'
+        path += part
+        paths.append( (path,part) )
 
+    (s3_dirs, s3_files) = s3_get_dirs_files(bucket_name, prefix)
+    dirs  = [obj['Prefix'].split('/')[-2]+'/' for obj in s3_dirs]
+    files = [ ( s3_to_link(obj), obj['Key'].split('/')[-1], obj['Size'], 'n/a','n/a')
+                  for obj in s3_files]
+
+    logging.warning("bucket_name=%s prefix=%s paths=%s files=%s dirs=%s",bucket_name,prefix,paths,files,dirs)
+    return s3_index.render(prefix=prefix, paths=paths, files=files, dirs=dirs)
+
+s3_list_prefix = s3_list_prefix_v1
 def s3_app(bucket, quoted_path):
     """
     Fetching a file
@@ -112,6 +141,7 @@ def s3_app(bucket, quoted_path):
         try:
             return s3_list_prefix(bucket, path)
         except FileNotFoundError as e:
+            logging.warning("e:%s",e)
             return f"<html><body><pre>\nquoted_path: {quoted_path}\npath: {path}\n</pre>not found</body></html>"
 
     # If the path does not end with a '/' and there is object there, see if it is a prefix
