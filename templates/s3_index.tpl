@@ -72,7 +72,7 @@
             --> files:</h2>
 		<table>
 		  <thead>
-		    <tr><th>Name</th><th>Size</th><th>SHA2-256</th><th>SHA3-256</th></tr>
+		    <tr><th>Name</th><th>Size</th><th><a href='https://digitalcorpora.org/about-digitalcorpora/hashes'>SHA2-256</a></th><th><a href='https://digitalcorpora.org/about-digitalcorpora/hashes'>SHA3-256</a></th></tr>
 		  </thead>
 		  <tbody>
                     % for f in files:
