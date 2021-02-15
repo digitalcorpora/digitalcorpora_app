@@ -16,6 +16,20 @@ def func(name):
 def func():
     return bottle.template("Python version {{version}}",version=sys.version)
 
+s3_index = bottle.SimpleTemplate( open(os.path.join( dirname(__file__), "templates/s3_index.tpl")).read() )
+@bottle.route('/t')
+def func():
+    prefix = 'a/b/c/d/e/f'
+    path = ''
+    paths = []
+    for part in prefix.split('/'):
+        path += part + '/'
+        paths.append( (path,part) )
+    dirs = ['subdir1','subdir2']
+    files= [ ('https://company.com/a','a',100,'n/a','n/a'),
+             ('https://company.com/b','b',200,'n/a','n/a')]
+    return s3_index.render(prefix=prefix, paths=paths, files=files, dirs=dirs)
+
 # Production
 @bottle.route('/')
 def root():
