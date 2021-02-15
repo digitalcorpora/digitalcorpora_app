@@ -7,6 +7,9 @@ bottle/boto3 interface to view an s3 bucket in a web browser.
 Currently not operational; based on operational code elsewhere.
 Being refactored into public code and prvate code.
 
+2021-02-15 - slg - updated to use anonymous s3 requests,
+                   per https://stackoverflow.com/questions/34865927/can-i-use-boto3-anonymously
+
 """
 
 import sys
@@ -22,6 +25,8 @@ import json
 import urllib.parse
 import os
 
+from botocore import UNSIGNED
+from botocore.client import Config
 from botocore.exceptions import ClientError
 
 from os.path import abspath,dirname
@@ -35,13 +40,17 @@ USE_BYPASS = True
 
 IGNORE_FILES = ['.DS_Store','Icon']
 
-def s3_get_dirs_files(bucket_name, path):
+def s3_get_dirs_files(bucket_name, prefix):
     """
     Returns a tuple of the s3 objects of the 'dirs' and the 'files'
+    Makes an unauthenticated call
+    :param bucket_name: bucket to read
+    :param prefix: prefix to examine
+    :return: (prefixes,keys) -  a list of prefixes under `prefix`, and keys under `prefix`.
     """
-    s3client  = boto3.client('s3')
+    s3client  = boto3.client('s3', config=Config(signature_version=UNSIGNED))
     paginator = s3client.get_paginator('list_objects_v2')
-    pages = paginator.paginate(Bucket=bucket_name, Prefix=path, Delimiter='/')
+    pages = paginator.paginate(Bucket=bucket_name, Prefix=prefix, Delimiter='/')
     dirs  = []
     files = []
     for page in pages:
@@ -50,7 +59,7 @@ def s3_get_dirs_files(bucket_name, path):
         for obj in page.get('Contents',[]):
             files.append(obj)
     if (not dirs) and (not files):
-        raise FileNotFoundError(path)
+        raise FileNotFoundError(prefix)
     return (dirs,files)
 
 def s3_to_link(obj):
@@ -146,7 +155,7 @@ def s3_app(bucket, quoted_path):
 
     # If the path does not end with a '/' and there is object there, see if it is a prefix
     try:
-        obj = boto3.client('s3').get_object(Bucket=bucket, Key=path)
+        obj = boto3.client('s3', config=Config(signature_version=UNSIGNED)).get_object(Bucket=bucket, Key=path)
     except botocore.exceptions.ClientError as e:
 
         # See if it is a directory list.
