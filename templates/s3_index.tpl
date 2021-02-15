@@ -1,4 +1,4 @@
-<html>
+<html lang='en'>
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <style type="text/css" media="screen">@import url( https://digitalcorpora.org/wp/wp-content/themes/digitalcorpora/style.css );</style>
@@ -15,12 +15,13 @@
       .post h1 { padding: 0 0 10px 0; }
       .post h2 { padding: 0 0 5px 0;  }
       .post h3 { padding: 10px 0 5px 0; font-size: 12pt;}
-      .post .content td.r { text-align: right;}
-      .post .content td.c { text-align: center;}
+      .post .content td.name { text-align: left;}
+      .post .content td.size { text-align: right;}
+      .post .content td.hash { text-align: center;}
       .post .content li.subdir { font-size: 12pt;}
     </style>
   </head>
-  <body class='customize-support'>
+  <body lang='en-US' class='customize-support'>
     <div id='wrap'>
       <div id='container'>
 	<div id="header">
@@ -34,11 +35,6 @@
 	  <!-- menus START -->
 	  <ul id="menus">
 	    <li class="page_item"><a class="home" title="Home" href="http://digitalcorpora.org/">Home</a></li>
-
-            % for path in paths:
-                <li class="page_item"><a href="/{{path[0]}}">{{path[1]}}</a></li>
-            % end
-            <!-- loop here c1 -->
 	  </ul>
 	</div>
 
@@ -60,7 +56,7 @@
 		<h1>downloads.digitalcorpora.org S3 Browser</h1>
 		<h2><!--
             % for path in paths:
-            -->/<a href="{{path[0]}}">{{path[1]}}</a><!--
+            --><a href="{{path[0]}}">{{path[1]}}</a><!--
             % end
             --> sub-dirs:</h2>
 
@@ -71,19 +67,20 @@
                 </ul>
 		<h2><!--
             % for path in paths:
-            -->/<a href="{{path[0]}}">{{path[1]}}</a><!--
+            --><a href="{{path[0]}}">{{path[1]}}</a><!--
             % end
             --> files:</h2>
 		<table>
 		  <thead>
-		    <tr><th>Name</th><th>Size</th><th>SHA2-256</th><th>SHA3-256</th></tr>
+		    <tr><th>Name</th><th>Size</th><th><a href='https://digitalcorpora.org/about-digitalcorpora/hashes'>SHA2-256</a></th><th><a href='https://digitalcorpora.org/about-digitalcorpora/hashes'>SHA3-256</a></th></tr>
 		  </thead>
 		  <tbody>
                     % for f in files:
                     <tr>
-                      <td><a href='{{f[0]}}'>{{f[1]}}</a></td>
-                      <td class='r'>{{f[2]}}</td><td class='c'>{{f[3]}}</td>
-                      <td class='c'>{{f[4]}}</td>
+                      <td class='name'><a href='{{f[0]}}'>{{f[1]}}</a></td>
+                      <td class='size'>{{f[2]}}</td>
+                      <td class='hash'>{{f[3]}}</td>
+                      <td class='hash'>{{f[4]}}</td>
                     </tr>
                     % end
 		  </tbody>
