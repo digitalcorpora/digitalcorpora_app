@@ -89,7 +89,7 @@ def s3_list_prefix(bucket_name, path):
     f.write("<table>\n")
     for (ct,obj) in enumerate(files):
         if ct==0:
-            f.write("<tr><th>Name</th><th>Size</th><th>Mod Date</th></tr>")
+            f.write("<tr><th>Name</th><th>Size</th><th>Date Uploaded to S3</th></tr>")
         name = obj['Key'].split('/')[-1]
         if name in IGNORE_FILES:
             continue
