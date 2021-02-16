@@ -17,27 +17,22 @@ jobs:
         uses: actions/setup-python@v1
         with:
           python-version: ${{ matrix.python-version }}
+      - name: Update GITHUB_PATH
+        run: |
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
           if [ -f requirements.txt ]; then pip install --user -r requirements.txt ; fi
           if [ -f requirements-dev.txt ]; then pip install --user -r requirements-dev.txt ; fi
-
-      - name: Lint with flake8
-        run: |
-          # stop the build if there are Python syntax errors or undefined names
-          flake8 python --count --select=E9,F63,F7,F82,W91,W293,W391 --show-source --statistics
-
-          # all Python files should follow PEP8 (except some notebooks, see setup.cfg)
-          flake8 python
-
-          # exit-zero treats all errors as warnings.  The GitHub editor is 127 chars wide
-          flake8 python --count --exit-zero --max-complexity=10 --statistics
 
       #- name: Install from source (required for the pre-commit tests)
       #  run: pip install .
 
+      - name: Lint with flake8
+        run: |
+          # stop the build if there are Python syntax errors or undefined names
+          flake8 . --count --select=E9,F63,F7,F82,W91,W293,W391 --exit-zero --max-complexity=10 --show-source --statistics
       - name: Test with pytest and SECRETS
         env:
           TMP_DBWRITER_HOSTNAME: ${{ secrets.TMP_DBWRITER_HOSTNAME }}
@@ -46,5 +41,5 @@ jobs:
           TMP_DBWRITER_PASSWORD: ${{ secrets.TMP_DBWRITER_PASSWORD }}
         run: pytest --cov=./ --cov-report=xml python
 
-      #- name: Upload coverage
-      #  uses: codecov/codecov-action@v1
+      - name: Upload coverage
+        uses: codecov/codecov-action@v1
