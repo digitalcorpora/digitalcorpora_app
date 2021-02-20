@@ -1,6 +1,8 @@
+<!DOCTYPE html>
 <html lang='en'>
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="google" content="notranslate"/>
     <style type="text/css" media="screen">@import url( https://digitalcorpora.org/wp/wp-content/themes/digitalcorpora/style.css );</style>
     <link rel='stylesheet' id='wp-block-library-css'  href='https://digitalcorpora.org/wp/wp-includes/css/dist/block-library/style.min.css?ver=5.6.1' type='text/css' media='all' />
     <link rel='stylesheet' id='contact-form-7-css'  href='https://digitalcorpora.org/wp/wp-content/plugins/contact-form-7/includes/css/styles.css?ver=5.3.2' type='text/css' media='all' />
@@ -94,20 +96,27 @@
 	</div>
 
 	<div class="fixed"></div>
-	<!-- footer START -->
+	<!-- (W) footer START -->
 	<div id="footer">
 	  <a id="gotop" href="#" onclick="MGJS.goTop();return false;">Top</a>
 	  <a id="powered" href="http://wordpress.org/">WordPress</a>
 	  <div id="copyright">
 	    Copyright &copy; 2009-2021 Digital Corpora	</div>
 	  <div id="themeinfo">
-	    Theme by <a href="http://www.neoease.com/">NeoEase</a>.
-            Valid <a href="http://validator.w3.org/check?uri=referer">XHTML 1.1</a>
-            and <a href="http://jigsaw.w3.org/css-validator/check/referer?profile=css3">CSS 3</a>.
+	    Theme by <a href="https://www.neoease.com/">NeoEase</a>.
+            Valid <a href="https://validator.w3.org/check?uri=referer">XHTML 1.1</a>
+            and <a href="https://jigsaw.w3.org/css-validator/check/referer?profile=css3">CSS 3</a>.
 	  </div>
+        <p>
+          <small>
+            Directory listing by <a href='https://github.com/digitalcorpora/app'>s3_gateway</a>
+            Python version {{sys_version}}
+          </small>
+        </p>
 	</div>
 	<!-- footer END -->
       </div>
+      <!-- This is under the light gray box, in the dark gray box -->
     </div>
   </body>
 </html>

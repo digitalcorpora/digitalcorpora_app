@@ -135,7 +135,7 @@ def s3_list_prefix_v1(bucket_name, prefix):
                   for obj in s3_files]
 
     logging.warning("bucket_name=%s prefix=%s paths=%s files=%s dirs=%s",bucket_name,prefix,paths,files,dirs)
-    return s3_index.render(prefix=prefix, paths=paths, files=files, dirs=dirs)
+    return s3_index.render(prefix=prefix, paths=paths, files=files, dirs=dirs, sys_version=sys.version)
 
 s3_list_prefix = s3_list_prefix_v1
 def s3_app(bucket, quoted_path):
