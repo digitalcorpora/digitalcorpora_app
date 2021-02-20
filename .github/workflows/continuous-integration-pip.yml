@@ -1,5 +1,5 @@
 # See https://docs.github.com/en/actions/guides/building-and-testing-python
-
+# 2020-02-20 slg - For Dreamhost, we are now using Python 3.9 and Ubuntu-18.04
 name: CI (pip)
 on: [push]
 
@@ -7,8 +7,8 @@ jobs:
   build:
     strategy:
       matrix:
-        os: ['ubuntu-latest']
-        python-version: [3.6]
+        os: ['ubuntu-18.04']
+        python-version: [3.9]
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout

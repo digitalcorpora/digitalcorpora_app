@@ -135,7 +135,7 @@ def s3_list_prefix_v1(bucket_name, prefix):
                   for obj in s3_files]
 
     logging.warning("bucket_name=%s prefix=%s paths=%s files=%s dirs=%s",bucket_name,prefix,paths,files,dirs)
-    return s3_index.render(prefix=prefix, paths=paths, files=files, dirs=dirs)
+    return s3_index.render(prefix=prefix, paths=paths, files=files, dirs=dirs, sys_version=sys.version)
 
 s3_list_prefix = s3_list_prefix_v1
 def s3_app(bucket, quoted_path):
@@ -183,24 +183,12 @@ def s3_app(bucket, quoted_path):
 if __name__=="__main__":
     import argparse
 
-    # from ctools.lock import lock_script
-    # lock_script()
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-                                     description="""This is the testing program for the gateway that allows S3 files to be accessed from the dashboard. If given a prefix, it will display the HTML UI for choosing a file. Otherwise it will provide the file's contents.""")
+                                     description="""This is the testing program for the gateway that allows S3 files to be accessed from the website.""")
     parser.add_argument("--bucket", default=DEFAULT_BUCKET, help='which bucket to use.')
-    parser.add_argument("--zip_pattern")
-    parser.add_argument("--log_cluster")
-    parser.add_argument("--log_application")
-    parser.add_argument("--pattern")
-    parser.add_argument('--dump',help='just dump the file',action='store_true')
     parser.add_argument('--path',help='specify path')
 
     args = parser.parse_args()
 
-    if args.zip_pattern:
-        if args.pattern:
-            print(s3_gen_find_in_zip("app/download/", args.bucket, args.path, args.zip_pattern, args.pattern))
-        else:
-            print(s3_gen_find_in_dir("app/contents/", args.bucket, args.path, args.zip_pattern))
     if args.path:
         print(s3_app(args.bucket,args.path))
