@@ -79,10 +79,10 @@
 		  <tbody>
                     % for f in files:
                     <tr>
-                      <td class='name'><a href='{{f[0]}}'>{{f[1]}}</a></td>
-                      <td class='size'>{{f[2]}}</td>
-                      <td class='hash'>{{f[3]}}</td>
-                      <td class='hash'>{{f[4]}}</td>
+                      <td class='name'><a href='{{f['a']}}'>{{f['basename']}}</a></td>
+                      <td class='size'>{{f['size']}}</td>
+                      <td class='hash'>{{f['sha2_256']}}</td>
+                      <td class='hash'>{{f['sha3_256']}}</td>
                     </tr>
                     % end
 		  </tbody>

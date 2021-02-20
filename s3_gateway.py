@@ -131,8 +131,11 @@ def s3_list_prefix_v1(bucket_name, prefix):
 
     (s3_dirs, s3_files) = s3_get_dirs_files(bucket_name, prefix)
     dirs  = [obj['Prefix'].split('/')[-2]+'/' for obj in s3_dirs]
-    files = [ ( s3_to_link(obj), obj['Key'].split('/')[-1], obj['Size'], 'n/a','n/a')
-                  for obj in s3_files]
+    files = [ { 'a': s3_to_link(obj),
+                'basename': os.path.basename(obj['Key']),
+                'size': obj['Size'],
+                'sha2_256': 'n/a',
+                'sha3_256': 'n/a'} for obj in s3_files]
 
     logging.warning("bucket_name=%s prefix=%s paths=%s files=%s dirs=%s",bucket_name,prefix,paths,files,dirs)
     return s3_index.render(prefix=prefix, paths=paths, files=files, dirs=dirs, sys_version=sys.version)
