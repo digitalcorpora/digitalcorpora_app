@@ -13,14 +13,16 @@ $ make touch
 """
 
 # Use python of choice
-INTERP = os.path.join(os.getenv('HOME'), 'opt/python-3.9.2/bin/python3.9')
+DESIRED_PYTHON='python3.9'
+DREAMHOST_PYTHON_BINDIR = os.path.join(os.getenv('HOME'), 'opt/python-3.9.2/bin')
 
-if sys.executable != INTERP:
-    if not os.path.exists(INTERP):
-        print("File not found:"+INTERP)
-        exit(1)
-    os.execl(INTERP, INTERP, *sys.argv)
-else:
-    import bottle
-    import app_wsgi
+if DREAMHOST_PYTHON_BINDIR not in os.environ['PATH']:
+    os.environ['PATH'] = DREAMHOST_PYTHON_BINDIR + ":" + os.environ['PATH']
+
+if DESIRED_PYTHON not in sys.executable:
+    os.execlp(DESIRED_PYTHON, DESIRED_PYTHON, *sys.argv)
+
+# If we get here, we are running under the DESIRED_PYTHON
+import bottle
+import app_wsgi
 application = app_wsgi.app()

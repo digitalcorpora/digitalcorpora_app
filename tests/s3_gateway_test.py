@@ -5,7 +5,6 @@ import os
 from os.path import abspath,dirname
 
 sys.path.append( dirname(dirname(abspath(__file__))))
-
 from s3_gateway import *
 
 @pytest.fixture
