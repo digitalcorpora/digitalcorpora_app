@@ -1,8 +1,10 @@
+MYFILES=$(shell /bin/ls *.py  | grep -v bottle.py)
+
 touch:
 	touch tmp/restart.txt
 
-flake8:
-	flake8 *.py
+pylint:
+	pylint $(MYFILES)
 
 install:
 	if [ -r requirements.txt ]; then pip3 install --user -r requirements.txt ; fi
