@@ -30,12 +30,15 @@ from botocore.client import Config
 import bottle
 
 #from botocore.exceptions import ClientError
-
 from bottle import request, response, redirect
 
 import ctools.dbfile
 import ctools.env
 
+DESCRIPTION="""
+This is the testing program for the gateway that
+allows S3 files to be accessed from the website.
+"""
 DEFAULT_BUCKET = 'digitalcorpora'
 BYPASS_URL = 'https://digitalcorpora.s3.amazonaws.com/'
 USE_BYPASS = True
@@ -45,6 +48,7 @@ IGNORE_FILES = ['.DS_Store', 'Icon']
 # Specify files in the runtime environment
 DBENV_FILE       = os.path.join( os.getenv('HOME'), 'dbreader.bash')
 S3_TEMPLATE_FILE = os.path.join(dirname(__file__), "templates/s3_index.tpl")
+S3_ERROR_404     = os.path.join(dirname(__file__), "templates/error_404.tpl")
 
 def s3_get_dirs_files(bucket_name, prefix):
     """
@@ -85,7 +89,8 @@ def s3_to_link(obj):
 # s3_list_prefix_v1, so that it gets read when s3_gateway.py is imported.
 # This causes bottle to compile it ONCE and repeatedly serve it out
 
-S3_INDEX = bottle.SimpleTemplate( open( S3_TEMPLATE_FILE ).read())
+S3_INDEX  = bottle.SimpleTemplate( open( S3_TEMPLATE_FILE ).read())
+ERROR_404 = bottle.SimpleTemplate( open( S3_TEMPLATE_FILE ).read())
 
 def s3_list_prefix(bucket_name, prefix):
     """The revised s3_list_prefix implementation: uses the Bottle
@@ -126,34 +131,31 @@ def s3_app(bucket, quoted_path):
     :param path:   - the path to display.
     """
     path = urllib.parse.unquote(quoted_path)
-    logging.warning("bucket=%s quoted_path=%s path=%s",
-                    bucket, quoted_path, path)
-    # pylint ignore=C0103
+    logging.warning("bucket=%s quoted_path=%s path=%s", bucket, quoted_path, path)
+
     if path.endswith("/"):
         try:
             return s3_list_prefix(bucket, path)
         except FileNotFoundError as e:
             logging.warning("e:%s", e)
-            return f"<html><body><pre>\nquoted_path: {quoted_path}\npath: {path}\n</pre>not found</body></html>"
+            response.status = 404
+            return S3_ERROR_404.render(bucket=bucket,path=path)
 
     # If the path does not end with a '/' and there is object there, see if it is a prefix
     try:
-        obj = boto3.client('s3', config=Config(
-            signature_version=UNSIGNED)).get_object(Bucket=bucket, Key=path)
+        obj = boto3.client('s3', config=Config( signature_version=UNSIGNED)).get_object(Bucket=bucket, Key=path)
     except botocore.exceptions.ClientError as e:
-
-        # See if it is a directory list.
         try:
             return s3_list_prefix(bucket, path+"/")
         except FileNotFoundError as e:
             # No object and not a prefix
             response.status = 404
-            return f"Error 404: File not found -- s3://{bucket}/{path}"
+            return S3_ERROR_404.render(bucket=bucket,path=path)
 
     # If we are using the bypass, redirect
 
     if USE_BYPASS:
-        print("redirect to", BYPASS_URL + path, file=sys.stderr)
+        logging.info("redirect to %s", BYPASS_URL + path)
         redirect(BYPASS_URL + path)
 
     # Otherwise download directly
@@ -164,17 +166,11 @@ def s3_app(bucket, quoted_path):
     return obj['Body']
 
 
-DESCRIPTION="""
-This is the testing program for the gateway that
-allows S3 files to be accessed from the website.
-"""
 if __name__ == "__main__":
     import argparse
-
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter,
                                      description=DESCRIPTION)
-    parser.add_argument("--bucket", default=DEFAULT_BUCKET,
-                        help='which bucket to use.')
+    parser.add_argument("--bucket", default=DEFAULT_BUCKET, help='which bucket to use.')
     parser.add_argument('--path', help='specify path')
 
     args = parser.parse_args()
