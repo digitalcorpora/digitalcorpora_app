@@ -32,8 +32,7 @@ import bottle
 #from botocore.exceptions import ClientError
 from bottle import request, response, redirect
 
-import ctools.dbfile
-import ctools.env
+import db_lookup
 
 DESCRIPTION="""
 This is the testing program for the gateway that
@@ -46,9 +45,15 @@ USE_BYPASS = True
 IGNORE_FILES = ['.DS_Store', 'Icon']
 
 # Specify files in the runtime environment
-DBENV_FILE       = os.path.join( os.getenv('HOME'), 'dbreader.bash')
-S3_TEMPLATE_FILE = os.path.join(dirname(__file__), "templates/s3_index.tpl")
-S3_ERROR_404     = os.path.join(dirname(__file__), "templates/error_404.tpl")
+S3_TEMPLATE_FILENAME = os.path.join(dirname(__file__), "templates/s3_index.tpl")
+S3_ERROR_404_FILENAME     = os.path.join(dirname(__file__), "templates/error_404.tpl")
+
+# Create the S3_INDEX bottle SimpleTemplate here, outside of the
+# s3_list_prefix_v1, so that it gets read when s3_gateway.py is imported.
+# This causes bottle to compile it ONCE and repeatedly serve it out
+
+S3_INDEX  = bottle.SimpleTemplate( open( S3_TEMPLATE_FILENAME ).read())
+ERROR_404 = bottle.SimpleTemplate( open( S3_TEMPLATE_FILENAME ).read())
 
 def s3_get_dirs_files(bucket_name, prefix):
     """
@@ -85,14 +90,8 @@ def s3_to_link(obj):
         raise RuntimeError("obj: "+json.dumps(obj, default=str))
 
 
-# Create the S3_INDEX bottle SimpleTemplate here, outside of the
-# s3_list_prefix_v1, so that it gets read when s3_gateway.py is imported.
-# This causes bottle to compile it ONCE and repeatedly serve it out
 
-S3_INDEX  = bottle.SimpleTemplate( open( S3_TEMPLATE_FILE ).read())
-ERROR_404 = bottle.SimpleTemplate( open( S3_TEMPLATE_FILE ).read())
-
-def s3_list_prefix(bucket_name, prefix):
+def s3_list_prefix(bucket_name, prefix, auth=None):
     """The revised s3_list_prefix implementation: uses the Bottle
     template system to generate HTML. Get a list of the sub-prefixes
     (dirs) and the objects with this prefix (files), and then construct
@@ -111,56 +110,58 @@ def s3_list_prefix(bucket_name, prefix):
         paths.append((path, part))
 
     (s3_dirs, s3_files) = s3_get_dirs_files(bucket_name, prefix)
+
     dirs = [obj['Prefix'].split('/')[-2]+'/' for obj in s3_dirs]
+    if auth is not None:
+        db_lookup.annotate_s3files(auth, s3_files)
     files = [{'a': s3_to_link(obj),
               'basename': os.path.basename(obj['Key']),
               'size': obj['Size'],
               'ETag': obj['ETag'],
-              'sha2_256': 'n/a',
-              'sha3_256': 'n/a'} for obj in s3_files]
+              'sha2_256': obj.get('sha2_256','n/a'),
+              'sha3_256': obj.get('sha3_256','n/a') } for obj in s3_files]
 
-    logging.warning("bucket_name=%s prefix=%s paths=%s files=%s dirs=%s",
-                    bucket_name, prefix, paths, files, dirs)
     return S3_INDEX.render(prefix=prefix, paths=paths, files=files, dirs=dirs, sys_version=sys.version)
 
 
-def s3_app(bucket, quoted_path):
+def s3_app(*, bucket, quoted_prefix, auth=None):
     """
     Fetching a file. Called from bottle.
     :param bucket: - the bucket that we are serving from
-    :param path:   - the path to display.
+    :param quoted_prefix:   - the path to display.
+    :param auth:   - Database authenticator
     """
-    path = urllib.parse.unquote(quoted_path)
-    logging.warning("bucket=%s quoted_path=%s path=%s", bucket, quoted_path, path)
+    prefix = urllib.parse.unquote(quoted_prefix)
+    logging.warning("bucket=%s quoted_prefix=%s prefix=%s", bucket, quoted_prefix, prefix)
 
-    if path.endswith("/"):
+    if prefix.endswith("/"):
         try:
-            return s3_list_prefix(bucket, path)
+            return s3_list_prefix(bucket, prefix, auth=auth)
         except FileNotFoundError as e:
             logging.warning("e:%s", e)
             response.status = 404
-            return S3_ERROR_404.render(bucket=bucket,path=path)
+            return ERROR_404.render(bucket=bucket,prefix=prefix)
 
-    # If the path does not end with a '/' and there is object there, see if it is a prefix
+    # If the prefix does not end with a '/' and there is object there, see if it is a prefix
     try:
-        obj = boto3.client('s3', config=Config( signature_version=UNSIGNED)).get_object(Bucket=bucket, Key=path)
+        obj = boto3.client('s3', config=Config( signature_version=UNSIGNED)).get_object(Bucket=bucket, Key=prefix)
     except botocore.exceptions.ClientError as e:
         try:
-            return s3_list_prefix(bucket, path+"/")
+            return s3_list_prefix(bucket, prefix+"/", auth=auth)
         except FileNotFoundError as e:
             # No object and not a prefix
             response.status = 404
-            return S3_ERROR_404.render(bucket=bucket,path=path)
+            return ERROR_404.render(bucket=bucket,prefix=prefix)
 
     # If we are using the bypass, redirect
 
     if USE_BYPASS:
-        logging.info("redirect to %s", BYPASS_URL + path)
-        redirect(BYPASS_URL + path)
+        logging.info("redirect to %s", BYPASS_URL + prefix)
+        redirect(BYPASS_URL + prefix)
 
     # Otherwise download directly
     try:
-        response.content_type = mimetypes.guess_type(path)[0]
+        response.content_type = mimetypes.guess_type(prefix)[0]
     except (TypeError,ValueError,KeyError) as e:
         response.content_type = 'application/octet-stream'
     return obj['Body']
@@ -171,9 +172,9 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter,
                                      description=DESCRIPTION)
     parser.add_argument("--bucket", default=DEFAULT_BUCKET, help='which bucket to use.')
-    parser.add_argument('--path', help='specify path')
+    parser.add_argument('--prefix', help='specify prefix')
 
     args = parser.parse_args()
 
-    if args.path:
-        print(s3_app(args.bucket, args.path))
+    if args.prefix:
+        print(s3_app(bucket=args.bucket, quoted_prefix=args.prefix))

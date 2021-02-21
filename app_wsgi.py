@@ -8,6 +8,13 @@ from os.path import abspath, dirname
 
 import bottle
 import s3_gateway
+import ctools.dbfile
+
+DBREADER_BASH_FILE = os.path.join( os.getenv('HOME'), 'dbreader.bash')
+try:
+    dbreader = ctools.dbfile.DBMySQLAuth.FromEnv( DBREADER_BASH_FILE )
+except FileNotFoundError as e:
+    dbreader = None
 
 @bottle.route('/ver')
 def func_ver():
@@ -19,8 +26,6 @@ def func_hello(name):
     """Demo for testing bottle parameter passing"""
     return bottle.template('<b>Hello {{name}}</b>!  Running Python version {{version}}',
                            name=name, version=sys.version)
-
-
 
 @bottle.route('/test_template')
 def func_test_template():
@@ -48,31 +53,32 @@ def func_root():
 @bottle.route('/corpora/')
 def func_corpora():
     """Route https://downloads.digitalcorpora.org/corpora/ with no path"""
-    return s3_gateway.s3_app('digitalcorpora', 'corpora/')
+    return s3_gateway.s3_app(bucket='digitalcorpora', quoted_prefix='corpora/', auth=dbreader)
 
 
 @bottle.route('/corpora/<path:path>')
 def func_corpora_path(path):
     """Route https://downloads.digitalcorpora.org/corpora/path"""
-    return s3_gateway.s3_app('digitalcorpora', 'corpora/' + path)
+    return s3_gateway.s3_app(bucket='digitalcorpora', quoted_prefix='corpora/' + path, auth=debreader)
+
+
+#@bottle.route('/downloads/')
+#def func_downloads():
+#    """Route https://downloads.digitalcorpora.org/downloads/ with no path"""
+#    return s3_gateway.s3_app('digitalcorpora', 'downloads/', auth=dbreader)
 
 
 @bottle.route('/downloads/')
-def func_downloads():
-    """Route https://downloads.digitalcorpora.org/downloads/ with no path"""
-    return s3_gateway.s3_app('digitalcorpora', 'downloads/')
-
-
 @bottle.route('/downloads/<path:path>')
-def func_downloads_path(path):
+def func_downloads_path(path=''):
     """Route https://downloads.digitalcorpora.org/downloads/path"""
-    return s3_gateway.s3_app('digitalcorpora', 'downloads/' + path)
+    return s3_gateway.s3_app(bucket='digitalcorpora', quoted_prefix='downloads/' + path, auth=dbreader)
 
 
 @bottle.route('/robots.txt')
 def func_robots():
     """Route https://downloads.digitalcorpora.org/robots.txt which asks Google not to index this."""
-    return s3_gateway.s3_app('digitalcorpora', 'robots.txt')
+    return s3_gateway.s3_app(bucket='digitalcorpora', quoted_prefix='robots.txt')
 
 def app():
     """The application"""

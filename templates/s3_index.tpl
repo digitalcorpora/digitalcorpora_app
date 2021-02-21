@@ -17,9 +17,9 @@
       .post h1 { padding: 0 0 10px 0; }
       .post h2 { padding: 0 0 5px 0;  }
       .post h3 { padding: 10px 0 5px 0; font-size: 12pt;}
-      .post .content td.name { text-align: left;}
+      .post .content td.name { text-align: left; width:300px;}
       .post .content td.size { text-align: right;}
-      .post .content td.hash { text-align: center;}
+      .post .content td.hash { text-align: left; word-break: break-all; font-size: 9pt}
       .post .content li.subdir { font-size: 12pt;}
     </style>
   </head>

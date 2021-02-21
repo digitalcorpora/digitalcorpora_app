@@ -1,12 +1,12 @@
-MYFILES=$(shell /bin/ls *.py  | grep -v bottle.py)
+PYLINT_FILES=$(shell /bin/ls *.py  | grep -v bottle.py | grep -v app_wsgi.py)
 
 touch:
 	@echo verify syntax and then restart
-	pylint $(MYFILES)
+	make pylint
 	touch tmp/restart.txt
 
 pylint:
-	pylint $(MYFILES)
+	pylint $(PYLINT_FILES)
 
 install:
 	if [ -r requirements.txt ]; then pip3 install --user -r requirements.txt ; fi
