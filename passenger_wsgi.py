@@ -1,9 +1,3 @@
-import app_wsgi
-import bottle
-import sys
-import os
-import os.path
-
 """
 passenger_wsgi.py script to switch to python3 and use Bottle
 
@@ -13,6 +7,11 @@ $ touch tmp/restart.txt
 (or)
 $ make touch
 """
+
+import sys
+import os
+import os.path
+
 
 # Use python of choice
 DESIRED_PYTHON = 'python3.9'
@@ -24,6 +23,7 @@ if DREAMHOST_PYTHON_BINDIR not in os.environ['PATH']:
 
 if DESIRED_PYTHON not in sys.executable:
     os.execlp(DESIRED_PYTHON, DESIRED_PYTHON, *sys.argv)
-
-# If we get here, we are running under the DESIRED_PYTHON
-application = app_wsgi.app()
+else:
+    # If we get here, we are running under the DESIRED_PYTHON
+    import app_wsgi
+    application = app_wsgi.app()

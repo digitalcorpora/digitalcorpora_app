@@ -7,6 +7,9 @@ from os.path import abspath,dirname
 sys.path.append( dirname(dirname(abspath(__file__))))
 from s3_gateway import *
 
+def test_s3_gateway_files():
+    assert os.path.exists(S3_TEMPLATE_FILE)
+
 @pytest.fixture
 def dirs_and_files():
     (dirs,files) = s3_get_dirs_files("digitalcorpora","tests/")

@@ -74,13 +74,20 @@
             --> files:</h2>
 		<table>
 		  <thead>
-		    <tr><th>Name</th><th>Size</th><th><a href='https://digitalcorpora.org/about-digitalcorpora/hashes'>SHA2-256</a></th><th><a href='https://digitalcorpora.org/about-digitalcorpora/hashes'>SHA3-256</a></th></tr>
+		    <tr>
+                      <th>Name</th>
+                      <th>Size</th>
+                      <th><a href='https://digitalcorpora.org/about-digitalcorpora/hashes'>AWS S3 ETag</a></th>
+                      <th><a href='https://digitalcorpora.org/about-digitalcorpora/hashes'>SHA2-256</a></th>
+                      <th><a href='https://digitalcorpora.org/about-digitalcorpora/hashes'>SHA3-256</a></th>
+                    </tr>
 		  </thead>
 		  <tbody>
                     % for f in files:
                     <tr>
                       <td class='name'><a href='{{f['a']}}'>{{f['basename']}}</a></td>
                       <td class='size'>{{f['size']}}</td>
+                      <td class='hash'>{{f['ETag']}}</td>
                       <td class='hash'>{{f['sha2_256']}}</td>
                       <td class='hash'>{{f['sha3_256']}}</td>
                     </tr>

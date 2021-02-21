@@ -1,0 +1,6 @@
+[FORMAT]
+max-line-length=240
+
+[MESSAGES CONTROL]
+# C0103: Variable name "e" doesn't conform to snake_case naming style
+disable=C0103

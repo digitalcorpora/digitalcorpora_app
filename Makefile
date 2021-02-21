@@ -1,6 +1,8 @@
 MYFILES=$(shell /bin/ls *.py  | grep -v bottle.py)
 
 touch:
+	@echo verify syntax and then restart
+	pylint $(MYFILES)
 	touch tmp/restart.txt
 
 pylint:
