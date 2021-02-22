@@ -59,7 +59,7 @@ def func_corpora():
 @bottle.route('/corpora/<path:path>')
 def func_corpora_path(path):
     """Route https://downloads.digitalcorpora.org/corpora/path"""
-    return s3_gateway.s3_app(bucket='digitalcorpora', quoted_prefix='corpora/' + path, auth=debreader)
+    return s3_gateway.s3_app(bucket='digitalcorpora', quoted_prefix='corpora/' + path, auth=dbreader)
 
 
 #@bottle.route('/downloads/')
