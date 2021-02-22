@@ -1,6 +1,20 @@
+PYLINT_FILES=$(shell /bin/ls *.py  | grep -v bottle.py | grep -v app_wsgi.py)
+
 touch:
+	@echo verify syntax and then restart
+	make pylint
 	touch tmp/restart.txt
 
-install:
+pylint:
+	pylint $(PYLINT_FILES)
+
+# These are used by the CI pipeline:
+install-dependencies:
 	if [ -r requirements.txt ]; then pip3 install --user -r requirements.txt ; fi
-	if [ -r requirements-dev.txt ]; then pip3 install --user -r requirements-dev.txt ; fi
+
+pytest:
+	pytest .
+
+coverage:
+	pytest --debug -v --cov=. --cov-report=xml tests/ || echo pytest failed
+	ls -l

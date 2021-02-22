@@ -17,9 +17,9 @@
       .post h1 { padding: 0 0 10px 0; }
       .post h2 { padding: 0 0 5px 0;  }
       .post h3 { padding: 10px 0 5px 0; font-size: 12pt;}
-      .post .content td.name { text-align: left;}
+      .post .content td.name { text-align: left; width:300px;}
       .post .content td.size { text-align: right;}
-      .post .content td.hash { text-align: center;}
+      .post .content td.hash { text-align: left; word-break: break-all; font-size: 9pt}
       .post .content li.subdir { font-size: 12pt;}
     </style>
   </head>
@@ -74,15 +74,22 @@
             --> files:</h2>
 		<table>
 		  <thead>
-		    <tr><th>Name</th><th>Size</th><th><a href='https://digitalcorpora.org/about-digitalcorpora/hashes'>SHA2-256</a></th><th><a href='https://digitalcorpora.org/about-digitalcorpora/hashes'>SHA3-256</a></th></tr>
+		    <tr>
+                      <th>Name</th>
+                      <th>Size</th>
+                      <!-- <th><a href='https://digitalcorpora.org/about-digitalcorpora/hashes'>AWS S3 ETag</a></th> -->
+                      <th><a href='https://digitalcorpora.org/about-digitalcorpora/hashes'>SHA2-256</a></th>
+                      <th><a href='https://digitalcorpora.org/about-digitalcorpora/hashes'>SHA3-256</a></th>
+                    </tr>
 		  </thead>
 		  <tbody>
                     % for f in files:
                     <tr>
-                      <td class='name'><a href='{{f[0]}}'>{{f[1]}}</a></td>
-                      <td class='size'>{{f[2]}}</td>
-                      <td class='hash'>{{f[3]}}</td>
-                      <td class='hash'>{{f[4]}}</td>
+                      <td class='name'><a href='{{f['a']}}'>{{f['basename']}}</a></td>
+                      <td class='size'>{{f['size']}}</td>
+                      <!-- <td class='hash'>{{f['ETag']}}</td> -->
+                      <td class='hash'>{{f['sha2_256']}}</td>
+                      <td class='hash'>{{f['sha3_256']}}</td>
                     </tr>
                     % end
 		  </tbody>
