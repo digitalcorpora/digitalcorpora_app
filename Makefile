@@ -11,13 +11,13 @@ pylint:
 # These are used by the CI pipeline:
 install-dependencies:
 	if [ -r requirements.txt ]; then pip3 install --user -r requirements.txt ; fi
-	if [ -r requirements-dev.txt ]; then pip3 install --user -r requirements-dev.txt ; fi
 
 pytest:
 	pytest .
 
 coverage:
 	echo hello world.
-	echo pytest -v --cov=. --cov-report=xml .
 	which pytest
-	ls -l `which pytest`
+	which coverage
+	pytest -v --cov=. --cov-report=xml tests/
+	ls -l
