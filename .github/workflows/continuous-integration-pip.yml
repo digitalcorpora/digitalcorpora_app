@@ -25,6 +25,7 @@ jobs:
         run: |
           echo "$HOME/.local/bin" >> $GITHUB_PATH
           make install-dependencies
+          find . -print
 
       - name: Lint with pylint
         run: pylint -j0 .
@@ -37,7 +38,6 @@ jobs:
           TMP_DBWRITER_PASSWORD: ${{ secrets.TMP_DBWRITER_PASSWORD }}
         run: |
           make coverage
-          ls -al
 
       - name: Upload coverage
         uses: codecov/codecov-action@v1
