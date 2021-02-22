@@ -17,4 +17,7 @@ pytest:
 	pytest .
 
 coverage:
-	pytest -v --cov=. --cov-report=xml .
+	echo hello world.
+	echo pytest -v --cov=. --cov-report=xml .
+	which pytest
+	ls -l `which pytest`
