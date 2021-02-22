@@ -27,16 +27,15 @@ jobs:
       - name: Lint with pylint
         run: pylint -j0 .
 
-      - name: Test with pytest but no SECRETS
-        run: make coverage
-
       - name: Test with pytest and SECRETS
         env:
           TMP_DBWRITER_HOSTNAME: ${{ secrets.TMP_DBWRITER_HOSTNAME }}
           TMP_DBWRITER_DATABASE: ${{ secrets.TMP_DBWRITER_DATABASE }}
           TMP_DBWRITER_USERNAME: ${{ secrets.TMP_DBWRITER_USERNAME }}
           TMP_DBWRITER_PASSWORD: ${{ secrets.TMP_DBWRITER_PASSWORD }}
-        run: make coverage
+        run: |
+          make coverage
+          ls -al
 
       - name: Upload coverage
         uses: codecov/codecov-action@v1
