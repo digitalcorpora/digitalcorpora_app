@@ -19,5 +19,6 @@ coverage:
 	echo hello world.
 	which pytest
 	which coverage
-	pytest -v --cov=. --cov-report=xml tests/
+	pytest -v --cov=. --cov-report=xml tests/ || echo pytest failed
+	echo ===== test ends ==========
 	ls -l
