@@ -13,21 +13,19 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v1
         with:
           python-version: ${{ matrix.python-version }}
+
       - name: Update GITHUB_PATH
         run: |
           echo "$HOME/.local/bin" >> $GITHUB_PATH
+
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
-          if [ -f requirements.txt ]; then pip install --user -r requirements.txt ; fi
-          if [ -f requirements-dev.txt ]; then pip install --user -r requirements-dev.txt ; fi
-
-      #- name: Install from source (required for the pre-commit tests)
-      #  run: pip install .
+          make install-dependencies
 
       - name: Lint with pylint
         run: |
@@ -40,7 +38,7 @@ jobs:
           TMP_DBWRITER_DATABASE: ${{ secrets.TMP_DBWRITER_DATABASE }}
           TMP_DBWRITER_USERNAME: ${{ secrets.TMP_DBWRITER_USERNAME }}
           TMP_DBWRITER_PASSWORD: ${{ secrets.TMP_DBWRITER_PASSWORD }}
-        run: pytest --cov=./ --cov-report=xml .
+        run: make coverage
 
       - name: Upload coverage
         uses: codecov/codecov-action@v1

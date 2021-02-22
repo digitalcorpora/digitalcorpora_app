@@ -8,6 +8,10 @@ touch:
 pylint:
 	pylint $(PYLINT_FILES)
 
-install:
+# These are used by the CI pipeline:
+install-dependencies:
 	if [ -r requirements.txt ]; then pip3 install --user -r requirements.txt ; fi
 	if [ -r requirements-dev.txt ]; then pip3 install --user -r requirements-dev.txt ; fi
+
+coverage:
+	pytest --cov=. --cov-report=xml .
