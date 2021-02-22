@@ -19,18 +19,16 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Update GITHUB_PATH
+      - name: Update GITHUB_PATH and install dependencies
         run: |
           echo "$HOME/.local/bin" >> $GITHUB_PATH
-
-      - name: Install dependencies
-        run: |
           make install-dependencies
 
       - name: Lint with pylint
-        run: |
-          # stop the build if there are Python syntax errors or undefined names
-          pylint -j0 .
+        run: pylint -j0 .
+
+      - name: Test with pytest but no SECRETS
+        run: make coverage
 
       - name: Test with pytest and SECRETS
         env:

@@ -8,6 +8,9 @@ import ctools.dbfile
 
 def annotate_s3files(auth, objs):
     """Given a dbreader and a set of objects, see if we can find their hash codes in the database"""
+    if not objs:
+        return
+
     keys = [obj['Key'] for obj in objs]
     cmd = "select * from downloadable where s3key in (" + ",".join(['%s']*len(keys)) + ")"
     rows = ctools.dbfile.DBMySQL.csfr(auth, cmd, keys, asDicts=True)

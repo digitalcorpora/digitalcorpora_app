@@ -112,7 +112,7 @@ def s3_list_prefix(bucket_name, prefix, auth=None):
     (s3_dirs, s3_files) = s3_get_dirs_files(bucket_name, prefix)
 
     dirs = [obj['Prefix'].split('/')[-2]+'/' for obj in s3_dirs]
-    if auth is not None:
+    if auth is not None and s3_files:
         db_lookup.annotate_s3files(auth, s3_files)
     files = [{'a': s3_to_link(obj),
               'basename': os.path.basename(obj['Key']),

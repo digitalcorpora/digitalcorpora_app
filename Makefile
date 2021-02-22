@@ -13,5 +13,8 @@ install-dependencies:
 	if [ -r requirements.txt ]; then pip3 install --user -r requirements.txt ; fi
 	if [ -r requirements-dev.txt ]; then pip3 install --user -r requirements-dev.txt ; fi
 
+pytest:
+	pytest .
+
 coverage:
-	pytest --cov=. --cov-report=xml .
+	pytest -v --cov=. --cov-report=xml .
