@@ -21,7 +21,7 @@ DREAMHOST_PYTHON_BINDIR = os.path.join(
 if DREAMHOST_PYTHON_BINDIR not in os.environ['PATH']:
     os.environ['PATH'] = DREAMHOST_PYTHON_BINDIR + ":" + os.environ['PATH']
 
-if (DESIRED_PYTHON not in sys.executable) and ('RUNNING_PYTEST' not in os.enviorn):
+if (DESIRED_PYTHON not in sys.executable) and ('RUNNING_PYTEST' not in os.environ):
     os.execlp(DESIRED_PYTHON, DESIRED_PYTHON, *sys.argv)
 else:
     # If we get here, we are running under the DESIRED_PYTHON
