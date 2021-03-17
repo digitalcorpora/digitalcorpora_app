@@ -17,4 +17,3 @@ pytest:
 
 coverage:
 	pytest --debug -v --cov=. --cov-report=xml tests/ || echo pytest failed
-	ls -l
