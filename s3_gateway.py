@@ -116,7 +116,7 @@ def s3_list_prefix(bucket_name, prefix, auth=None):
         db_lookup.annotate_s3files(auth, s3_files)
     files = [{'a': s3_to_link(obj),
               'basename': os.path.basename(obj['Key']),
-              'size': obj['Size'],
+              'size': "{:,}".format(obj['Size']),
               'ETag': obj['ETag'],
               'sha2_256': obj.get('sha2_256','n/a'),
               'sha3_256': obj.get('sha3_256','n/a') } for obj in s3_files]
