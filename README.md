@@ -1,3 +1,5 @@
+[![codecov](https://codecov.io/gh/digitalcorpora/app/branch/main/graph/badge.svg?token=E6GE1KIGAT)](https://codecov.io/gh/digitalcorpora/app)
+
 # digitalcorpora.org python app
 This repo provides the custom-written Python code to for the https://DigitalCorpora.org/ website.
 
