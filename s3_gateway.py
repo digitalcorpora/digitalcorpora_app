@@ -12,12 +12,12 @@ bottle/boto3 interface to view an s3 bucket in a web browser.
 
 """
 
-import sys
-import mimetypes
-import logging
 import json
-import urllib.parse
+import logging
+import mimetypes
 import os
+import sys
+import urllib.parse
 from os.path import dirname
 
 import boto3
@@ -45,8 +45,8 @@ USE_BYPASS = True
 IGNORE_FILES = ['.DS_Store', 'Icon']
 
 # Specify files in the runtime environment
-S3_TEMPLATE_FILENAME = os.path.join(dirname(__file__), "templates/s3_index.tpl")
-S3_ERROR_404_FILENAME     = os.path.join(dirname(__file__), "templates/error_404.tpl")
+S3_TEMPLATE_FILENAME  = os.path.join(dirname(__file__), "templates/s3_index.tpl")
+S3_ERROR_404_FILENAME = os.path.join(dirname(__file__), "templates/error_404.tpl")
 
 # Create the S3_INDEX bottle SimpleTemplate here, outside of the
 # s3_list_prefix_v1, so that it gets read when s3_gateway.py is imported.

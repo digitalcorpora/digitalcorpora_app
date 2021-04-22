@@ -7,8 +7,12 @@ import os
 from os.path import abspath, dirname
 
 import bottle
-import s3_gateway
+
 import ctools.dbfile
+
+
+import s3_gateway
+import s3_reports
 
 DBREADER_BASH_FILE = os.path.join( os.getenv('HOME'), 'dbreader.bash')
 try:
@@ -62,23 +66,30 @@ def func_corpora_path(path):
     return s3_gateway.s3_app(bucket='digitalcorpora', quoted_prefix='corpora/' + path, auth=dbreader)
 
 
-#@bottle.route('/downloads/')
-#def func_downloads():
-#    """Route https://downloads.digitalcorpora.org/downloads/ with no path"""
-#    return s3_gateway.s3_app('digitalcorpora', 'downloads/', auth=dbreader)
-
-
 @bottle.route('/downloads/')
 @bottle.route('/downloads/<path:path>')
 def func_downloads_path(path=''):
     """Route https://downloads.digitalcorpora.org/downloads/path"""
     return s3_gateway.s3_app(bucket='digitalcorpora', quoted_prefix='downloads/' + path, auth=dbreader)
 
-
 @bottle.route('/robots.txt')
 def func_robots():
     """Route https://downloads.digitalcorpora.org/robots.txt which asks Google not to index this."""
     return s3_gateway.s3_app(bucket='digitalcorpora', quoted_prefix='robots.txt')
+
+@bottle.route('/reports')
+def func_stats():
+    return s3_reports.report_app(auth=dbreader)
+
+@bottle.route('/reports.js')
+def func_root():
+    """TODO: return a better template"""
+    return bottle.static_file('reports.js', root=os.path.join(dirname(abspath(__file__)), 'static'))
+
+
+@bottle.route('/reports/json/<num>')
+def func_stats(num):
+    return s3_reports.report_json(auth=dbreader,num=num)
 
 def app():
     """The application"""
