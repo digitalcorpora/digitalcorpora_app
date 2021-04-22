@@ -77,9 +77,19 @@ def func_robots():
     """Route https://downloads.digitalcorpora.org/robots.txt which asks Google not to index this."""
     return s3_gateway.s3_app(bucket='digitalcorpora', quoted_prefix='robots.txt')
 
-@bottle.route('/reports/')
+@bottle.route('/reports')
 def func_stats():
     return s3_reports.report_app(auth=dbreader)
+
+@bottle.route('/reports.js')
+def func_root():
+    """TODO: return a better template"""
+    return bottle.static_file('reports.js', root=os.path.join(dirname(abspath(__file__)), 'static'))
+
+
+@bottle.route('/reports/json/<num>')
+def func_stats(num):
+    return s3_reports.report_json(auth=dbreader,num=num)
 
 def app():
     """The application"""

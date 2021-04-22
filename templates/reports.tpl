@@ -3,15 +3,14 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <meta name="google" content="notranslate"/>
-    <style type="text/css" media="screen">@import url( https://digitalcorpora.org/wp/wp-content/themes/digitalcorpora/style.css );</style>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"
+	    integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
+	    crossorigin="anonymous"></script>
+
+    <script type='text/javascript' src='reports.js'></script>
     <link rel='stylesheet' id='wp-block-library-css'  href='https://digitalcorpora.org/wp/wp-includes/css/dist/block-library/style.min.css?ver=5.6.1' type='text/css' media='all' />
-    <link rel='stylesheet' id='contact-form-7-css'  href='https://digitalcorpora.org/wp/wp-content/plugins/contact-form-7/includes/css/styles.css?ver=5.3.2' type='text/css' media='all' />
-    <link rel='stylesheet' id='simple-banner-style-css'  href='https://digitalcorpora.org/wp/wp-content/plugins/simple-banner/simple-banner.css?ver=2.9.4' type='text/css' media='all' />
-    <link rel='stylesheet' id='jvcf7p_client_css-css'  href='https://digitalcorpora.org/wp/wp-content/plugins/jquery-validation-for-contact-form-7-pro/includes/assets/css/jvcf7p_client.css?ver=5.2' type='text/css' media='all' />
-    <script type='text/javascript' src='https://digitalcorpora.org/wp/wp-includes/js/jquery/jquery.min.js?ver=3.5.1' id='jquery-core-js'></script>
-    <script type='text/javascript' src='https://digitalcorpora.org/wp/wp-includes/js/jquery/jquery-migrate.min.js?ver=3.3.2' id='jquery-migrate-js'></script>
-    <script type='text/javascript' id='simple-banner-script-js-extra'></script>
-    <title>Digital Corpora Reports</title>
+    <style type="text/css" media="screen">@import url( https://digitalcorpora.org/wp/wp-content/themes/digitalcorpora/style.css );</style>
+    <title>Digital Corpora Reports 2</title>
 
     <style type="text/css">
       .post h1 { padding: 0 0 10px 0; }
@@ -59,11 +58,10 @@
 		<h2>Available Reports:</h2>
                 <ul>
                   % for (ct,r) in enumerate(reports):
-                      <li><a href='{{ct}}'>{{r}}</a></li>
+                      <li><a href='?report={{ct}}'>{{r}}</a></li>
                   % end
                 </ul>
-                <h2>Report</h2>
-                {{report}}
+                <div id='report'>
 	      </div>
 	    </div>
 	  </div>
@@ -84,7 +82,7 @@
 	  </div>
         <p>
           <small>
-            Directory listing by <a href='https://github.com/digitalcorpora/app'>s3_gateway</a>
+            Reports provided by <a href='https://github.com/digitalcorpora/app'>s3_reports.py</a>
             Python version {{sys_version}}
           </small>
         </p>
