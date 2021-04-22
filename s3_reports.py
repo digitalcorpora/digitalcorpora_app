@@ -64,7 +64,7 @@ def report_json(*,auth,num):
     :param auth: authorization
     :param num: which report to generate.
     """
-    report = REPORTS[round(num)]
+    report = REPORTS[int(num)]
     column_names = []
     rows = DBMySQL.csfr(auth, report[1], [], time_zone='GMT', get_column_names=column_names)
     return json.dumps({'title':report[0],
