@@ -1,8 +1,11 @@
 PYLINT_FILES=$(shell /bin/ls *.py  | grep -v bottle.py | grep -v app_wsgi.py)
 
-touch:
+all:
 	@echo verify syntax and then restart
 	make pylint
+	make touch
+
+touch:
 	touch tmp/restart.txt
 
 pylint:
