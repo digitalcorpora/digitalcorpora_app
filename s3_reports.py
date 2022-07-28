@@ -18,7 +18,7 @@ REPORT = bottle.SimpleTemplate( open( REPORT_TEMPLATE_FILENAME ).read())
 
 REPORTS = [
     ('Downloads over past week',
-     """SELECT s3key,round(sum(bytes_sent)/max(bytes)) as count, min(dtime) as first,max(dtime) as last
+     """SELECT s3key, round(sum(bytes_sent)/max(bytes)) as count, min(dtime) as first,max(dtime) as last
         FROM downloads
         LEFT JOIN downloadable ON downloads.did = downloadable.id
         WHERE dtime > DATE_ADD(NOW(), INTERVAL -7 DAY)
@@ -28,7 +28,7 @@ REPORTS = [
      """),
 
     ('Downloads in the past 24 hours',
-     """SELECT s3key,round(sum(bytes_sent)/max(bytes)) as count
+     """SELECT s3key, round(sum(bytes_sent)/max(bytes)) as count
         FROM downloads
         LEFT JOIN downloadable ON downloads.did = downloadable.id
         WHERE dtime > addtime(now(),"-24:00:00")
@@ -38,7 +38,7 @@ REPORTS = [
      """),
 
     ('Failed downloads in past 24 hours',
-     """SELECT s3key,round(sum(bytes_sent)/max(bytes)) as count
+     """SELECT s3key, round(sum(bytes_sent)/max(bytes)) as count
         FROM downloads
         LEFT JOIN downloadable ON downloads.did = downloadable.id
         WHERE dtime > addtime(now(),"-24:00:00")
@@ -49,7 +49,7 @@ REPORTS = [
 
     ('Downloads per day for the past 30 days',
      """
-     SELECT ddate as `date`,count(*)
+     SELECT ddate as `date`, count(*) as count
      FROM (SELECT date(dtime) ddate,s3key,round(sum(bytes_sent)/max(bytes)) as count
            FROM downloads
            LEFT JOIN downloadable ON downloads.did = downloadable.id
