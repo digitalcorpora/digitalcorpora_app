@@ -1,5 +1,12 @@
 """
 WSGI file used for bottle interface.
+
+Debug:
+(cd ~/apps.digitalcorpora.org/;make touch)
+https://app.digitalcorpora.org/
+https://app.digitalcorpora.org/ver
+https://app.digitalcorpora.org/reports
+
 """
 
 import sys
@@ -9,7 +16,6 @@ from os.path import abspath, dirname
 import bottle
 
 import ctools.dbfile
-
 
 import s3_gateway
 import s3_reports
@@ -52,7 +58,6 @@ def func_test_template():
 def func_root():
     """TODO: return a better template"""
     return bottle.static_file('index.html', root=os.path.join(dirname(abspath(__file__)), 'static'))
-
 
 @bottle.route('/corpora/')
 def func_corpora():

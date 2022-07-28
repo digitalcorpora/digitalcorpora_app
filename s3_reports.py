@@ -6,11 +6,11 @@ import os
 import os.path
 import sys
 import json
-
 from os.path import dirname
 
-from ctools.dbfile import DBMySQL
 import bottle
+
+from ctools.dbfile import DBMySQL
 
 REPORT_TEMPLATE_FILENAME  = os.path.join(dirname(__file__), "templates/reports.tpl")
 REPORT = bottle.SimpleTemplate( open( REPORT_TEMPLATE_FILENAME ).read())
@@ -18,7 +18,7 @@ REPORT = bottle.SimpleTemplate( open( REPORT_TEMPLATE_FILENAME ).read())
 
 REPORTS = [
     ('Downloads over past week',
-     """SELECT s3key,round(sum(bytes_sent)/max(bytes)) as count,min(dtime) as first,max(dtime) as last,
+     """SELECT s3key,round(sum(bytes_sent)/max(bytes)) as count, min(dtime) as first,max(dtime) as last
         FROM downloads
         LEFT JOIN downloadable ON downloads.did = downloadable.id
         WHERE dtime > DATE_ADD(NOW(), INTERVAL -7 DAY)
@@ -49,7 +49,7 @@ REPORTS = [
 
     ('Downloads per day for the past 30 days',
      """
-     SELECT ddate,count(*)
+     SELECT ddate as `date`,count(*)
      FROM (SELECT date(dtime) ddate,s3key,round(sum(bytes_sent)/max(bytes)) as count
            FROM downloads
            LEFT JOIN downloadable ON downloads.did = downloadable.id
@@ -64,7 +64,7 @@ def report_json(*,auth,num):
     :param auth: authorization
     :param num: which report to generate.
     """
-    report = REPORTS[round(num)]
+    report = REPORTS[int(num)]
     column_names = []
     rows = DBMySQL.csfr(auth, report[1], [], time_zone='GMT', get_column_names=column_names)
     return json.dumps({'title':report[0],

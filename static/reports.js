@@ -26,7 +26,7 @@ function table(column_names, rows) {
 $( document ).ready( function() {
     let num = findGetParameter("report");
     console.log("ready! report=",num);
-    $.getJSON( REPORT_URL + num, function( data ) {
+    $.getJSON( `$(REPORT_URL)$(num)`, function( data ) {
         console.log("data=",data);
         $('#report').html(`<h2> ${data.title} </h2>\n` + table(data.column_names,data.rows));
     })

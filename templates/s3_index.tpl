@@ -3,13 +3,13 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <meta name="google" content="notranslate"/>
-    <style type="text/css" media="screen">@import url( https://digitalcorpora.org/wp/wp-content/themes/digitalcorpora/style.css );</style>
-    <link rel='stylesheet' id='wp-block-library-css'  href='https://digitalcorpora.org/wp/wp-includes/css/dist/block-library/style.min.css?ver=5.6.1' type='text/css' media='all' />
-    <link rel='stylesheet' id='contact-form-7-css'  href='https://digitalcorpora.org/wp/wp-content/plugins/contact-form-7/includes/css/styles.css?ver=5.3.2' type='text/css' media='all' />
-    <link rel='stylesheet' id='simple-banner-style-css'  href='https://digitalcorpora.org/wp/wp-content/plugins/simple-banner/simple-banner.css?ver=2.9.4' type='text/css' media='all' />
-    <link rel='stylesheet' id='jvcf7p_client_css-css'  href='https://digitalcorpora.org/wp/wp-content/plugins/jquery-validation-for-contact-form-7-pro/includes/assets/css/jvcf7p_client.css?ver=5.2' type='text/css' media='all' />
-    <script type='text/javascript' src='https://digitalcorpora.org/wp/wp-includes/js/jquery/jquery.min.js?ver=3.5.1' id='jquery-core-js'></script>
-    <script type='text/javascript' src='https://digitalcorpora.org/wp/wp-includes/js/jquery/jquery-migrate.min.js?ver=3.3.2' id='jquery-migrate-js'></script>
+    <style type="text/css" media="screen">@import url( https://digitalcorpora.org/wp-content/themes/digitalcorpora/style.css );</style>
+    <link rel='stylesheet' id='wp-block-library-css'  href='https://digitalcorpora.org/wp-includes/css/dist/block-library/style.min.css?ver=5.6.1' type='text/css' media='all' />
+    <link rel='stylesheet' id='contact-form-7-css'  href='https://digitalcorpora.org/wp-content/plugins/contact-form-7/includes/css/styles.css?ver=5.3.2' type='text/css' media='all' />
+    <link rel='stylesheet' id='simple-banner-style-css'  href='https://digitalcorpora.org/wp-content/plugins/simple-banner/simple-banner.css?ver=2.9.4' type='text/css' media='all' />
+    <link rel='stylesheet' id='jvcf7p_client_css-css'  href='https://digitalcorpora.org/wp-content/plugins/jquery-validation-for-contact-form-7-pro/includes/assets/css/jvcf7p_client.css?ver=5.2' type='text/css' media='all' />
+    <script type='text/javascript' src='https://digitalcorpora.org/wp-includes/js/jquery/jquery.min.js?ver=3.5.1' id='jquery-core-js'></script>
+    <script type='text/javascript' src='https://digitalcorpora.org/wp-includes/js/jquery/jquery-migrate.min.js?ver=3.3.2' id='jquery-migrate-js'></script>
     <script type='text/javascript' id='simple-banner-script-js-extra'></script>
     <title>Digital Corpora Downloads: {{prefix}}</title>
 
@@ -108,13 +108,8 @@
 	  <a id="gotop" href="#" onclick="MGJS.goTop();return false;">Top</a>
 	  <a id="powered" href="http://wordpress.org/">WordPress</a>
 	  <div id="copyright">
-	    Copyright &copy; 2009-2021 Digital Corpora	</div>
-	  <div id="themeinfo">
-	    Theme by <a href="https://www.neoease.com/">NeoEase</a>.
-            Valid <a href="https://validator.w3.org/check?uri=referer">XHTML 1.1</a>
-            and <a href="https://jigsaw.w3.org/css-validator/check/referer?profile=css3">CSS 3</a>.
-	  </div>
-        <p>
+	    Copyright &copy; 2009-2022 Digital Corpora	</div>
+          <p>
           <small>
             Directory listing by <a href='https://github.com/digitalcorpora/app'>s3_gateway</a>
             Python version {{sys_version}}
