@@ -3,9 +3,9 @@ WSGI file used for bottle interface.
 
 Debug:
 (cd ~/apps.digitalcorpora.org/;make touch)
-https://app.digitalcorpora.org/
-https://app.digitalcorpora.org/ver
-https://app.digitalcorpora.org/reports
+https://downloads.digitalcorpora.org/
+https://downloads.digitalcorpora.org/ver
+https://downloads.digitalcorpora.org/reports
 
 """
 
