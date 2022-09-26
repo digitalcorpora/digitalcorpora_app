@@ -132,7 +132,7 @@ def s3_app(*, bucket, quoted_prefix, auth=None):
     :param auth:   - Database authenticator
     """
     prefix = urllib.parse.unquote(quoted_prefix)
-    logging.warning("bucket=%s quoted_prefix=%s prefix=%s", bucket, quoted_prefix, prefix)
+    logging.warning("s3_gateway.py::s3_app s3_appbucket=%s prefix=%s", bucket, prefix)
 
     if prefix.endswith("/"):
         try:
