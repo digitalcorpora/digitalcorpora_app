@@ -20,7 +20,9 @@ def test_s3_get_dirs_files_test(dirs_and_files):
     assert dirs==[{'Prefix': 'tests/subdir with-space/'},
                   {'Prefix': 'tests/subdir1/'}]
     keys = list(sorted([obj['Key'] for obj in files]))
-    assert keys==['tests/file1.txt','tests/file2.txt']
+    assert 'tests/file1.txt' in keys
+    assert 'tests/file2.txt' in keys
+    assert 'tests/hello_world.txt' in keys
 
 def test_s3_to_link(dirs_and_files):
     (dirs,files) = dirs_and_files
