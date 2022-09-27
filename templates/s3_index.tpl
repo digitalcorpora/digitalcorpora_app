@@ -13,6 +13,7 @@
       body {padding-left: 50pt;}
       a:visited {color:blue;}
       a:link {color:blue;}
+      a:hover {color:pink;}
       h1 { padding: 0 0 0 0; margin:0 0 0 0; line-height:normal;}
       h2 { padding: 0 0 0 0; margin:0 0 0 0; line-height:normal;}
       h3 { padding: 0 0 0 0; margin:0 0 0 0; font-size: 12pt; line-height:normal;}
@@ -21,7 +22,7 @@
       #files th { padding: 0 5pt 0 5pt; }
       #files td { padding: 0 5pt 0 5pt; }
       #files td.name { text-align: left; width:200px; }
-      #files td.size  { text-align: right; }
+      #files td.size  { text-align: right; width:100px}
       #files td.mtime { text-align: left; width:200px; }
       #files td.hash { text-align: left; word-break: break-all; font-size: 9pt; font-family: monospace; width: 44em;}
       #files li.subdir { font-size: 12pt;}
