@@ -45,15 +45,20 @@ USE_BYPASS = True
 IGNORE_FILES = ['.DS_Store', 'Icon']
 
 # Specify files in the runtime environment
-S3_TEMPLATE_FILENAME  = os.path.join(dirname(__file__), "templates/s3_index.tpl")
-S3_ERROR_404_FILENAME = os.path.join(dirname(__file__), "templates/error_404.tpl")
+#S3_TEMPLATE_FILENAME  = os.path.join(dirname(__file__), "templates/s3_index.tpl")
+#S3_ERROR_404_FILENAME = os.path.join(dirname(__file__), "templates/error_404.tpl")
 
 # Create the S3_INDEX bottle SimpleTemplate here, outside of the
 # s3_list_prefix_v1, so that it gets read when s3_gateway.py is imported.
 # This causes bottle to compile it ONCE and repeatedly serve it out
 
-S3_INDEX  = bottle.SimpleTemplate( open( S3_TEMPLATE_FILENAME ).read())
-ERROR_404 = bottle.SimpleTemplate( open( S3_TEMPLATE_FILENAME ).read())
+def get_template( basename ):
+    filename = os.path.join( dirname(__file__), "templates", basename)
+    with open( filename, "r") as f:
+        return bottle.SimpleTemplate( f.read() )
+
+S3_INDEX  = get_template( "s3_index.tpl" )
+ERROR_404 = get_template( "error_404.tpl" )
 
 def s3_get_dirs_files(bucket_name, prefix):
     """
