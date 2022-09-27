@@ -1,6 +1,0 @@
-    $("#but1").click( function() {
-	var line = $("#text1").val(); 
-	console.log( line );
-	appendLine( line );
-	return false; //stop event bubbling up and event propigation
-    });

@@ -16,11 +16,13 @@ DESIRED_PYTHON = 'python3.9'
 DREAMHOST_PYTHON_BINDIR = os.path.join( os.getenv('HOME'), 'opt/python-3.9.2/bin')
 
 def dump_vars(f):
+    """Send the list of variables to output for debugging"""
     for (k,v) in os.environ.items():
         f.write(k + "=" + v + "\n")
         f.flush()
 
 def redirect_stderr():
+    """Make stderr go to a file"""
     errfile = open( os.path.join( os.getenv('HOME'), 'error.log') ,'a')
     os.close(sys.stderr.fileno())
     os.dup2(errfile.fileno(), sys.stderr.fileno())

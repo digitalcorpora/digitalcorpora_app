@@ -44,16 +44,14 @@ USE_BYPASS = True
 
 IGNORE_FILES = ['.DS_Store', 'Icon']
 
-# Specify files in the runtime environment
-S3_TEMPLATE_FILENAME  = os.path.join(dirname(__file__), "templates/s3_index.tpl")
-S3_ERROR_404_FILENAME = os.path.join(dirname(__file__), "templates/error_404.tpl")
+def get_template( basename ):
+    """Open a file and return the bottle template"""
+    filename = os.path.join( dirname(__file__), "templates", basename)
+    with open( filename, "r") as f:
+        return bottle.SimpleTemplate( f.read() )
 
-# Create the S3_INDEX bottle SimpleTemplate here, outside of the
-# s3_list_prefix_v1, so that it gets read when s3_gateway.py is imported.
-# This causes bottle to compile it ONCE and repeatedly serve it out
-
-S3_INDEX  = bottle.SimpleTemplate( open( S3_TEMPLATE_FILENAME ).read())
-ERROR_404 = bottle.SimpleTemplate( open( S3_TEMPLATE_FILENAME ).read())
+S3_INDEX  = get_template( "s3_index.tpl" )
+ERROR_404 = get_template( "error_404.tpl" )
 
 def s3_get_dirs_files(bucket_name, prefix):
     """
@@ -118,6 +116,7 @@ def s3_list_prefix(bucket_name, prefix, auth=None):
               'basename': os.path.basename(obj['Key']),
               'size': "{:,}".format(obj['Size']),
               'ETag': obj['ETag'],
+              'LastModified': obj['LastModified'],
               'sha2_256': obj.get('sha2_256','n/a'),
               'sha3_256': obj.get('sha3_256','n/a') } for obj in s3_files]
 

@@ -4,7 +4,6 @@ db_lookup.py:
 Given a list of dictionaries that have Keys, mtimes and etags, see if we can find them in the database
 """
 
-import logging
 import ctools.dbfile
 
 def annotate_s3files(auth, objs):
