@@ -87,8 +87,6 @@ def s3_to_link(obj):
     else:
         raise RuntimeError("obj: "+json.dumps(obj, default=str))
 
-
-
 def s3_list_prefix(bucket_name, prefix, auth=None):
     """The revised s3_list_prefix implementation: uses the Bottle
     template system to generate HTML. Get a list of the sub-prefixes
