@@ -102,9 +102,12 @@
       return false;
     }
 
+    // Runs when the user clicks the back button
     $(window).on("popstate", function() {
       if (history.state && history.state.page == "Search") {
          load_search(history.state.q, true);
+      } else {
+         $('#s3results').html('');
       }
    });
 
