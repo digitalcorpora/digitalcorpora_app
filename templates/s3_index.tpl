@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html lang='en'>
   <head>
+    <title>Digital Corpora: {{prefix}}</title>
     <link rel="stylesheet" id="ultra-style-css" href="https://digitalcorpora.org/wp-content/themes/ultra/style.css?ver=1.6.4" type="text/css" media="all">
     <link rel="stylesheet" id="font-awesome-css" href="https://digitalcorpora.org/wp-content/themes/ultra/font-awesome/css/font-awesome.min.css?ver=4.7.0" type="text/css" media="all">
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <meta name="google" content="notranslate"/>
     <style type="text/css" media="screen">@import url( https://digitalcorpora.org/wp-content/themes/digitalcorpora/style.css );</style>
     <script type='text/javascript' src='https://digitalcorpora.org/wp-includes/js/jquery/jquery.min.js?ver=3.5.1' id='jquery-core-js'></script>
-    <title>Digital Corpora: {{prefix}}</title>
 
     <style type="text/css">
       body {padding-left: 50pt;}
@@ -29,19 +29,21 @@
       #files { color:black; }
     </style>
   </head>
-  <body lang='en-US' style='background:white' class='home page-template-default page page-id-2 logged-in admin-bar full group-blog sidebar tagline no-touch page-layout-default resp customize-support'  >
+  <body lang='en-US' style='background:white'
+        class='home page-template-default page page-id-2 logged-in admin-bar full group-blog sidebar tagline no-touch page-layout-default resp customize-support'  >
     <header id="masthead" class="site-header sticky-header scale responsive-menu" style="position: relative; left: auto; width: 100%;">
       <div class="container">
 	<div class="site-branding-container">
 	  <div class="site-branding">
 	    <a href="https://digitalcorpora.org/" rel="home">
-	      <h1 class="site-title">Digital Corpora</h1>						</a>
+	      <h1 class="site-title">Digital Corpora</h1>
+	    </a>
 	    <p class="site-description">Producing the Digital Body</p>
 	  </div><!-- .site-branding -->
 	</div><!-- .site-branding-container -->
     </header>
 
-    <!-- searchbox START -->
+    <!-- legacy searchbox Start -->
     <div id="searchbox">
       <form action="https://digitalcorpora.org" method="get">
 	<div class="content">
