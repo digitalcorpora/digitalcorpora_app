@@ -1,7 +1,7 @@
 # See https://docs.github.com/en/actions/guides/building-and-testing-python
 # 2020-02-20 slg - For Dreamhost, we are now using Python 3.9 and Ubuntu-18.04
 name: CI (pip)
-on: [push]
+on: [push, pull_request]
 
 jobs:
   build:
@@ -17,7 +17,7 @@ jobs:
           submodules: true
 
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v1
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
 
@@ -28,7 +28,9 @@ jobs:
           find . -print
 
       - name: Lint with pylint
-        run: pylint -j0 .
+        run: |
+          pip install pylint
+          pylint -j0 .
 
       - name: Test with pytest and SECRETS
         env:
@@ -37,6 +39,7 @@ jobs:
           TMP_DBWRITER_USERNAME: ${{ secrets.TMP_DBWRITER_USERNAME }}
           TMP_DBWRITER_PASSWORD: ${{ secrets.TMP_DBWRITER_PASSWORD }}
         run: |
+          pip install pytest
           make coverage
 
       - name: Upload coverage
