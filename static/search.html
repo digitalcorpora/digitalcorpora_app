@@ -55,7 +55,7 @@
 
     <!-- s3searchbox START -->
     <div id="s3searchbox">
-      <form action="https://digitalcorpora.org" method="get">
+      <form>
 	<div class="content">
 	  <input type="text"   class="textfield" id="q" name="q" size="24" value="" />
 	  <input type="submit" class="button"    id="s3search" value="Search S3 Downloads" />
@@ -64,16 +64,13 @@
     </div>
     <p></p>
 
-   <div id="s3results">
-   </div>
+   <div id="s3results"></div>
 
     <div id="footer">
       <a id="gotop" href="#" onclick="MGJS.goTop();return false;">Top</a>
-      <div id="copyright">
-	Copyright &copy; 2009-2022 Simson Garfinkel</div>
+      <div id="copyright">Copyright &copy; 2009-2022 Simson Garfinkel</div>
     </div>
     <!-- footer END -->
-    <!-- This is under the light gray box, in the dark gray box -->
 
     <script>
     function load_search(q, skipPushState) {
