@@ -12,33 +12,31 @@ import sys
 import os
 import os.path
 
-DESIRED_PYTHON = 'python3.9'
+DESIRED_PYTHON_VERSION  = '3.9'
+DESIRED_PYTHON          = 'python3.9'
 DREAMHOST_PYTHON_BINDIR = os.path.join( os.getenv('HOME'), 'opt/python-3.9.2/bin')
 
-def dump_vars(f):
-    """Send the list of variables to output for debugging"""
-    for (k,v) in os.environ.items():
-        f.write(k + "=" + v + "\n")
-        f.flush()
+debug=False
 
-def redirect_stderr():
-    """Make stderr go to a file"""
-    errfile = open( os.path.join( os.getenv('HOME'), 'error.log') ,'a')
-    os.close(sys.stderr.fileno())
-    os.dup2(errfile.fileno(), sys.stderr.fileno())
-    #dump_vars(errfile)
+errfile = open( os.path.join( os.getenv('HOME'), 'error.log'),'a')
+os.close(sys.stderr.fileno())
+os.dup2(errfile.fileno(), sys.stderr.fileno())
 
-if 'IN_PASSENGER' in os.environ:
-    # Send error to error.log, but not when running under pytest
-    redirect_stderr()
+if sys.version >= DESIRED_PYTHON_VERSION:
+    sys.path.append(os.getcwd())
+    sys.path.append('app')
+    try:
+        from app import app as application    # this is all that is needed
+    except ModuleNotFoundError as e:
+        print("python interpreter:",sys.executable,file=sys.stderr)
+        raise
 
-    # Use python of choice
-    if DREAMHOST_PYTHON_BINDIR not in os.environ['PATH']:
-        os.environ['PATH'] = DREAMHOST_PYTHON_BINDIR + ":" + os.environ['PATH']
+if DREAMHOST_PYTHON_BINDIR not in os.environ['PATH']:
+    if debug:
+        sys.stderr.write("Adding "+DREAMHOST_PYTHON_BINDIR+" to PATH\n")
+    os.environ['PATH'] = DREAMHOST_PYTHON_BINDIR + ":" + os.environ['PATH']
 
-    if DESIRED_PYTHON not in sys.executable:
-        os.execlp(DESIRED_PYTHON, DESIRED_PYTHON, *sys.argv)
-    else:
-        # If we get here, we are running under the DESIRED_PYTHON
-        import app_wsgi
-        application = app_wsgi.app()
+if (DESIRED_PYTHON not in sys.executable) and ('RUNNING_PYTEST' not in os.environ):
+    if debug:
+        sys.stderr.write("Executing "+DESIRED_PYTHON+"\n")
+    os.execlp(DESIRED_PYTHON, DESIRED_PYTHON, *sys.argv)
