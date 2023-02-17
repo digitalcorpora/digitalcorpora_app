@@ -9,5 +9,5 @@ import app.db_lookup
 
 def test_db_lookup():
     objs = []
-    db_lookup.annotate_s3files(None,objs)
+    app.db_lookup.annotate_s3files(None,objs)
     assert objs==[]

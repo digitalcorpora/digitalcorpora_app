@@ -73,12 +73,12 @@ def s3_get_dirs_files(bucket_name, prefix):
         raise FileNotFoundError(prefix)
     return (dirs, files)
 
-def s3_to_link(obj):
+def s3_to_link(url, obj):
     """Given a s3 object, return a link to it"""
     # pylint: disable=R1705
     if 'Prefix' in obj:
         name = obj['Prefix'].split("/")[-2]+"/"
-        return request.url + urllib.parse.quote(name)
+        return url + urllib.parse.quote(name)
     elif 'Key' in obj:
         return BYPASS_URL + urllib.parse.quote(obj['Key'])
     else:
@@ -107,7 +107,7 @@ def s3_list_prefix(bucket_name, prefix, auth=None):
     dirs = [obj['Prefix'].split('/')[-2]+'/' for obj in s3_dirs]
     if auth is not None and s3_files:
         db_lookup.annotate_s3files(auth, s3_files)
-    files = [{'a': s3_to_link(obj),
+    files = [{'a': s3_to_link(request.url, obj),
               'basename': os.path.basename(obj['Key']),
               'size': "{:,}".format(obj['Size']),
               'ETag': obj['ETag'],
