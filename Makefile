@@ -14,7 +14,7 @@ check:
 touch:
 	touch tmp/restart.txt
 
-pylint:
+lint:
 	pylint $(PYLINT_FILES)
 
 # These are used by the CI pipeline:
