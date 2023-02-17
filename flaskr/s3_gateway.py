@@ -134,7 +134,7 @@ def s3_app(*, bucket, quoted_prefix, auth=None):
         except FileNotFoundError as e:
             logging.warning("e:%s", e)
             response.status = 404
-            return render_template(ERROR_404,bucket=bucket,prefix=prefix)
+            return render_template(ERROR_404, bucket=bucket,prefix=prefix)
 
     # If the prefix does not end with a '/' and there is object there, see if it is a prefix
     try:
@@ -145,7 +145,7 @@ def s3_app(*, bucket, quoted_prefix, auth=None):
         except FileNotFoundError as e:
             # No object and not a prefix
             response.status = 404
-            return render_template(ERROR_404,bucket=bucket,prefix=prefix)
+            return render_template(ERROR_404, bucket=bucket,prefix=prefix)
 
     # If we are using the bypass, redirect
 

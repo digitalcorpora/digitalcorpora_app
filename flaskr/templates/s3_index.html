@@ -44,13 +44,24 @@
     </header>
 
     <!-- legacy searchbox Start -->
-    <div id="searchbox">
+    <div id="searchbox-website">
+    Website:
       <form action="https://digitalcorpora.org" method="get">
 	<div class="content">
 	  <input type="text" class="textfield" name="s" size="24" value="" />
 	  <input type="submit" class="button" value="Search Wordpress Site" />
 	</div>
       </form>
+    </div>
+
+    <div id='searchbox-corpus'>
+    Corpus:
+    <form action="https://downloads.digitalcorpora.org/search" method="get">
+       <div class='content'>
+         <input type="text" class="textfield" name="q" size="24" value=""/>
+          <input type='submit' class='button' value='Search Corpus'/>
+       </div>
+       </form>
     </div>
 
     <div id='s3_browser'>
