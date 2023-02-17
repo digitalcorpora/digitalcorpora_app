@@ -30,7 +30,7 @@ pytest:
 
 coverage:
 	python3 -m pip install pytest pytest_cov
-	python3 -m pytest --debug -v --cov=. --cov-report=xml tests
+	python3 -m pytest  -v --cov=. --cov-report=xml tests
 
 clean:
 	find . -name '*~' -exec rm {} \;
