@@ -1,0 +1,4 @@
+export MYSQL_USER=dbreader
+export MYSQL_PASSWORD=dbreader_test_password
+export MYSQL_HOST=localhost
+export MYSQL_DATABASE=no_database

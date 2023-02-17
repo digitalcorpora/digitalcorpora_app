@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% block header %}
+<h3>{% block title %} Demo Page {% endblock %} </a></h3>
+{% endblock %}
+
+{% block content %}
+    <table id='results' class='rtable'>
+    <colgroup>
+      <col class='datePublished'/>
+      <col class='author'/>
+      <col class='title'/>
+    </colgroup>
+    <thead>
+        <tr>
+            <th class='datePublished'> datePublished </th>
+            <th class='author'>        author </th>
+            <th class='title'>      title </th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td class='datePublished'>2000-01-01 10:10:10</td>
+            <td class='author'>   Author1   </td>
+            <td class='title'> Title1 </td>
+        </tr>
+        <tr>
+            <td class='datePublished'>2000-01-01 10:10:10</td>
+            <td class='author'>   Author2   </td>
+            <td class='title'> Title2 </td>
+        </tr>
+        <tr>
+            <td class='datePublished'>2000-01-01 10:10:10</td>
+            <td class='author'>   Author3   </td>
+            <td class='title'> Title3 </td>
+        </tr>
+    </tbody>
+    <tfoot>
+    </tfoot>
+    </table>
+{% endblock %}

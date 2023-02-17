@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% block header %}
+<h3>{% block title %} {{ report_name }} {% endblock %} </a></h3>
+{% endblock %}
+
+{% block content %}
+<!-- results go here -->
+<style>
+table.dataTable tbody th, table.dataTable tbody td {
+  padding: 0px 0px;
+}
+</style>
+
+<div id='trresults'>
+  <table id='report' class='rtable'>
+  </table>
+</div>
+
+<script>
+  var columns   = {{columns_data | safe}};
+  var json_data = {{json_data | safe}};
+
+  $(document).ready( function() {
+    $('#report').DataTable({
+        data: json_data,
+        columns: columns,
+        pageLength:100,
+        lengthMenu: [ [10, 100, 1000, -1], [10, 25, 100, 1000, "All"] ],
+        oLanguage: {
+          sSearch: "Filter Results: "
+         }
+    });
+  });
+</script>
+
+{% endblock %}

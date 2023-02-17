@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% block header %}
+<h3>{% block title %} {{ report_name }} {% endblock %} </a></h3>
+{% endblock %}
+
+{% block content %}
+<!-- results go here -->
+<div id='trresults'>
+  <table id='report' class='rtable'>
+    <thead>
+      <tr>
+        {% for col in headings %}
+        <th>{{ col | safe}} </th>
+        {% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in rows %}
+      <tr>
+        {% for col in row %}
+        <td>{{ col | safe}} </td>
+        {% endfor %}
+      </tr>
+      {% endfor %}
+    </tbody>
+    <tfoot>
+    </tfoot>
+  </table>
+</div>
+
+<script>
+  $(document).ready( function() {
+    $('#report').DataTable({
+        pageLength:100,
+        lengthChange": false,
+        oLanguage: {
+          sSearch: "Filter Results: "
+         }
+    });
+  });
+</script>
+
+{% endblock %}

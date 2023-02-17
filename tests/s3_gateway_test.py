@@ -27,9 +27,11 @@ def test_s3_get_dirs_files_test(dirs_and_files):
 
 def test_s3_to_link(dirs_and_files):
     (dirs,files) = dirs_and_files
-    assert s3_to_link(dirs[0])=='http://127.0.0.1/subdir%20with-space/'
-    assert s3_to_link(dirs[1])=='http://127.0.0.1/subdir1/'
-    assert s3_to_link(files[0])=='https://digitalcorpora.s3.amazonaws.com/tests/file1.txt'
+    gtw_url = 'http://127.0.0.1/'
+    aws_url = 'https://digitalcorpora.s3.amazonaws.com/'
+    assert s3_to_link(gtw_url, dirs[0])  == gtw_url + 'subdir%20with-space/'
+    assert s3_to_link(gtw_url, dirs[1])  == gtw_url + 'subdir1/'
+    assert s3_to_link(gtw_url, files[0]) == aws_url + 'tests/file1.txt'
 
 def test_redirect():
     """A direct download should instead redirect to Amazon"""
