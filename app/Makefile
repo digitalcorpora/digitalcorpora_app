@@ -1,2 +1,0 @@
-touch:
-	(cd ..;make touch)
