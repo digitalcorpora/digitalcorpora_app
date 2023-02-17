@@ -14,8 +14,12 @@ check:
 touch:
 	touch tmp/restart.txt
 
-lint:
-	pylint $(PYLINT_FILES)
+pylint:
+	pylint --rcfile .pylintrc  --verbose  $(PYLINT_FILES)
+
+flake8:
+	flake8 $(PYLINT_FILES)
+
 
 # These are used by the CI pipeline:
 install-dependencies:
