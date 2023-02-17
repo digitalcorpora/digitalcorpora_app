@@ -28,7 +28,7 @@ import s3_gateway
 
 DBREADER_BASH_FILE = os.path.join( os.getenv('HOME'), 'dbreader.bash')
 try:
-    dbreader = ctools.dbfile.DBMySQLAuth.GetBashEnvFromFile( DBREADER_BASH_FILE )
+    dbreader = ctools.dbfile.DBMySQLAuth.FromBashEnvFile( DBREADER_BASH_FILE )
 except FileNotFoundError as e:
     dbreader = None
 
