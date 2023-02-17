@@ -25,3 +25,12 @@ def test_ver(client):
     response = client.get('/ver')
     assert response.status_code == 200
     assert response.data.decode('utf-8').startswith('Python version')
+
+def test_test_template(client):
+    response = client.get('/test_template')
+    assert response.status_code == 200
+    data = response.data.decode('utf-8')
+    print(data)
+    assert "Search Wordpress Site" in data
+    assert "Search Corpus" in data
+    assert "SHA2-256" in data

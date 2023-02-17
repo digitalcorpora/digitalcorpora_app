@@ -133,6 +133,6 @@ def create_app(config_filename=None):
             {'a':'https://company.com/a', 'basename':'a', 'size':100, 'ETag':'n/a', 'sha2_256':'n/a', 'sha3_256':'n/a'},
             {'a':'https://company.com/b', 'basename':'b', 'size':200, 'ETag':'n/a', 'sha2_256':'n/a', 'sha3_256':'n/a'}
         ]
-        return s3_gateway.S3_INDEX.render(prefix=prefix, paths=paths, files=files, dirs=dirs)
+        return render_template(s3_gateway.S3_INDEX,prefix=prefix, paths=paths, files=files, dirs=dirs)
 
     return app
