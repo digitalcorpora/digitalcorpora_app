@@ -1,21 +1,32 @@
-PYTHON_DIR=python
+PYLINT_FILES=$(shell /bin/ls *.py  | grep -v app_wsgi.py)
+
+all:
+	@echo verify syntax and then restart
+	make pylint
+	make touch
+
+check:
+	make touch
+	make pylint
+	make pytest
+
+
+touch:
+	touch tmp/restart.txt
 
 pylint:
-	(cd $(PYTHON_DIR); make pylint)
+	pylint $(PYLINT_FILES)
 
+# These are used by the CI pipeline:
 install-dependencies:
-	python3 -m pip install --user --upgrade pip
 	if [ -r requirements.txt ]; then pip3 install --user -r requirements.txt ; else echo no requirements.txt ; fi
 
-
-configure-aws:
-	sudo yum install -y python3 python3-pip python3-wheel git emacs
-	git config --global pager.branch false
-	make install-dependencies
+pytest:
+	pytest .
 
 coverage:
-	(cd $(PYTHON_DIR); python3 -m pytest --debug -v --cov=. --cov-report=xml tests; cp coverage.xml ..)
+	python3 -m pip install pytest pytest_cov
+	python3 -m pytest --debug -v --cov=. --cov-report=xml tests
 
-
-pytest:
-	(cd $(PYTHON_DIR); make pytest)
+clean:
+	find . -name '*~' -exec rm {} \;
