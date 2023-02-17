@@ -5,7 +5,7 @@ import os
 from os.path import abspath,dirname
 
 sys.path.append( dirname(dirname(abspath(__file__))))
-import db_lookup
+import app.db_lookup
 
 def test_db_lookup():
     objs = []

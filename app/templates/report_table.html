@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% block header %}
+<h3>{% block title %} {{ report_name }} {% endblock %} </a></h3>
+{% endblock %}
+
+{% block content %}
+<!-- results go here -->
+<div id='trresults'>
+  <table id='results'>
+    <colgroup>
+      <col class='datePublished'/>
+      <col class='author'/>
+      <col class='title'/>
+    </colgroup>
+    <thead>
+      <tr>
+        <th class='datePublished'> datePublished </th>
+        <th class='author'>        author </th>
+        <th class='title'>      title </th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in rows %}
+      <tr>
+        <td class='datePublished'>{{ row['datePublished'] }}</td>
+        <td
+        <td class='author'>   <a href='/search?author={{ row['eauthor'] }}'> {{ row['author'] }}</a> </td>
+        <td class='title'> <a href='{{ row['url'] }}'> {{ row['title'] }} </a></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+    <tfoot>
+    </tfoot>
+  </table>
+</div>
+{% endblock %}

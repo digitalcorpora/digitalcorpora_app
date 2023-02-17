@@ -1,0 +1,69 @@
+body,h1,h2,h3,h4,h5,h6 {
+    font-family: "Raleway", Arial, Helvetica, sans-serif;
+}
+
+body {
+    padding-left: 50pt;
+    background:white;
+}
+
+div#footer {
+    padding-top: 10pt;
+}
+
+div#copyright {
+    color: blue;
+    font-size: 70%;
+    padding-top: 10pt;
+}
+
+table.results td {
+    vertical-align:top;
+}
+
+table.results tr:nth-child(odd) {
+  background-color: #f1f6f4;
+  color: black;
+}
+
+table.results table.metadata {
+    font-size: 70%;
+}
+
+table.metadata th {
+    background-color:transparent;
+}
+
+table.results table.metadata tr:nth-child(odd) {
+    background-color: white;
+    color: black;
+}
+
+// top right bottom left
+tr {
+    padding: 0pt 0pt 0pt 0pt;
+}
+
+col.datePublished {
+    min-width: 150px;
+    max-width: 150px;
+}
+col.title  { max-width: 500px; }
+col.author { width: 30%; max-width:300px; }
+
+td.datePublished {
+    overflow-wrap: break-word;
+    padding: 1pt 1pt 1pt 10pt;
+}
+
+td.title {
+    max-width: 500px;
+    overflow-wrap: break-word;
+    padding: 1pt 1pt 1pt 10pt;
+}
+
+td.author {
+    max-width: 300px;
+    overflow-wrap: break-word;
+    padding: 1pt 1pt 1pt 10pt;
+}

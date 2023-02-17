@@ -57,9 +57,9 @@
 		<h1>digitalcorpora.org Reports</h1>
 		<h2>Available Reports:</h2>
                 <ul>
-                  % for (ct,r) in enumerate(reports):
+                  {% for (ct,r) in enumerate(reports) %}
                       <li><a href='?report={{ct}}'>{{r}}</a></li>
-                  % end
+                  {% endfor %}
                 </ul>
                 <div id='report'>
 	      </div>

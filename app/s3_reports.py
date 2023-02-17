@@ -8,13 +8,9 @@ import sys
 import json
 from os.path import dirname
 
-import bottle
-
 from ctools.dbfile import DBMySQL
 
-REPORT_TEMPLATE_FILENAME  = os.path.join(dirname(__file__), "templates/reports.tpl")
-REPORT = bottle.SimpleTemplate( open( REPORT_TEMPLATE_FILENAME ).read())
-
+REPORT_TEMPLATE_FILENAME  = "reports.html"
 
 REPORTS = [
     ('Downloads over past week',
@@ -72,9 +68,8 @@ def report_json(*,auth,num):
                        'column_names':column_names,
                        'rows': rows},default=str)
 
-def report_app(auth):
+def report_app(*, auth):
     """Run from bottle."""
-    print(auth,file=sys.stderr)
-    return REPORT.render(reports=[report[0] for report in REPORTS],sys_version=sys.version)
+    return render_template(REPORT_TEMPLATE_FILENAME, reports=[report[0] for report in REPORTS],sys_version=sys.version)
 
 #Don't forget time_zone = gmt

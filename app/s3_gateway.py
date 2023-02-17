@@ -3,7 +3,6 @@
 
 """
 s3_gateway:
-bottle/boto3 interface to view an s3 bucket in a web browser.
 
 2021-02-15 slg - updated to use anonymous s3 requests,
                  per https://stackoverflow.com/questions/34865927/can-i-use-boto3-anonymously
@@ -27,10 +26,8 @@ import botocore.exceptions
 from botocore import UNSIGNED
 from botocore.client import Config
 
-import bottle
-
-#from botocore.exceptions import ClientError
-from bottle import request, response, redirect
+from flask import Flask, redirect, request, render_template, Response
+from flask import Flask, send_from_directory
 
 import db_lookup
 
@@ -44,14 +41,14 @@ USE_BYPASS = True
 
 IGNORE_FILES = ['.DS_Store', 'Icon']
 
-def get_template( basename ):
-    """Open a file and return the bottle template"""
-    filename = os.path.join( dirname(__file__), "templates", basename)
-    with open( filename, "r") as f:
-        return bottle.SimpleTemplate( f.read() )
+#def get_template( basename ):
+#    """Open a file and return the bottle template"""
+#    filename = os.path.join( dirname(__file__), "templates", basename)
+#    with open( filename, "r") as f:
+#        return bottle.SimpleTemplate( f.read() )
 
-S3_INDEX  = get_template( "s3_index.tpl" )
-ERROR_404 = get_template( "error_404.tpl" )
+S3_INDEX  = "s3_index.html"
+ERROR_404 = "error_404.html"
 
 def s3_get_dirs_files(bucket_name, prefix):
     """
@@ -118,7 +115,7 @@ def s3_list_prefix(bucket_name, prefix, auth=None):
               'sha2_256': obj.get('sha2_256','n/a'),
               'sha3_256': obj.get('sha3_256','n/a') } for obj in s3_files]
 
-    return S3_INDEX.render(prefix=prefix, paths=paths, files=files, dirs=dirs, sys_version=sys.version)
+    return render_template(S3_INDEX,prefix=prefix, paths=paths, files=files, dirs=dirs, sys_version=sys.version)
 
 
 def s3_app(*, bucket, quoted_prefix, auth=None):
@@ -137,7 +134,7 @@ def s3_app(*, bucket, quoted_prefix, auth=None):
         except FileNotFoundError as e:
             logging.warning("e:%s", e)
             response.status = 404
-            return ERROR_404.render(bucket=bucket,prefix=prefix)
+            return render_template(ERROR_404,bucket=bucket,prefix=prefix)
 
     # If the prefix does not end with a '/' and there is object there, see if it is a prefix
     try:
@@ -148,7 +145,7 @@ def s3_app(*, bucket, quoted_prefix, auth=None):
         except FileNotFoundError as e:
             # No object and not a prefix
             response.status = 404
-            return ERROR_404.render(bucket=bucket,prefix=prefix)
+            return render_template(ERROR_404,bucket=bucket,prefix=prefix)
 
     # If we are using the bypass, redirect
 
@@ -158,10 +155,11 @@ def s3_app(*, bucket, quoted_prefix, auth=None):
 
     # Otherwise download directly
     try:
-        response.content_type = mimetypes.guess_type(prefix)[0]
+        r = Response(response=obj['Body'], status=200, mimetype=mimetypes.guess_type(prefix)[0])
     except (TypeError,ValueError,KeyError) as e:
-        response.content_type = 'application/octet-stream'
-    return obj['Body']
+        r = Response(response=obj['Body'], status=200, mimetype='application/octet-stream')
+        r.headers['Content-Type'] = 'application/octet-stream'
+    return r
 
 
 if __name__ == "__main__":

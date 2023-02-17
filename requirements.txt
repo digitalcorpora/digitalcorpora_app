@@ -1,9 +1,10 @@
 boto3
-bottle
+flask
 pylint
 pytest
 pytest-cov
 pytest-env
+pytest-flask
 markdown
 pymysql
 coverage

@@ -56,21 +56,21 @@
     <div id='s3_browser'>
       <h1>S3 Downloads Browser</h1>
       <h2><!--
-        % for path in paths:
+        {% for path in paths %}
         --><a href="{{path[0]}}">{{path[1]}}</a><!--
-        % end
+        {% endfor %}
         --> sub-dirs:
       </h2>
 
       <ul>
-        % for d in dirs:
+        {% for d in dirs %}
         <li class='subdir'><a href='{{d}}'>{{d}}</a></li>
-        % end
+        {% endfor %}
       </ul>
       <h2><!--
-        % for path in paths:
+        {% for path in paths %}
         --><a href="{{path[0]}}">{{path[1]}}</a><!--
-        % end
+        {% endfor %}
         --> files:
       </h2>
       <table id='files'>
@@ -84,7 +84,7 @@
           </tr>
 	</thead>
 	<tbody>
-          % for f in files:
+          {% for f in files %}
           <tr>
             <td class='name'><a href='{{f['a']}}'>{{f['basename']}}</a></td>
             <td class='size'>{{f['size']}}</td>
@@ -92,7 +92,7 @@
             <td class='hash'>{{f['sha2_256']}}</td>
             <td class='hash'>{{f['sha3_256']}}</td>
           </tr>
-          % end
+          {% endfor %}
 	</tbody>
 	<tfoot>
 	</tfoot>
