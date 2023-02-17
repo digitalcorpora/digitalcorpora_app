@@ -24,6 +24,7 @@ debug=False
 
 # Rewrite stderr if not running under pytest
 if 'PYTEST' not in os.environ:
+    #pylint: disable = unspecified-encoding
     with open( os.path.join( os.getenv('HOME'), 'error.log'),'a') as errfile:
         os.close(sys.stderr.fileno())
         os.dup2(errfile.fileno(), sys.stderr.fileno())
@@ -43,5 +44,6 @@ sys.path.append( MYDIR )
 sys.path.append( os.path.join(MYDIR,APP_NAME))
 
 ## Run Flask application
+#pylint: disable = wrong-import-position
 import flaskr
 application = flaskr.create_app()
