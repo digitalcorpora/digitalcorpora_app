@@ -20,17 +20,17 @@ debug=False
 
 # Rewrite stderr if not running under pytest
 if 'PYTEST' not in os.environ:
-    errfile = open( os.path.join( os.getenv('HOME'), 'error.log'),'a')
-    os.close(sys.stderr.fileno())
-    os.dup2(errfile.fileno(), sys.stderr.fileno())
+    with open( os.path.join( os.getenv('HOME'), 'error.log'),'a', encoding='utf-8') as errfile:
+        os.close(sys.stderr.fileno())
+        os.dup2(errfile.fileno(), sys.stderr.fileno())
 
 if sys.version >= DESIRED_PYTHON_VERSION:
     sys.path.append(os.getcwd())
     sys.path.append('app')
     try:
         ## Run Flask application
-        import app
-        app.create_app()
+        import flaskr
+        flaskr.create_app()
     except ModuleNotFoundError as e:
         print("python interpreter:",sys.executable,file=sys.stderr)
         raise
