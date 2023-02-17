@@ -29,7 +29,8 @@ if sys.version >= DESIRED_PYTHON_VERSION:
     sys.path.append('app')
     try:
         ## Run Flask application
-        from app import app as application    # this is all that is needed
+        import app
+        app.create_app()
     except ModuleNotFoundError as e:
         print("python interpreter:",sys.executable,file=sys.stderr)
         raise
