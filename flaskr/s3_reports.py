@@ -7,8 +7,9 @@ import os.path
 import sys
 import json
 from os.path import dirname
-
 from ctools.dbfile import DBMySQL
+from flask import Flask, redirect, request, render_template
+from flask import Flask, send_from_directory
 
 REPORT_TEMPLATE_FILENAME  = "reports.html"
 
@@ -55,21 +56,24 @@ REPORTS = [
      """),
 ]
 
-def report_json(*,auth,num):
+def report_generate(*, auth, num):
     """Run a specific numbered report and return the result as a JSON object that's easy to render.
     :param auth: authorization
     :param num: which report to generate.
     """
     report = REPORTS[int(num)]
     column_names = []
-    rows = DBMySQL.csfr(auth, report[1], [], time_zone='GMT', get_column_names=column_names)
-    return json.dumps({'title':report[0],
-                       'sql':report[1],
-                       'column_names':column_names,
-                       'rows': rows},default=str)
+    rows = DBMySQL.csfr(auth, report[1], [], get_column_names=column_names)
+    return {'title':report[0],
+            'sql':report[1],
+            'column_names':column_names,
+            'rows': rows}
 
 def report_app(*, auth):
-    """Run from bottle."""
-    return render_template(REPORT_TEMPLATE_FILENAME, reports=[report[0] for report in REPORTS],sys_version=sys.version)
-
-#Don't forget time_zone = gmt
+    if request.args.get('report'):
+        rdict = report_generate(auth=auth, num=int(request.args.get('report')))
+    else:
+        rdict = {}
+    rdict['reports'] = reports=[(ct,report[0]) for (ct,report) in enumerate(REPORTS)]
+    rdict['sys_version'] = sys.version
+    return render_template(REPORT_TEMPLATE_FILENAME, **rdict)

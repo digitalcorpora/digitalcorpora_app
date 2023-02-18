@@ -26,6 +26,7 @@ for path in [ APP_DIR, BIN_DIR, LIB_DIR, ROOT_DIR ]:
 
 import ctools.dbfile
 import s3_gateway
+import s3_reports
 
 DBREADER_BASH_FILE = os.path.join( os.getenv('HOME'), 'dbreader.bash')
 try:
@@ -93,12 +94,13 @@ def create_app(config_filename=None):
     ## Reports
 
     @app.route('/reports')
+    @app.route('/reports/')
     def func_reports():
         return s3_reports.report_app(auth=dbreader)
 
     @app.route('/reports/json/<num>')
     def func_stats(num):
-        return s3_reports.report_json(auth=dbreader,num=num)
+        return json.dumps(s3_reports.report_generate(auth=dbreader,num=num),default=str)
 
     @app.route('/hello/<name>')
     def func_hello(name):
