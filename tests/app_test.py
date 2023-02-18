@@ -21,7 +21,26 @@ def client(app):
 def runner(app):
     return app.test_cli_runner()
 
-def test_ver(client):
+
+def test_misc(client):
+    response = client.get('/')
+    assert response.status_code == 200
+
     response = client.get('/ver')
     assert response.status_code == 200
     assert response.data.decode('utf-8').startswith('Python version')
+
+    response = client.get('/robots.txt')
+    assert response.status_code == 200
+
+    response = client.get('/corpora/')
+    assert response.status_code == 200
+
+    response = client.get('/downloads/')
+    assert response.status_code == 200
+
+    response = client.get('/hello/world')
+    assert response.status_code == 200
+
+    #response = client.get('/reports/')
+    #assert response.status_code == 200

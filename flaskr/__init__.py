@@ -62,7 +62,6 @@ def create_app(config_filename=None):
 
     @app.route('/')
     def func_root():
-        print("func_root",file=sys.stderr)
         return send_from_directory( STATIC_DIR, 'index.html')
 
     @app.route('/static/<path:path>')
@@ -93,6 +92,7 @@ def create_app(config_filename=None):
     ## Reports
 
     @app.route('/reports')
+    @app.route('/reports/')
     def func_reports():
         return s3_reports.report_app(auth=dbreader)
 
