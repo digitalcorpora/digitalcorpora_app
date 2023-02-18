@@ -63,7 +63,6 @@ def create_app(config_filename=None):
 
     @app.route('/')
     def func_root():
-        print("func_root",file=sys.stderr)
         return send_from_directory( STATIC_DIR, 'index.html')
 
     @app.route('/static/<path:path>')
