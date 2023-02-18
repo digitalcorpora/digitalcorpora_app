@@ -65,7 +65,7 @@ confidence=
 # W0621 - Redefining name 'auth' from outer scope
 # R0914 - Too many local variables
 # W0105 - String statement has no effect
-disable=C0103,C0301,R1720,R1705,C0116,W0621,R0914,W0105
+disable=C0103,C0301,R1720,R1705,C0116,E0012,W0621,R0914,W0105
 
 
 
