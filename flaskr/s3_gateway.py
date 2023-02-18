@@ -17,6 +17,7 @@ import mimetypes
 import os
 import sys
 import urllib.parse
+import pymysql
 from os.path import dirname
 
 import boto3
@@ -106,7 +107,12 @@ def s3_list_prefix(bucket_name, prefix, auth=None):
 
     dirs = [obj['Prefix'].split('/')[-2]+'/' for obj in s3_dirs]
     if auth is not None and s3_files:
-        db_lookup.annotate_s3files(auth, s3_files)
+        try:
+            db_lookup.annotate_s3files(auth, s3_files)
+        except pymysql.err.ProgrammingError as e:
+            if e.args[0]!=1146:
+                raise
+            logging.error("%s: %s",e.args[0],e.args[1])
     files = [{'a': s3_to_link(request.url, obj),
               'basename': os.path.basename(obj['Key']),
               'size': "{:,}".format(obj['Size']),
