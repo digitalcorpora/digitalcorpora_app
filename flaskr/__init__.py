@@ -17,6 +17,9 @@ LIB_DIR  = os.path.join(ROOT_DIR, 'lib')
 TEST_DIR = os.path.join(ROOT_DIR, 'tests')
 STATIC_DIR = os.path.join(APP_DIR, 'static')
 
+DBREADER_DIRS  = [APP_DIR, HOME]
+DBREADER_FILES = ['dbreader_digitalcorpora.bash','dbreader.bash']
+
 DEBUG=True
 
 for path in [ APP_DIR, BIN_DIR, LIB_DIR, ROOT_DIR ]:
@@ -26,19 +29,32 @@ for path in [ APP_DIR, BIN_DIR, LIB_DIR, ROOT_DIR ]:
 import ctools.dbfile
 import s3_gateway
 
-DBREADER_BASH_FILE = os.path.join( os.getenv('HOME'), 'dbreader.bash')
-try:
-    dbreader = ctools.dbfile.DBMySQLAuth.FromBashEnvFile( DBREADER_BASH_FILE )
-except FileNotFoundError as e:
-    dbreader = None
 
-def create_app(config_filename=None):
+def get_dbreader():
+    if os.environ['MYSQL_HOST'] and os.environ['MYSQL_DATABASE'] and os.environ['MYSQL_USER'] and os.environ['MYSQL_PASSWORD']:
+        return ctool.dbfile.DBMySQLAuth(host=os.environ['MYSQL_HOST'],
+                                        database=os.environ['MYSQL_DATABASE'],
+                                        user=os.environ['MYSQL_USER'],
+                                        password=os.environ['MYSQL_PASSWORD'])
+
+    for d in DBREADER_DIRS:
+        for fname in DBREADER_FILES:
+            path = os.path.join( d, fname )
+            if os.path.exists(path):
+                return ctools.dbfile.DBMySQLAuth.FromBashEnvFile( DBREADER_BASH_FILE )
+    return None
+
+def create_app(config_filename=None, auth=None):
     app = Flask(__name__, static_folder='static')
     if config_filename is not None:
         app.config.from_pyfile(config_filename)
     if DEBUG:
         app.debug=DEBUG
 
+    if auth is not None:
+        dbreader = auth
+    else:
+        dbreader = get_dbreader()
 
 
     # https://help.dreamhost.com/hc/en-us/articles/215769548-Passenger-and-Python-WSGI

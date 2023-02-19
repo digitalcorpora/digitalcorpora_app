@@ -7,6 +7,10 @@ sys.path.append( dirname(dirname(abspath(__file__))))
 
 from flaskr import create_app
 
+def get_github_auth():
+
+
+
 @pytest.fixture()
 def app():
     app = create_app()
