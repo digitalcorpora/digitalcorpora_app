@@ -117,7 +117,7 @@ def create_app(config_filename=None):
         rows = ctools.dbfile.DBMySQL.csfr(dbreader,
                                           f"select * from downloadable where s3key like %s and present=1 order by s3key limit 1000",q,
                                           asDicts=True)
-        return json.dumps(rows,indent=4, sort_keys=True, default=str)
+        return json.dumps(rows, sort_keys=True, default=str)
 
 
     @app.route('/test_template')
