@@ -32,7 +32,7 @@ import s3_gateway
 
 def get_dbreader():
     try:
-        return ctool.dbfile.DBMySQLAuth(host=os.environ['MYSQL_HOST'],
+        return ctools.dbfile.DBMySQLAuth(host=os.environ['MYSQL_HOST'],
                                         database=os.environ['MYSQL_DATABASE'],
                                         user=os.environ['MYSQL_USER'],
                                         password=os.environ['MYSQL_PASSWORD'])
@@ -43,7 +43,7 @@ def get_dbreader():
         for fname in DBREADER_FILES:
             path = os.path.join( d, fname )
             if os.path.exists(path):
-                return ctools.dbfile.DBMySQLAuth.FromBashEnvFile( DBREADER_BASH_FILE )
+                return ctools.dbfile.DBMySQLAuth.FromBashEnvFile( path )
     return None
 
 def create_app(config_filename=None, auth=None):
