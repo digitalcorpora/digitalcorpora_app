@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang='en'>
+  <head>
+    <link rel="stylesheet" id="ultra-style-css" href="https://digitalcorpora.org/wp-content/themes/ultra/style.css?ver=1.6.4" type="text/css" media="all">
+    <link rel="stylesheet" id="font-awesome-css" href="https://digitalcorpora.org/wp-content/themes/ultra/font-awesome/css/font-awesome.min.css?ver=4.7.0" type="text/css" media="all">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="google" content="notranslate"/>
+    <style type="text/css" media="screen">@import url( https://digitalcorpora.org/wp-content/themes/digitalcorpora/style.css );</style>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <title>Digital Corpora: Search</title>
+
+    <style type="text/css">
+      body {padding-left: 50pt;}
+      a:visited {color:blue;}
+      a:link {color:blue;}
+      a:hover {color:pink;}
+      h1 { padding: 0 0 0 0; margin:0 0 0 0; line-height:normal;}
+      h2 { padding: 0 0 0 0; margin:0 0 0 0; line-height:normal;}
+      h3 { padding: 0 0 0 0; margin:0 0 0 0; font-size: 12pt; line-height:normal;}
+      ul { padding: 20pt 0 20pt 20pt; margin:0 0 0 0; line-height:normal;}
+      li { padding: 0 0 0 0; margin:0 0 0 0; line-height:normal;}
+      #files th { padding: 0 5pt 0 5pt; }
+      #files td { padding: 0 5pt 0 5pt; }
+      #files td.name { text-align: left; width:200px; }
+      #files td.size  { text-align: right; width:100px}
+      #files td.mtime { text-align: left; width:200px; }
+      #files td.hash { text-align: left; word-break: break-all; font-size: 9pt; font-family: monospace; width: 44em;}
+      #files li.subdir { font-size: 12pt;}
+      #files { color:black; }
+    </style>
+  </head>
+  <body lang='en-US' style='background:white' class='home page-template-default page page-id-2 logged-in admin-bar full group-blog sidebar tagline no-touch page-layout-default resp customize-support'  >
+    <header id="masthead" class="site-header sticky-header scale responsive-menu" style="position: relative; left: auto; width: 100%;">
+      <div class="container">
+	<div class="site-branding-container">
+	  <div class="site-branding">
+	    <a href="https://digitalcorpora.org/" rel="home">
+	      <h1 class="site-title">Digital Corpora</h1>						</a>
+	    <p class="site-description">Producing the Digital Body</p>
+	  </div><!-- .site-branding -->
+	</div><!-- .site-branding-container -->
+    </header>
+
+    <!-- wpsearchbox START -->
+    <div id="wpsearchbox">
+      <form action="https://digitalcorpora.org" method="get">
+	<div class="content">
+	  <input type="text" class="textfield" name="s" size="24" value="" />
+	  <input type="submit" class="button" value="Search Wordpress Site" />
+	</div>
+      </form>
+    </div>
+    <p></p>
+
+    <!-- s3searchbox START -->
+    <div id="s3searchbox">
+      <form>
+	<div class="content">
+	  <input type="text"   class="textfield" id="q" name="q" size="24" value="" />
+	  <input type="submit" class="button"    id="s3search" value="Search S3 Downloads" />
+	</div>
+      </form>
+    </div>
+    <p></p>
+
+   <div id="s3results"></div>
+
+    <div id="footer">
+      <a id="gotop" href="#" onclick="MGJS.goTop();return false;">Top</a>
+      <div id="copyright">Copyright &copy; 2009-2022 Simson Garfinkel</div>
+    </div>
+    <!-- footer END -->
+
+    <script>
+    function load_search(q, skipPushState) {
+      $('#q').val(q);   // Set it
+      $.ajax({ url: "/search/api?q="+q}).then(function(data) {
+          let rows = JSON.parse(data);
+          let html = "<table id='files'><thead><tr><th>Dir</th><th>Name</th><th>Size</th><th>Last Modified</th></thead><tbody>";
+          for (const row of rows) {
+            const pathArray = row.s3key.split("/");
+            const basename  = pathArray[pathArray.length -1];
+            const dirname   = row.s3key.substring(0, row.s3key.length - basename.length);
+            html += `<tr><td class='name'><a href='${dirname}'>${dirname}</a></td><td class='name'><a href='${row.s3key}'>${basename}</a></td><td class='size'>${row.bytes}</td><td class='mtime'>${row.mtime}</td></tr>\n`;
+          }
+          html += "</tbody><tfoot></tfoot></table>\n";
+          $('#s3results').html(html);
+          if (!skipPushState) {
+             var state = {q:q};
+             window.history.pushState( {q:q, page:'Search'}, "Search", "?q="+q);
+          }
+      });
+    }
+
+    function do_search(e) {
+      var q=$('#q').val();
+      load_search(q);
+      return false;
+    }
+
+    // Runs when the user clicks the back button
+    $(window).on("popstate", function() {
+      if (history.state && history.state.page == "Search") {
+         load_search(history.state.q, true);
+      } else {
+         $('#s3results').html('');
+      }
+   });
+
+    $(document).ready( function() {
+      $('#s3search').on('click', do_search );
+      let searchParams = new URLSearchParams(window.location.search)
+      if (searchParams.has('q')) {
+         const q = searchParams.get('q');
+         console.log("search for ",q);
+         load_search(q);
+      };
+
+
+
+    });
+    </script>
+  </body>
+</html>
