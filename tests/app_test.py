@@ -42,5 +42,5 @@ def test_misc(client):
     response = client.get('/hello/world')
     assert response.status_code == 200
 
-    #response = client.get('/reports/')
-    #assert response.status_code == 200
+    response = client.get('/test_template')
+    assert response.status_code == 200
