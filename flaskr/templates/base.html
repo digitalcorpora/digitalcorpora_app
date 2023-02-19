@@ -1,50 +1,86 @@
 <!DOCTYPE html>
-
 <html lang="en">
   <head>
     <title> {% block title %}{% endblock %} </title>
-
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <meta name="google"   content="notranslate"/>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <link rel="stylesheet" id="font-awesome-css" href="/static/font-awesome.min.css?ver=4.7.0" type="text/css" media="all">
-    <link rel="stylesheet"                       href="/static/search_style.css" type="text/css" media="all">
-    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.1/css/jquery.dataTables.css">
+    <link rel="stylesheet" id="ultra-style-css"  href="https://digitalcorpora.org/wp-content/themes/ultra/style.css?ver=1.6.4" type="text/css" media="all">
+    <link rel="stylesheet" id="font-awesome-css" href="https://digitalcorpora.org/wp-content/themes/ultra/font-awesome/css/font-awesome.min.css?ver=4.7.0" type="text/css" media="all">
 
+    <style type="text/css" media="screen">@import url( https://digitalcorpora.org/wp-content/themes/digitalcorpora/style.css );</style>
     <script type="text/javascript" charset="utf8" src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.13.1/js/jquery.dataTables.js"></script>
-    <script>
-    const site  = '{{ site | safe }}';
-    </script>
 
     {% block head %}{% endblock %}
+
+    <style type="text/css">
+      body {padding-left: 50pt; color:black}
+      a:visited {color:blue;}
+      a:link {color:blue;}
+      a:hover {color:pink;}
+      h1 { padding: 0 0 0 0; margin:0 0 0 0; line-height:normal;}
+      h2 { padding: 0 0 0 0; margin:0 0 0 0; line-height:normal;}
+      h3 { padding: 0 0 0 0; margin:0 0 0 0; font-size: 12pt; line-height:normal;}
+      ul { padding: 20pt 0 20pt 20pt; margin:0 0 0 0; line-height:normal;}
+      li { padding: 0 0 0 0; margin:0 0 0 0; line-height:normal;}
+      #files th { padding: 0 5pt 0 5pt; }
+      #files td { padding: 0 5pt 0 5pt; }
+      #files td.name { text-align: left; width:200px; }
+      #files td.size  { text-align: right; width:100px}
+      #files td.mtime { text-align: left; width:200px; }
+      #files td.hash { text-align: left; word-break: break-all; font-size: 9pt; font-family: monospace; width: 44em;}
+      #files li.subdir { font-size: 12pt;}
+      #files { color:black; }
+    </style>
   </head>
-  <body class='home page-template-default page page-id-2 logged-in  tagline no-touch page-layout-default resp customize-support'  >
+
+  <body lang='en-US' style='background:white'
+        class='home page-template-default page page-id-2 logged-in admin-bar full group-blog sidebar tagline no-touch page-layout-default resp customize-support'  >
     <header id="masthead" class="site-header sticky-header scale responsive-menu" style="position: relative; left: auto; width: 100%;">
       <div class="container">
-        <div class="site-branding-container">
-          <div class="site-branding">
-            <h1 class="site-title">{{sitename}} Site Search and Analysis Reports</h1>
-          </div><!-- .site-branding -->
-        </div><!-- .site-branding-container -->
+	<div class="site-branding-container">
+	  <div class="site-branding">
+	    <a href="https://digitalcorpora.org/" rel="home">
+	      <h1 class="site-title">Digital Corpora</h1>
+	    </a>
+	    <p class="site-description">Producing the Digital Body</p>
+	  </div><!-- .site-branding -->
+	</div><!-- .site-branding-container -->
     </header>
 
-    <div id="header">
-
+    <!-- legacy searchbox Start -->
+    <div id="searchbox-website">
+    Website:
+      <form action="https://digitalcorpora.org" method="get">
+	<div class="content">
+	  <input type="text" class="textfield" name="s" size="24" value="" />
+	  <input type="submit" class="button" value="Search Wordpress Site" />
+	</div>
+      </form>
     </div>
 
+    <div id='searchbox-corpus'>
+    Corpus:
+    <form action="https://downloads.digitalcorpora.org/search" method="get">
+       <div class='content'>
+         <input type="text" class="textfield" name="q" size="24" value=""/>
+          <input type='submit' class='button' value='Search Corpus'/>
+       </div>
+       </form>
+    </div>
 
-    <section class="content" style="margin-left:30px; margin-right:30px;">
-      <header>
-        {% block header %}{% endblock %}
-      </header>
-        {% block content %}{% endblock %}
-    </section>
+    {% block body %}
+    {% endblock %}
+
+    <div id='navigation'>
+      <a href='/corpora/'>Corpora</a> | <a href='/reports'> Reports</a>
+    </div>
 
     <div id="footer">
-      <a href='/{{site|safe}}/search'>Search</a> | <a href='/{{site|safe}}/reports/'>Reports</a> | <a href='/about'>About</a>
-      <div id="copyright"><p>Copyright &copy; 2022 Simson Garfinkel</p></div>
+      <div id="copyright">Copyright &copy; 2009-2022 Simson Garfinkel</div>
+      <div id='about'> Directory listing by <a href='https://github.com/digitalcorpora/app'>s3_gateway</a></div>
     </div>
   </body>
 </html>
