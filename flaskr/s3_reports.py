@@ -64,6 +64,9 @@ REPORTS = [
      """),
 ]
 
+def report_count():
+    return len(REPORTS)
+
 def report_generate(*, auth, num):
     """Run a specific numbered report and return the result as a JSON object that's easy to render.
     :param auth: authorization

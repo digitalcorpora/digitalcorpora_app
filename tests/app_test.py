@@ -6,6 +6,7 @@ from os.path import abspath,dirname
 sys.path.append( dirname(dirname(abspath(__file__))))
 
 from flaskr import create_app
+import flaskr.s3_reports as s3_reports
 
 @pytest.fixture()
 def app():
@@ -46,8 +47,9 @@ def test_reports(client):
     response = client.get('/reports')
     assert response.status_code == 200
 
-    response = client.get('/reports?reports=0')
-    assert response.status_code == 200
+    for report in range(s3_reports.report_count()):
+        response = client.get(f'/reports?reports={report}')
+        assert response.status_code == 200
 
 def test_template(client):
     response = client.get('/test_template')
