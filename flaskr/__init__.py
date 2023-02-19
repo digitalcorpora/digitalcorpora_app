@@ -31,11 +31,13 @@ import s3_gateway
 
 
 def get_dbreader():
-    if os.environ['MYSQL_HOST'] and os.environ['MYSQL_DATABASE'] and os.environ['MYSQL_USER'] and os.environ['MYSQL_PASSWORD']:
+    try:
         return ctool.dbfile.DBMySQLAuth(host=os.environ['MYSQL_HOST'],
                                         database=os.environ['MYSQL_DATABASE'],
                                         user=os.environ['MYSQL_USER'],
                                         password=os.environ['MYSQL_PASSWORD'])
+    except KeyError as e:
+        pass
 
     for d in DBREADER_DIRS:
         for fname in DBREADER_FILES:
