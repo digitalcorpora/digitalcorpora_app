@@ -64,7 +64,7 @@ def create_app(config_filename=None):
 
     @app.route('/')
     def func_root():
-        return send_from_directory( STATIC_DIR, 'index.html')
+        return render_template( 'index.html')
 
     @app.route('/static/<path:path>')
     def send_static():

@@ -49,7 +49,7 @@ def test_reports(client):
     response = client.get('/reports?reports=0')
     assert response.status_code == 200
 
-def test_test_template(client):
+def test_template(client):
     response = client.get('/test_template')
     assert response.status_code == 200
     data = response.data.decode('utf-8')
@@ -57,3 +57,7 @@ def test_test_template(client):
     assert "Search Wordpress Site" in data
     assert "Search Corpus" in data
     assert "SHA2-256" in data
+
+def test_errors(client):
+    response = client.get('/downloads/nothing-here')
+    assert response.status_code == 404

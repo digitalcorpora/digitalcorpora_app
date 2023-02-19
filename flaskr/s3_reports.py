@@ -14,6 +14,14 @@ from flask import Flask, send_from_directory
 REPORT_TEMPLATE_FILENAME  = "reports.html"
 
 REPORTS = [
+    ('Last 50 corpora uploads ',
+     """SELECT s3key, bytes, mtime, tags
+        FROM downloadable
+        WHERE present=1
+        ORDER BY mtime DESC
+        LIMIT 50
+     """),
+
     ('Downloads over past week',
      """SELECT s3key, round(sum(bytes_sent)/max(bytes)) as count, min(dtime) as first,max(dtime) as last
         FROM downloads
