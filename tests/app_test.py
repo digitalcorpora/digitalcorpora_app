@@ -53,6 +53,10 @@ def test_misc(client):
     response = client.get('/hello/world')
     assert response.status_code == 200
 
+    response = client.get('/test_template')
+    assert response.status_code == 200
+
+
 def test_reports(client):
     response = client.get('/reports')
     assert response.status_code == 200
@@ -86,7 +90,6 @@ def test_search(client):
 
     for k in GEN0.keys():
         assert gen0[k] == GEN0[k]
-
 
 
 def test_errors(client):
