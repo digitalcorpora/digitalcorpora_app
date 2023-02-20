@@ -31,12 +31,12 @@ jobs:
         run: |
           make pylint
 
-      - name: Test with pytest and SECRETS
+      - name: Test with pytest and a functioning database
         env:
-          TMP_DBWRITER_HOSTNAME: ${{ secrets.TMP_DBWRITER_HOSTNAME }}
-          TMP_DBWRITER_DATABASE: ${{ secrets.TMP_DBWRITER_DATABASE }}
-          TMP_DBWRITER_USERNAME: ${{ secrets.TMP_DBWRITER_USERNAME }}
-          TMP_DBWRITER_PASSWORD: ${{ secrets.TMP_DBWRITER_PASSWORD }}
+          MYSQL_HOST:     ${{ secrets.MYSQL_HOST }}
+          MYSQL_DATABASE: ${{ secrets.MYSQL_DATABASE }}
+          MYSQL_USER:     ${{ secrets.MYSQL_USER }}
+          MYSQL_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
         run: |
           pip install pytest
           make coverage
