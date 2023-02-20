@@ -45,7 +45,7 @@ padding-right: 4pt;
           {% for row in rows %}
           <tr>
             {% for val in row %}
-            <td class='{{ column_names[loop.index0] }}'> {{ val }} </td>
+            <td class='{{ column_names[loop.index0] }}'> {{ val | safe }} </td>
             {% endfor %}
           </tr>
           {% endfor %}

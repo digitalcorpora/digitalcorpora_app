@@ -64,6 +64,9 @@ REPORTS = [
      """),
 ]
 
+def report_count():
+    return len(REPORTS)
+
 def report_generate(*, auth, num):
     """Run a specific numbered report and return the result as a JSON object that's easy to render.
     :param auth: authorization
@@ -80,6 +83,16 @@ def report_generate(*, auth, num):
 def report_app(*, auth):
     if request.args.get('report'):
         rdict = report_generate(auth=auth, num=int(request.args.get('report')))
+        try:
+            colnum = rdict['column_names'].index('s3key')
+        except ValueError:
+            colnum = -1
+        if colnum>=0:
+            # Convert from tuples to lists so that we can change the middle value
+            rdict['rows'] = [list(row) for row in rdict['rows']]
+            for row in rdict['rows']:
+                s3key = row[colnum]
+                row[colnum] = f'<a href="/{s3key}">{s3key}</a>'
     else:
         rdict = {}
     rdict['reports'] = reports=[(ct,report[0]) for (ct,report) in enumerate(REPORTS)]
