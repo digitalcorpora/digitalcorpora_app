@@ -14,6 +14,7 @@ import os.path
 
 DESIRED_PYTHON = 'python3.9'
 DREAMHOST_PYTHON_BINDIR = os.path.join( os.getenv('HOME'), 'opt/python-3.9.2/bin')
+DUMP_VARS = False
 
 def dump_vars(f):
     """Send the list of variables to output for debugging"""
@@ -26,7 +27,8 @@ def redirect_stderr():
     errfile = open( os.path.join( os.getenv('HOME'), 'error.log') ,'a')
     os.close(sys.stderr.fileno())
     os.dup2(errfile.fileno(), sys.stderr.fileno())
-    #dump_vars(errfile)
+    if DUMP_VARS:
+        dump_vars(errfile)
 
 if 'IN_PASSENGER' in os.environ:
     # Send error to error.log, but not when running under pytest

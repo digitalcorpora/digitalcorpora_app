@@ -16,7 +16,7 @@ from os.path import abspath, dirname
 
 import bottle
 
-import ctools.dbfile
+import lib.ctools.dbfile as dbfile
 
 import s3_gateway
 import s3_reports
@@ -24,7 +24,7 @@ import s3_reports
 STATIC_DIR = os.path.join(dirname(abspath(__file__)), 'static')
 DBREADER_BASH_FILE = os.path.join( os.getenv('HOME'), 'dbreader.bash')
 try:
-    dbreader = ctools.dbfile.DBMySQLAuth.FromEnv( DBREADER_BASH_FILE )
+    dbreader = dbfile.DBMySQLAuth.FromBashEnvFile( DBREADER_BASH_FILE )
 except FileNotFoundError as e:
     dbreader = None
 
@@ -77,7 +77,7 @@ def search():
 @bottle.route('/search/api')
 def search_api():
     q = '%' + bottle.request.query.get('q','') + '%'
-    rows = ctools.dbfile.DBMySQL.csfr(dbreader,
+    rows = dbfile.DBMySQL.csfr(dbreader,
                                       f"select * from downloadable where s3key like %s and present=1 order by s3key limit 1000",q,
                                       asDicts=True)
     return json.dumps(rows,indent=4, sort_keys=True, default=str)
