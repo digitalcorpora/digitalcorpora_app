@@ -28,8 +28,7 @@ from botocore import UNSIGNED
 from botocore.client import Config
 
 import bottle
-
-#from botocore.exceptions import ClientError
+#from bottle import jinja2_view as view, jinja2_template as template
 from bottle import request, response, redirect
 
 import db_lookup
@@ -50,8 +49,8 @@ def get_template( basename ):
     with open( filename, "r") as f:
         return bottle.SimpleTemplate( f.read() )
 
-S3_INDEX  = get_template( "s3_index.tpl" )
-ERROR_404 = get_template( "error_404.tpl" )
+S3_INDEX  = get_template( "s3_index.html" )
+ERROR_404 = get_template( "error_404.html" )
 
 def s3_get_dirs_files(bucket_name, prefix):
     """

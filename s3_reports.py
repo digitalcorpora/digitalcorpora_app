@@ -9,10 +9,10 @@ import json
 from os.path import dirname
 
 import bottle
+from bottle import jinja2_view as view, jinja2_template as template
+from lib.ctools.dbfile import DBMySQL
 
-from ctools.dbfile import DBMySQL
-
-REPORT_TEMPLATE_FILENAME  = os.path.join(dirname(__file__), "templates/reports.tpl")
+REPORT_TEMPLATE_FILENAME  = os.path.join(dirname(__file__), "templates/reports.html")
 REPORT = bottle.SimpleTemplate( open( REPORT_TEMPLATE_FILENAME ).read())
 
 

@@ -4,7 +4,7 @@ db_lookup.py:
 Given a list of dictionaries that have Keys, mtimes and etags, see if we can find them in the database
 """
 
-import ctools.dbfile
+import lib.ctools.dbfile
 
 def annotate_s3files(auth, objs):
     """Given a dbreader and a set of objects, see if we can find their hash codes in the database"""

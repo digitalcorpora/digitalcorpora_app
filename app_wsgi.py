@@ -12,16 +12,23 @@ https://downloads.digitalcorpora.org/reports
 import json
 import sys
 import os
+import functools
 from os.path import abspath, dirname
 
-import bottle
+STATIC_DIR = os.path.join(dirname(abspath(__file__)), 'static')
+TEMPLATE_DIR = os.path.join(dirname(abspath(__file__)), 'templates')
+
+assert os.path.exists(TEMPLATE_DIR)
 
 import lib.ctools.dbfile as dbfile
+
+import bottle
+from bottle import jinja2_view
+view = functools.partial(jinja2_view, template_lookup=[TEMPLATE_DIR])
 
 import s3_gateway
 import s3_reports
 
-STATIC_DIR = os.path.join(dirname(abspath(__file__)), 'static')
 DBREADER_BASH_FILE = os.path.join( os.getenv('HOME'), 'dbreader.bash')
 try:
     dbreader = dbfile.DBMySQLAuth.FromBashEnvFile( DBREADER_BASH_FILE )
@@ -29,9 +36,9 @@ except FileNotFoundError as e:
     dbreader = None
 
 @bottle.route('/')
+@view('index.html')
 def func_root():
-    """TODO: return a better template"""
-    return bottle.static_file('index.html', root=STATIC_DIR)
+    return {'title':'ROOT'}
 
 @bottle.route('/corpora/')
 @bottle.route('/corpora/<path:path>')
