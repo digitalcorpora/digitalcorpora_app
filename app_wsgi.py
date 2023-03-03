@@ -17,6 +17,7 @@ from os.path import abspath, dirname
 
 STATIC_DIR = os.path.join(dirname(abspath(__file__)), 'static')
 TEMPLATE_DIR = os.path.join(dirname(abspath(__file__)), 'templates')
+DBREADER_BASH_FILE = os.path.join( os.getenv('HOME'), 'dbreader.bash')
 
 assert os.path.exists(TEMPLATE_DIR)
 
@@ -29,38 +30,38 @@ view = functools.partial(jinja2_view, template_lookup=[TEMPLATE_DIR])
 import s3_gateway
 import s3_reports
 
-DBREADER_BASH_FILE = os.path.join( os.getenv('HOME'), 'dbreader.bash')
-try:
-    dbreader = dbfile.DBMySQLAuth.FromBashEnvFile( DBREADER_BASH_FILE )
-except FileNotFoundError as e:
-    dbreader = None
+@functools.cache()
+def get_dbreader():
+    try:
+        return dbfile.DBMySQLAuth.FromBashEnvFile( DBREADER_BASH_FILE )
+    except FileNotFoundError as e:
+        return None
 
 @bottle.route('/')
 @view('index.html')
 def func_root():
     return {'title':'ROOT'}
 
-@bottle.route('/corpora/')
-@bottle.route('/corpora/<path:path>')
-def func_corpora_path(path=''):
-    """Route https://downloads.digitalcorpora.org/corpora/path"""
-    return s3_gateway.s3_app(bucket='digitalcorpora', quoted_prefix='corpora/' + path, auth=dbreader)
-
-
-@bottle.route('/downloads/')
-@bottle.route('/downloads/<path:path>')
-def func_downloads_path(path=''):
-    """Route https://downloads.digitalcorpora.org/downloads/path"""
-    return s3_gateway.s3_app(bucket='digitalcorpora', quoted_prefix='downloads/' + path, auth=dbreader)
-
 @bottle.route('/robots.txt')
 def func_robots():
     """Route https://downloads.digitalcorpora.org/robots.txt which asks Google not to index this."""
     return s3_gateway.s3_app(bucket='digitalcorpora', quoted_prefix='robots.txt')
 
+@bottle.route('/corpora/')
+@bottle.route('/corpora/<path:path>')
+def func_corpora_path(path=''):
+    """Route https://downloads.digitalcorpora.org/corpora/path"""
+    return s3_gateway.s3_app(bucket='digitalcorpora', quoted_prefix='corpora/' + path, auth=get_dbreader())
+
+@bottle.route('/downloads/')
+@bottle.route('/downloads/<path:path>')
+def func_downloads_path(path=''):
+    """Route https://downloads.digitalcorpora.org/downloads/path"""
+    return s3_gateway.s3_app(bucket='digitalcorpora', quoted_prefix='downloads/' + path, auth=get_dbreader())
+
 @bottle.route('/reports')
 def func_stats():
-    return s3_reports.report_app(auth=dbreader)
+    return s3_reports.report_app(auth=get_dbreader())
 
 @bottle.route('/reports.js')
 def func_root():
@@ -69,7 +70,7 @@ def func_root():
 
 @bottle.route('/reports/json/<num>')
 def func_stats(num):
-    return s3_reports.report_json(auth=dbreader,num=num)
+    return s3_reports.report_json(auth=get_dbreader(),num=num)
 
 @bottle.route('/hello/<name>')
 def func_hello(name):
@@ -84,28 +85,12 @@ def search():
 @bottle.route('/search/api')
 def search_api():
     q = '%' + bottle.request.query.get('q','') + '%'
+    dbreader = get_dbreader()
     rows = dbfile.DBMySQL.csfr(dbreader,
                                       f"select * from downloadable where s3key like %s and present=1 order by s3key limit 1000",q,
                                       asDicts=True)
     return json.dumps(rows,indent=4, sort_keys=True, default=str)
 
-
-@bottle.route('/test_template')
-def func_test_template():
-    """Testpoint for testing template without using S3"""
-    prefix = 'a/b/c/d/e/f'
-    path = ''
-    paths = []
-    for part in prefix.split('/'):
-        path += part + '/'
-        paths.append((path, part))
-    dirs = ['subdir1', 'subdir2']
-    # pylint: disable=C0301
-    files = [
-        {'a':'https://company.com/a', 'basename':'a', 'size':100, 'ETag':'n/a', 'sha2_256':'n/a', 'sha3_256':'n/a'},
-        {'a':'https://company.com/b', 'basename':'b', 'size':200, 'ETag':'n/a', 'sha2_256':'n/a', 'sha3_256':'n/a'}
-        ]
-    return s3_gateway.S3_INDEX.render(prefix=prefix, paths=paths, files=files, dirs=dirs)
 
 @bottle.route('/ver')
 def func_ver():

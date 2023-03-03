@@ -28,10 +28,8 @@ from botocore import UNSIGNED
 from botocore.client import Config
 
 import bottle
-#from bottle import jinja2_view as view, jinja2_template as template
 from bottle import request, response, redirect
 
-import db_lookup
 
 DESCRIPTION="""
 This is the testing program for the gateway that
@@ -51,6 +49,27 @@ def get_template( basename ):
 
 S3_INDEX  = get_template( "s3_index.html" )
 ERROR_404 = get_template( "error_404.html" )
+
+def annotate_s3files(auth, objs):
+    """Given a dbreader and a set of objects, see if we can find their hash codes in the database"""
+
+    if not objs:
+        return
+
+    keys = [obj['Key'] for obj in objs]
+    cmd = "select * from downloadable where s3key in (" + ",".join(['%s']*len(keys)) + ")"
+    rows = ctools.dbfile.DBMySQL.csfr(auth, cmd, keys, asDicts=True)
+
+    # Re-organize what we got by key...
+    rbyk = {row['s3key'] : row for row in rows}
+    # Annotate the array
+    for obj in objs:
+        s3key = obj['Key']
+        if s3key in rbyk:
+            rk = rbyk[s3key]
+            if rk['etag'] == obj['ETag']:
+                obj['sha2_256'] = rk['sha2_256']
+                obj['sha3_256'] = rk['sha3_256']
 
 def s3_get_dirs_files(bucket_name, prefix):
     """
@@ -108,7 +127,7 @@ def s3_list_prefix(bucket_name, prefix, auth=None):
 
     dirs = [obj['Prefix'].split('/')[-2]+'/' for obj in s3_dirs]
     if auth is not None and s3_files:
-        db_lookup.annotate_s3files(auth, s3_files)
+        annotate_s3files(auth, s3_files)
     files = [{'a': s3_to_link(obj),
               'basename': os.path.basename(obj['Key']),
               'size': "{:,}".format(obj['Size']),
