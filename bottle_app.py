@@ -13,19 +13,16 @@ import json
 import sys
 import os
 import functools
-from os.path import abspath, dirname
-from paths import STATIC_DIR,TEMPLATE_DIR,view
-
-DBREADER_BASH_FILE = os.path.join( os.getenv('HOME'), 'dbreader.bash')
-
-assert os.path.exists(TEMPLATE_DIR)
-
-import lib.ctools.dbfile as dbfile
 
 import bottle
 
+from paths import STATIC_DIR,TEMPLATE_DIR,DBREADER_BASH_FILE,view
+from lib.ctools import dbfile
+
 import s3_gateway
 import s3_reports
+
+assert os.path.exists(TEMPLATE_DIR)
 
 VERSION_TEMPLATE="""
 Python version {{version}}
@@ -35,7 +32,7 @@ Python version {{version}}
 def get_dbreader():
     try:
         return dbfile.DBMySQLAuth.FromBashEnvFile( DBREADER_BASH_FILE )
-    except FileNotFoundError as e:
+    except FileNotFoundError:
         return None
 
 @bottle.route('/ver')
@@ -73,12 +70,8 @@ def func_downloads_path(path=''):
     return s3_gateway.s3_app(bucket='digitalcorpora', quoted_prefix='downloads/' + path, auth=get_dbreader())
 
 @bottle.route('/reports')
-def func_stats():
+def reports():
     return s3_reports.reports_html(auth=get_dbreader())
-
-@bottle.route('/reports/json/<num>')
-def func_stats(num):
-    return s3_reports.report_json(auth=get_dbreader(),num=num)
 
 @bottle.route('/search')
 def search():
@@ -87,7 +80,9 @@ def search():
 
 @bottle.route('/search/api')
 def search_api():
+    # pylint: disable=no-member
     q = '%' + bottle.request.query.get('q','') + '%'
+    # pylint: enable=no-member
     dbreader = get_dbreader()
     rows = dbfile.DBMySQL.csfr(dbreader,
                                """SELECT * from downloadable

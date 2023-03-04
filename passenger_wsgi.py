@@ -24,11 +24,12 @@ def dump_vars(f):
 
 def redirect_stderr():
     """Make stderr go to a file"""
-    errfile = open( os.path.join( os.getenv('HOME'), 'error.log') ,'a')
-    os.close(sys.stderr.fileno())
-    os.dup2(errfile.fileno(), sys.stderr.fileno())
-    if DUMP_VARS:
-        dump_vars(errfile)
+    # pylint: disable=unspecified-encoding
+    with open( os.path.join( os.getenv('HOME'), 'error.log') ,'a') as errfile:
+        os.close(sys.stderr.fileno())
+        os.dup2(errfile.fileno(), sys.stderr.fileno())
+        if DUMP_VARS:
+            dump_vars(errfile)
 
 if 'IN_PASSENGER' in os.environ:
     # Send error to error.log, but not when running under pytest

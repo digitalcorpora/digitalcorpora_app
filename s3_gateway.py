@@ -20,8 +20,6 @@ import sys
 import urllib.parse
 from os.path import dirname
 
-from lib.ctools.dbfile import DBMySQL
-
 import boto3
 import botocore
 import botocore.exceptions
@@ -32,6 +30,7 @@ from botocore.client import Config
 import bottle
 from bottle import request, response, redirect
 
+from lib.ctools.dbfile import DBMySQL
 from paths import TEMPLATE_DIR
 
 DESCRIPTION="""
@@ -47,6 +46,7 @@ IGNORE_FILES = ['.DS_Store', 'Icon']
 def get_template( basename ):
     """Open a file and return the bottle template"""
     filename = os.path.join( dirname(__file__), "templates", basename)
+    # pylint: disable=unspecified-encoding
     with open( filename, "r") as f:
         return bottle.SimpleTemplate( f.read() )
 
@@ -97,12 +97,12 @@ def s3_get_dirs_files(bucket_name, prefix):
         raise FileNotFoundError(prefix)
     return (dirs, files)
 
-def s3_to_link(obj):
+def s3_to_link(url, obj):
     """Given a s3 object, return a link to it"""
     # pylint: disable=R1705
     if 'Prefix' in obj:
         name = obj['Prefix'].split("/")[-2]+"/"
-        return request.url + urllib.parse.quote(name)
+        return url + urllib.parse.quote(name)
     elif 'Key' in obj:
         return BYPASS_URL + urllib.parse.quote(obj['Key'])
     else:
@@ -131,7 +131,8 @@ def s3_list_prefix(bucket_name, prefix, auth=None):
     dirs = [obj['Prefix'].split('/')[-2]+'/' for obj in s3_dirs]
     if auth is not None and s3_files:
         annotate_s3files(auth, s3_files)
-    files = [{'a': s3_to_link(obj),
+    # pylint: disable=consider-using-f-string
+    files = [{'a': s3_to_link(request.url, obj),
               'basename': os.path.basename(obj['Key']),
               'size': "{:,}".format(obj['Size']),
               'ETag': obj['ETag'],
@@ -168,10 +169,10 @@ def s3_app(*, bucket, quoted_prefix, auth=None):
     # If the prefix does not end with a '/' and there is object there, see if it is a prefix
     try:
         obj = boto3.client('s3', config=Config( signature_version=UNSIGNED)).get_object(Bucket=bucket, Key=prefix)
-    except botocore.exceptions.ClientError as e:
+    except botocore.exceptions.ClientError:
         try:
             return s3_list_prefix(bucket, prefix+"/", auth=auth)
-        except FileNotFoundError as e:
+        except FileNotFoundError:
             # No object and not a prefix
             response.status = 404
             return bottle.jinja2_template('error_404.html',bucket=bucket,prefix=prefix,template_lookup=[TEMPLATE_DIR])
@@ -185,7 +186,7 @@ def s3_app(*, bucket, quoted_prefix, auth=None):
     # Otherwise download directly
     try:
         response.content_type = mimetypes.guess_type(prefix)[0]
-    except (TypeError,ValueError,KeyError) as e:
+    except (TypeError,ValueError,KeyError):
         response.content_type = 'application/octet-stream'
     return obj['Body']
 

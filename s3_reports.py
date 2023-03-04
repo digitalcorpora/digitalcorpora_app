@@ -4,17 +4,9 @@
 Generate reports.
 """
 
-import os
-import os.path
 import sys
-import json
-from os.path import dirname
-
 import bottle
-from bottle import static_file
-
-from paths import STATIC_DIR,TEMPLATE_DIR,view
-
+from paths import view
 from lib.ctools.dbfile import DBMySQL
 
 REPORT_TEMPLATE_FILENAME  = "reports.html"
@@ -86,27 +78,33 @@ def report_generate(*, auth, num):
             'column_names':column_names,
             'rows': rows}
 
+def reports_json(*, num, auth):
+    rdict = report_generate(auth=auth, num=num)
+    try:
+        colnum = rdict['column_names'].index('s3key')
+    except ValueError:
+        colnum = -1
+    if colnum>=0:
+        # Convert from tuples to lists so that we can change the middle value
+        rdict['rows'] = [list(row) for row in rdict['rows']]
+        for row in rdict['rows']:
+            s3key = row[colnum]
+            row[colnum] = f'<a href="/{s3key}">{s3key}</a>'
+    return rdict
+
 @view(REPORT_TEMPLATE_FILENAME)
 def reports_html(*, auth):
     """If reports with a get, just return the report rendered"""
     try:
+        # pylint: disable=no-member
         num =  int(bottle.request.query.get('report'))
-    except (TypeError,KeyError) as e:
+        # pylint: enable=no-member
+    except (TypeError,KeyError):
         num = None
     if num is not None:
-        rdict = report_generate(auth=auth, num=num)
-        try:
-            colnum = rdict['column_names'].index('s3key')
-        except ValueError:
-            colnum = -1
-        if colnum>=0:
-            # Convert from tuples to lists so that we can change the middle value
-            rdict['rows'] = [list(row) for row in rdict['rows']]
-            for row in rdict['rows']:
-                s3key = row[colnum]
-                row[colnum] = f'<a href="/{s3key}">{s3key}</a>'
+        rdict = reports_json(num=num, auth=auth)
     else:
         rdict = {}
-    rdict['reports'] = reports=[(ct,report[0]) for (ct,report) in enumerate(REPORTS)]
+    rdict['reports'] = [(ct,report[0]) for (ct,report) in enumerate(REPORTS)]
     rdict['sys_version'] = sys.version
     return rdict
