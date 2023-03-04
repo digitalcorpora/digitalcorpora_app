@@ -33,3 +33,8 @@ def test_s3_to_link(dirs_and_files):
 
 def test_redirect():
     """A direct download should instead redirect to Amazon"""
+
+def test_db_lookup():
+    objs = []
+    db_lookup.annotate_s3files(None,objs)
+    assert objs==[]
