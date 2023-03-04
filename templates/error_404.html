@@ -1,8 +1,10 @@
-<html>
-  <body>
-    <p>Not found:</p>
+{% extends 'base.html' %}
+{% block searchboxes %}{% endblock %}
+{% block title %} Error 404 {% endblock %}
+{% block body %}
+<h3>Error 404</h3>
+ <p>Not found:</p>
     <pre>
       s3://{{bucket}}/{{prefix}}
     </pre>
-  </body>
-</html>
+{% endblock %}

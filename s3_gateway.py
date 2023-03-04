@@ -163,7 +163,7 @@ def s3_app(*, bucket, quoted_prefix, auth=None):
         except FileNotFoundError as e:
             logging.warning("e:%s", e)
             response.status = 404
-            return ERROR_404.render(bucket=bucket,prefix=prefix)
+            return bottle.jinja2_template('error_404.html',bucket=bucket,prefix=prefix,template_lookup=[TEMPLATE_DIR])
 
     # If the prefix does not end with a '/' and there is object there, see if it is a prefix
     try:
@@ -174,7 +174,7 @@ def s3_app(*, bucket, quoted_prefix, auth=None):
         except FileNotFoundError as e:
             # No object and not a prefix
             response.status = 404
-            return ERROR_404.render(bucket=bucket,prefix=prefix)
+            return bottle.jinja2_template('error_404.html',bucket=bucket,prefix=prefix,template_lookup=[TEMPLATE_DIR])
 
     # If we are using the bypass, redirect
 

@@ -51,6 +51,7 @@
 	</div><!-- .site-branding-container -->
     </header>
 
+{% block searchboxes %}
     <!-- legacy searchbox Start -->
     <div id="searchbox-website">
     Website:
@@ -71,12 +72,15 @@
        </div>
        </form>
     </div>
+{% endblock %}
 
     {% block body %}
     {% endblock %}
 
     <div id='navigation'>
-      <a href='/corpora/'>Corpora</a> | <a href='/reports'> Reports</a>
+      <a href='/corpora/'>Corpora</a>
+        | <a href='/reports'> Reports</a>
+        | <a href='https://digitalcorpora.org/about-digitalcorpora/'>About</a>
     </div>
 
     <div id="footer">
