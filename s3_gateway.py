@@ -20,6 +20,8 @@ import sys
 import urllib.parse
 from os.path import dirname
 
+from lib.ctools.dbfile import DBMySQL
+
 import boto3
 import botocore
 import botocore.exceptions
@@ -58,7 +60,7 @@ def annotate_s3files(auth, objs):
 
     keys = [obj['Key'] for obj in objs]
     cmd = "select * from downloadable where s3key in (" + ",".join(['%s']*len(keys)) + ")"
-    rows = ctools.dbfile.DBMySQL.csfr(auth, cmd, keys, asDicts=True)
+    rows = DBMySQL.csfr(auth, cmd, keys, asDicts=True)
 
     # Re-organize what we got by key...
     rbyk = {row['s3key'] : row for row in rows}
