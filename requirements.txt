@@ -1,5 +1,5 @@
 boto3
-flask
+bottle
 pylint
 pytest
 pytest-cov
