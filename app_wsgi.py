@@ -14,9 +14,8 @@ import sys
 import os
 import functools
 from os.path import abspath, dirname
+from paths import STATIC_DIR,TEMPLATE_DIR,view
 
-STATIC_DIR = os.path.join(dirname(abspath(__file__)), 'static')
-TEMPLATE_DIR = os.path.join(dirname(abspath(__file__)), 'templates')
 DBREADER_BASH_FILE = os.path.join( os.getenv('HOME'), 'dbreader.bash')
 
 assert os.path.exists(TEMPLATE_DIR)
@@ -24,8 +23,6 @@ assert os.path.exists(TEMPLATE_DIR)
 import lib.ctools.dbfile as dbfile
 
 import bottle
-from bottle import jinja2_view,static_file
-view = functools.partial(jinja2_view, template_lookup=[TEMPLATE_DIR])
 
 import s3_gateway
 import s3_reports
@@ -50,7 +47,7 @@ def func_ver():
 ### Local Static
 @bottle.get('/static/<path:path>')
 def static_path(path):
-    return static_file(path, root=STATIC_DIR)
+    return bottle.static_file(path, root=STATIC_DIR)
 
 ### S3 STATIC
 @bottle.route('/robots.txt')
@@ -86,7 +83,8 @@ def func_stats(num):
 
 @bottle.route('/search')
 def search():
-    return bottle.static_file( 'search.html', root=STATIC_DIR );
+    return bottle.static_file('search.html', root=STATIC_DIR)
+
 
 @bottle.route('/search/api')
 def search_api():
