@@ -14,6 +14,7 @@
     <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.13.1/js/jquery.dataTables.js"></script>
 
     {% block head %}{% endblock %}
+    {% block script %}{% endblock %}
 
     <style type="text/css">
       body {padding-left: 50pt; color:black}
@@ -63,9 +64,9 @@
 
     <div id='searchbox-corpus'>
     Corpus:
-    <form action="https://downloads.digitalcorpora.org/search" method="get">
+    <form action="/search" method="get">
        <div class='content'>
-         <input type="text" class="textfield" name="q" size="24" value=""/>
+         <input type="text" class="textfield" name="q" size="24" id="q" value=""/>
           <input type='submit' class='button' value='Search Corpus'/>
        </div>
        </form>

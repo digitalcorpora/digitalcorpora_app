@@ -31,7 +31,6 @@ VERSION_TEMPLATE="""
 Python version {{version}}
 """
 
-
 @functools.cache
 def get_dbreader():
     try:
@@ -42,7 +41,7 @@ def get_dbreader():
 @bottle.route('/ver')
 def func_ver():
     """Demo for reporting python version. Allows us to validate we are using Python3"""
-    return bottle.template(VERSION_TEMPLATE, version=sys.version)
+    return bottle.jinja2_template(VERSION_TEMPLATE, version=sys.version)
 
 ### Local Static
 @bottle.get('/static/<path:path>')
@@ -83,7 +82,7 @@ def func_stats(num):
 
 @bottle.route('/search')
 def search():
-    return bottle.jinja2_render('searchX.html', root=STATIC_DIR, template_lookup=[TEMPLATE_DIR])
+    return bottle.jinja2_template('search.html', template_lookup=[TEMPLATE_DIR])
 
 
 @bottle.route('/search/api')

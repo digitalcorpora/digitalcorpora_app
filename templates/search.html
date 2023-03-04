@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% block title %} Digital Corpora: Search Me {% endblock %}
+{% block script %}
+    <script>
+    function load_search(q, skipPushState) {
+      $('#q').val(q);   // Set it
+      console.log('q:',q);
+      $.ajax({ url: "/search/api?q="+q}).then(function(data) {
+          let rows = JSON.parse(data);
+          console.log('rows:',rows);
+          let html = "<table id='files'><thead><tr><th>Dir</th><th>Name</th><th>Size</th><th>Last Modified</th></thead><tbody>";
+          for (const row of rows) {
+            const pathArray = row.s3key.split("/");
+            const basename  = pathArray[pathArray.length -1];
+            const dirname   = row.s3key.substring(0, row.s3key.length - basename.length);
+            html += `<tr><td class='name'><a href='${dirname}'>${dirname}</a></td><td class='name'><a href='${row.s3key}'>${basename}</a></td><td class='size'>${row.bytes}</td><td class='mtime'>${row.mtime}</td></tr>\n`;
+          }
+          html += "</tbody><tfoot></tfoot></table>\n";
+          $('#s3results').html(html);
+          if (!skipPushState) {
+             var state = {q:q};
+             window.history.pushState( {q:q, page:'Search'}, "Search", "?q="+q);
+          }
+      });
+    }
+
+    function do_search(e) {
+      var q=$('#q').val();
+      load_search(q);
+      return false;
+    }
+
+    // Runs when the user clicks the back button
+    $(window).on("popstate", function() {
+      if (history.state && history.state.page == "Search") {
+         load_search(history.state.q, true);
+      } else {
+         $('#s3results').html('');
+      }
+   });
+
+    $(document).ready( function() {
+      $('#s3search').on('click', do_search );
+      let searchParams = new URLSearchParams(window.location.search)
+      if (searchParams.has('q')) {
+         const q = searchParams.get('q');
+         console.log("search for ",q);
+         load_search(q);
+      };
+
+    });
+    </script>
+{% endblock %}
+{% block body %}
+<div id='s3results'></div>
+{% endblock %}

@@ -42,5 +42,5 @@ if 'IN_PASSENGER' in os.environ:
         os.execlp(DESIRED_PYTHON, DESIRED_PYTHON, *sys.argv)
     else:
         # If we get here, we are running under the DESIRED_PYTHON
-        import app_wsgi
-        application = app_wsgi.app()
+        import bottle_app
+        application = bottle_app.app()
