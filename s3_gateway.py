@@ -32,6 +32,7 @@ from botocore.client import Config
 import bottle
 from bottle import request, response, redirect
 
+from paths import TEMPLATE_DIR
 
 DESCRIPTION="""
 This is the testing program for the gateway that
@@ -138,7 +139,12 @@ def s3_list_prefix(bucket_name, prefix, auth=None):
               'sha2_256': obj.get('sha2_256','n/a'),
               'sha3_256': obj.get('sha3_256','n/a') } for obj in s3_files]
 
-    return S3_INDEX.render(prefix=prefix, paths=paths, files=files, dirs=dirs, sys_version=sys.version)
+    return bottle.jinja2_template('s3_index.html',
+                                  {'prefix':prefix,
+                                   'paths':paths,
+                                   'files':files,
+                                   'dirs':dirs,
+                                   'sys_version':sys.version},template_lookup=[TEMPLATE_DIR])
 
 
 def s3_app(*, bucket, quoted_prefix, auth=None):
