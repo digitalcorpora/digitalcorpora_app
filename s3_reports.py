@@ -1,3 +1,5 @@
+## BOTTLE VERSION
+
 """
 Generate reports.
 """
@@ -9,14 +11,23 @@ import json
 from os.path import dirname
 
 import bottle
-from bottle import jinja2_view as view, jinja2_template as template
+from bottle import static_file
+
+from paths import STATIC_DIR,TEMPLATE_DIR,view
+
 from lib.ctools.dbfile import DBMySQL
 
-REPORT_TEMPLATE_FILENAME  = os.path.join(dirname(__file__), "templates/reports.html")
-REPORT = bottle.SimpleTemplate( open( REPORT_TEMPLATE_FILENAME ).read())
-
+REPORT_TEMPLATE_FILENAME  = "reports.html"
 
 REPORTS = [
+    ('Last 50 corpora uploads ',
+     """SELECT s3key, bytes, mtime, tags
+        FROM downloadable
+        WHERE present=1
+        ORDER BY mtime DESC
+        LIMIT 50
+     """),
+
     ('Downloads over past week',
      """SELECT s3key, round(sum(bytes_sent)/max(bytes)) as count, min(dtime) as first,max(dtime) as last
         FROM downloads
@@ -59,22 +70,43 @@ REPORTS = [
      """),
 ]
 
-def report_json(*,auth,num):
+def report_count():
+    return len(REPORTS)
+
+def report_generate(*, auth, num):
     """Run a specific numbered report and return the result as a JSON object that's easy to render.
     :param auth: authorization
     :param num: which report to generate.
     """
     report = REPORTS[int(num)]
     column_names = []
-    rows = DBMySQL.csfr(auth, report[1], [], time_zone='GMT', get_column_names=column_names)
-    return json.dumps({'title':report[0],
-                       'sql':report[1],
-                       'column_names':column_names,
-                       'rows': rows},default=str)
+    rows = DBMySQL.csfr(auth, report[1], [], get_column_names=column_names)
+    return {'title':report[0],
+            'sql':report[1],
+            'column_names':column_names,
+            'rows': rows}
 
-def report_app(auth):
-    """Run from bottle."""
-    print(auth,file=sys.stderr)
-    return REPORT.render(reports=[report[0] for report in REPORTS],sys_version=sys.version)
-
-#Don't forget time_zone = gmt
+@view(REPORT_TEMPLATE_FILENAME)
+def reports_html(*, auth):
+    """If reports with a get, just return the report rendered"""
+    try:
+        num =  int(bottle.request.query.get('report'))
+    except (TypeError,KeyError) as e:
+        num = None
+    if num is not None:
+        rdict = report_generate(auth=auth, num=num)
+        try:
+            colnum = rdict['column_names'].index('s3key')
+        except ValueError:
+            colnum = -1
+        if colnum>=0:
+            # Convert from tuples to lists so that we can change the middle value
+            rdict['rows'] = [list(row) for row in rdict['rows']]
+            for row in rdict['rows']:
+                s3key = row[colnum]
+                row[colnum] = f'<a href="/{s3key}">{s3key}</a>'
+    else:
+        rdict = {}
+    rdict['reports'] = reports=[(ct,report[0]) for (ct,report) in enumerate(REPORTS)]
+    rdict['sys_version'] = sys.version
+    return rdict
