@@ -13,7 +13,8 @@
             const pathArray = row.s3key.split("/");
             const basename  = pathArray[pathArray.length -1];
             const dirname   = row.s3key.substring(0, row.s3key.length - basename.length);
-            html += `<tr><td class='name'><a href='${dirname}'>${dirname}</a></td><td class='name'><a href='${row.s3key}'>${basename}</a></td><td class='size'>${row.bytes}</td><td class='mtime'>${row.mtime}</td></tr>\n`;
+            html += `<tr><td class='name'><a href='${dirname}'>${dirname}</a></td>`;
+            html += `<td class='name'><a href='${row.s3key}'>${basename}</a></td><td class='size'>${row.bytes}</td><td class='mtime'>${row.mtime}</td></tr>\n`;
           }
           html += "</tbody><tfoot></tfoot></table>\n";
           $('#s3results').html(html);

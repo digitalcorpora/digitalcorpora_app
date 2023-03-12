@@ -13,7 +13,8 @@ import os
 import os.path
 
 DESIRED_PYTHON = 'python3.9'
-DREAMHOST_PYTHON_BINDIR = os.path.join( os.getenv('HOME'), 'opt/python-3.9.2/bin')
+HOME = os.getenv('HOME')
+DREAMHOST_PYTHON_BINDIR = os.path.join( HOME, 'opt/python-3.9.2/bin')
 DUMP_VARS = False
 
 def dump_vars(f):
@@ -38,6 +39,8 @@ if 'IN_PASSENGER' in os.environ:
     # Use python of choice
     if DREAMHOST_PYTHON_BINDIR not in os.environ['PATH']:
         os.environ['PATH'] = DREAMHOST_PYTHON_BINDIR + ":" + os.environ['PATH']
+
+    os.environ['PYTHONDONTWRITEBYTECODE'] = os.path.join( HOME, '.__pycache__')
 
     if DESIRED_PYTHON not in sys.executable:
         os.execlp(DESIRED_PYTHON, DESIRED_PYTHON, *sys.argv)
