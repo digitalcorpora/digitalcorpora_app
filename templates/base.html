@@ -36,7 +36,12 @@
     {% block script %}{% endblock %}
 
     <style type="text/css">
-      body {padding-left: 50pt; color:black}
+      body {
+             padding-left: 50pt;
+             color:black;
+             width: fit-content;
+             min-width: 900pt;
+             }
       a:visited {color:blue;}
       a:link {color:blue;}
       a:hover {color:pink;}
@@ -46,6 +51,8 @@
       ul { padding: 20pt 0 20pt 20pt; margin:0 0 0 0; line-height:normal;}
       li { padding: 0 0 0 0; margin:0 0 0 0; line-height:normal;}
       table { width: fit-content;}            // overrides table {width:100%} in digitalcorpora/style.css
+      pre { width: fit-content;}            // overrides table {width:100%} in digitalcorpora/style.css
+
       #results { padding-top: 30px;}
       #files th { padding: 0 5pt 0 5pt; }
       #files td { padding: 0 5pt 0 5pt; }
