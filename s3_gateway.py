@@ -23,6 +23,7 @@ from os.path import dirname
 import boto3
 import botocore
 import botocore.exceptions
+import mistune
 
 from botocore import UNSIGNED
 from botocore.client import Config
@@ -32,6 +33,9 @@ from bottle import request, response, redirect
 
 from lib.ctools.dbfile import DBMySQL
 from paths import TEMPLATE_DIR
+
+README_NAMES = ['README.txt', 'README.md']
+README_TXT_HEADER = "<h3> README </h3>"
 
 DESCRIPTION="""
 This is the testing program for the gateway that
@@ -80,12 +84,11 @@ def s3_get_dirs_files(bucket_name, prefix):
     Makes an unauthenticated call
     :param bucket_name: bucket to read
     :param prefix: prefix to examine
-    :return: (prefixes,keys) -  a list of prefixes under `prefix`, and keys under `prefix`.
+    :return: (dirs, files) -  a list of prefix objects under `dirs`, and s3 objects under `files`.
     """
     s3client = boto3.client('s3', config=Config(signature_version=UNSIGNED))
     paginator = s3client.get_paginator('list_objects_v2')
-    pages = paginator.paginate(
-        Bucket=bucket_name, Prefix=prefix, Delimiter='/')
+    pages = paginator.paginate( Bucket=bucket_name, Prefix=prefix, Delimiter='/' )
     dirs = []
     files = []
     for page in pages:
@@ -96,6 +99,24 @@ def s3_get_dirs_files(bucket_name, prefix):
     if (not dirs) and (not files):
         raise FileNotFoundError(prefix)
     return (dirs, files)
+
+def get_readme(bucket_name, s3_files):
+    for name in README_NAMES:
+        for obj in s3_files:
+            if name.lower() == os.path.basename(obj['Key']).lower():
+                o2 = boto3.client('s3', config=Config( signature_version=UNSIGNED)).get_object(Bucket=bucket_name,
+                                                                                               Key=obj['Key'])
+                if (not o2) or 'Body' not in o2:
+                    continue
+
+                if name.lower().endswith(".txt"):
+                    return README_TXT_HEADER + "<pre>\n" + o2['Body'].read().decode('utf-8','ignore') + "\n<pre>\n"
+
+                if name.lower().endswith(".md"):
+                    return mistune.html(o2['Body'].read().decode('utf-8','ignore'))
+
+
+    return ""
 
 def s3_to_link(url, obj):
     """Given a s3 object, return a link to it"""
@@ -140,11 +161,15 @@ def s3_list_prefix(bucket_name, prefix, auth=None):
               'sha2_256': obj.get('sha2_256','n/a'),
               'sha3_256': obj.get('sha3_256','n/a') } for obj in s3_files]
 
+    # Look for a readme file
+    readme_html = get_readme(bucket_name, s3_files)
+
     return bottle.jinja2_template('s3_index.html',
                                   {'prefix':prefix,
                                    'paths':paths,
                                    'files':files,
                                    'dirs':dirs,
+                                   'readme_html':readme_html,
                                    'sys_version':sys.version},template_lookup=[TEMPLATE_DIR])
 
 

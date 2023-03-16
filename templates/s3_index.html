@@ -13,8 +13,8 @@
 
       <ul>
         {% for d in dirs %}
-        <li class='subdir'><a href='{{d}}'>{{d}}</a></li>
-        {% endfor %}
+        <li class='subdir'><a href='{{d}}'>{{d}}</a></li> {% endfor %}
+
       </ul>
       <h2><!--
         {% for path in paths %}
@@ -46,5 +46,8 @@
 	<tfoot>
 	</tfoot>
       </table>
-    </div> <!-- main -->
+
+    {{ readme_html }}
+
+    </div> <!-- s3_browser -->
 {% endblock %}
