@@ -54,8 +54,8 @@ def get_template( basename ):
     with open( filename, "r") as f:
         return bottle.SimpleTemplate( f.read() )
 
-S3_INDEX  = get_template( "s3_index.html" )
-ERROR_404 = get_template( "error_404.html" )
+INDEX_S3  = 'index_s3.html'
+ERROR_404 = 'error_404.html'
 
 def annotate_s3files(auth, objs):
     """Given a dbreader and a set of objects, see if we can find their hash codes in the database"""
@@ -164,7 +164,7 @@ def s3_list_prefix(bucket_name, prefix, auth=None):
     # Look for a readme file
     readme_html = get_readme(bucket_name, s3_files)
 
-    return bottle.jinja2_template('s3_index.html',
+    return bottle.jinja2_template(INDEX_S3,
                                   {'prefix':prefix,
                                    'paths':paths,
                                    'files':files,
@@ -189,7 +189,7 @@ def s3_app(*, bucket, quoted_prefix, auth=None):
         except FileNotFoundError as e:
             logging.warning("e:%s", e)
             response.status = 404
-            return bottle.jinja2_template('error_404.html',bucket=bucket,prefix=prefix,template_lookup=[TEMPLATE_DIR])
+            return bottle.jinja2_template(ERROR_404,bucket=bucket,prefix=prefix,template_lookup=[TEMPLATE_DIR])
 
     # If the prefix does not end with a '/' and there is object there, see if it is a prefix
     try:

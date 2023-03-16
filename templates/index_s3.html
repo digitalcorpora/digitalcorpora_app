@@ -22,14 +22,16 @@
         {% endfor %}
         --> files:
       </h2>
+      <button id='hash_button'>Show File Hashes</button>
+
       <table id='files'>
 	<thead>
 	  <tr>
             <th>Name</th>
             <th>Size</th>
             <th>Last Modified</th>
-            <th><a href='https://digitalcorpora.org/about-digitalcorpora/hashes'>SHA2-256</a></th>
-            <th><a href='https://digitalcorpora.org/about-digitalcorpora/hashes'>SHA3-256</a></th>
+            <th class='hash'><a href='https://digitalcorpora.org/about-digitalcorpora/hashes'>SHA2-256</a></th>
+            <th class='hash'><a href='https://digitalcorpora.org/about-digitalcorpora/hashes'>SHA3-256</a></th>
           </tr>
 	</thead>
 	<tbody>
