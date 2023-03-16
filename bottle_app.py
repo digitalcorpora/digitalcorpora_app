@@ -13,6 +13,7 @@ import json
 import sys
 import os
 import functools
+from urllib.parse import urlparse
 
 import bottle
 
@@ -55,7 +56,9 @@ def func_robots():
 @bottle.route('/')
 @view('index.html')
 def func_root():
-    return {'title':'ROOT'}
+    o = urlparse(bottle.request.url)
+    return {'title':'ROOT',
+            'hostname':o.hostname}
 
 @bottle.route('/corpora/')
 @bottle.route('/corpora/<path:path>')

@@ -5,11 +5,11 @@
 <p>Where do you want to go today?</p>
 
 <ul>
-<li><a href='/corpora/'>Corpora</a></li>
-<li><a href='/downloads/'>Downloads</a></li>
-<li><a href='/reports'>Available Download Reports</a></li>
+<li><a href='/corpora/'>Corpora</a> --- The Digital Corpora. Explore the system and click links to download directly from Amazon S3 via HTTPS.</li>
+<li><a href='/downloads/'>Downloads</a> --- Legacy software downloads</li>
+<li><a href='/reports'>Reports</a> --- Download Reports</li>
 </ul>
 
-<p>Note: downloads.digitalcorpora.org is a site hosted at Dreamhost, and runs a Python custom app that provides download statistics and web browsing of the Digital Corpora downloads, which are hosted in the Amazon S3 bucket s3://digitalcorpora/. Downloads are performed by HTTPS from Amazon S3. The downloads themselves are not hosted on Dreamhost and do not travel through Dreamhost.</p>
+<p>Note: <b>{{ hostname }}</b> is a site hosted at Dreamhost, and runs a Python custom app that provides download statistics and web browsing of the Digital Corpora downloads, which are hosted in the Amazon S3 bucket s3://digitalcorpora/. Downloads are performed by HTTPS from Amazon S3. The downloads themselves are not hosted on Dreamhost and do not travel through Dreamhost.</p>
 
 {% endblock %}
