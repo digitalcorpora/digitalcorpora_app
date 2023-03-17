@@ -11,6 +11,7 @@ https://downloads.digitalcorpora.org/reports
 
 import json
 import sys
+import io
 import os
 import functools
 from urllib.parse import urlparse
@@ -60,6 +61,7 @@ def func_root():
     return {'title':'ROOT',
             'hostname':o.hostname}
 
+
 @bottle.route('/corpora/')
 @bottle.route('/corpora/<path:path>')
 def func_corpora_path(path=''):
@@ -80,14 +82,27 @@ def reports():
 def search():
     return bottle.jinja2_template('search.html', template_lookup=[TEMPLATE_DIR])
 
+@bottle.route('/index.tsv')
+def index_tsf():
+    with io.StringIO() as f:
+        column_names = []
+        rows = dbfile.DBMySQL.csfr(get_dbreader(),
+                                   """SELECT * from downloadable WHERE present=1 ORDER BY s3key""",
+                                   (), get_column_names=column_names,asDicts=False)
+        print("\t".join(column_names), file=f)
+        for row in rows:
+            print("\t".join([str(v) for v in row]), file=f)
+        bottle.response.content_type = "text/plain"
+        return f.getvalue()
+
+## API (used by search)
 
 @bottle.route('/search/api')
 def search_api():
     # pylint: disable=no-member
     q = '%' + bottle.request.query.get('q','') + '%'
     # pylint: enable=no-member
-    dbreader = get_dbreader()
-    rows = dbfile.DBMySQL.csfr(dbreader,
+    rows = dbfile.DBMySQL.csfr(get_dbreader(),
                                """SELECT * from downloadable
                                   WHERE s3key LIKE %s AND present=1 ORDER BY s3key LIMIT 1000
                                """, (q,), asDicts=True)
