@@ -157,7 +157,7 @@ def s3_list_prefix(bucket_name, prefix, auth=None):
               'basename': os.path.basename(obj['Key']),
               'size': "{:,}".format(obj['Size']),
               'ETag': obj['ETag'],
-              'LastModified': str(obj['LastModified']).replace("+00:00",""),
+              'LastModified': str(obj['LastModified']).replace("+00:00","Z"),
               'sha2_256': obj.get('sha2_256','n/a'),
               'sha3_256': obj.get('sha3_256','n/a') } for obj in s3_files]
 
