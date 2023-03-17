@@ -110,10 +110,10 @@ def get_readme(bucket_name, s3_files):
                     continue
 
                 if name.lower().endswith(".txt"):
-                    return README_TXT_HEADER + "<pre>\n" + o2['Body'].read().decode('utf-8','ignore') + "\n<pre>\n"
+                    return README_TXT_HEADER + "<pre id='readme'>\n" + o2['Body'].read().decode('utf-8','ignore') + "\n<pre>\n"
 
                 if name.lower().endswith(".md"):
-                    return mistune.html(o2['Body'].read().decode('utf-8','ignore'))
+                    return mistune.html("<div id='readme'>" + o2['Body'].read().decode('utf-8','ignore') + "</div>")
 
 
     return ""
