@@ -181,7 +181,10 @@ def s3_app(*, bucket, quoted_prefix, auth=None):
     :param auth:   - Database authenticator
     """
     prefix = urllib.parse.unquote(quoted_prefix)
-    logging.warning("s3_gateway.py::s3_app s3_appbucket=%s prefix=%s", bucket, prefix)
+    if 'dev.digitalcorpora' in bottle.request.url:
+        logging.info("s3_gateway.py:s3_app url=%s s3_appbucket=%s prefix=%s", bottle.request.url, bucket, prefix)
+    else:
+        logging.warning("s3_gateway.py:s3_app url=%s s3_appbucket=%s prefix=%s", bottle.request.url, bucket, prefix)
 
     if prefix.endswith("/"):
         try:
