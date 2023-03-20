@@ -1,4 +1,5 @@
 PYLINT_FILES=$(shell /bin/ls *.py  | grep -v bottle.py | grep -v app_wsgi.py)
+PYLINT_THRESHOLD=8
 
 all:
 	@echo verify syntax and then restart
@@ -14,7 +15,7 @@ touch:
 	touch tmp/restart.txt
 
 pylint:
-	pylint --rcfile .pylintrc --verbose $(PYLINT_FILES)
+	pylint --rcfile .pylintrc --fail-under=$(PYLINT_THRESHOLD) --verbose $(PYLINT_FILES)
 
 flake8:
 	flake8 $(PYLINT_FILES)
