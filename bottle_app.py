@@ -1,6 +1,8 @@
 """
 WSGI file used for bottle interface.
 
+The goal is to only have the bottle code in this file and nowhere else.
+
 Debug:
 (cd ~/apps.digitalcorpora.org/;make touch)
 https://downloads.digitalcorpora.org/
@@ -89,8 +91,6 @@ def search_api():
                                   WHERE s3key LIKE %s AND present=1 ORDER BY s3key LIMIT 1000
                                """, (q,), asDicts=True)
     return json.dumps(rows,indent=4, sort_keys=True, default=str)
-
-
 
 def app():
     """The application"""
