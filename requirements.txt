@@ -10,3 +10,4 @@ pymysql
 coverage
 boddle
 mistune
+WebTest
