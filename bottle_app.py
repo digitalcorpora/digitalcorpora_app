@@ -9,6 +9,7 @@ https://downloads.digitalcorpora.org/reports
 
 """
 
+import csv
 import json
 import sys
 import io
@@ -88,10 +89,10 @@ def index_tsf():
         column_names = []
         rows = dbfile.DBMySQL.csfr(get_dbreader(),
                                    """SELECT * from downloadable WHERE present=1 ORDER BY s3key""",
-                                   (), get_column_names=column_names,asDicts=False)
-        print("\t".join(column_names), file=f)
+                                   (), get_column_names=column_names,asDicts=True)
+        writer = csv.DictWriter(f, fieldnames=column_names, delimiter="\t")
         for row in rows:
-            print("\t".join([str(v) for v in row]), file=f)
+            writer.writerow(row)
         bottle.response.content_type = "text/plain"
         return f.getvalue()
 
