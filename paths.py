@@ -3,8 +3,7 @@ Single handy place for paths.
 """
 
 import os
-from os.path import dirname, abspath, relpath, join
-import logging
+from os.path import dirname, abspath, join
 import functools
 
 from bottle import jinja2_view
