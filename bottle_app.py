@@ -92,7 +92,7 @@ def index_tsf():
                                    (), get_column_names=column_names,asDicts=True)
         writer = csv.DictWriter(f, fieldnames=column_names, delimiter="\t")
         for row in rows:
-            writer.write(row)
+            writer.writerow(row)
         bottle.response.content_type = "text/plain"
         return f.getvalue()
 
