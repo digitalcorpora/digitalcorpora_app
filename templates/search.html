@@ -8,12 +8,13 @@
       $.ajax({ url: "/search/api?q="+q}).then(function(data) {
           let rows = JSON.parse(data);
           console.log('rows:',rows);
-          let html = "<table id='files'><thead><tr><th>Dir</th><th>Name</th><th>Size</th><th>Last Modified</th></thead><tbody>";
+          let html = "<h2 id='results'>Search Results</h2><table id='files'><thead><tr><th>Dir</th><th>Name</th><th>Size</th><th>Last Modified</th></thead><tbody>";
           for (const row of rows) {
             const pathArray = row.s3key.split("/");
             const basename  = pathArray[pathArray.length -1];
             const dirname   = row.s3key.substring(0, row.s3key.length - basename.length);
-            html += `<tr><td class='name'><a href='${dirname}'>${dirname}</a></td><td class='name'><a href='${row.s3key}'>${basename}</a></td><td class='size'>${row.bytes}</td><td class='mtime'>${row.mtime}</td></tr>\n`;
+            html += `<tr><td class='dirname'><a href='${dirname}'>${dirname}</a></td>`;
+            html += `<td class='filename'><a href='${row.s3key}'>${basename}</a></td><td class='size'>${row.bytes}</td><td class='mtime'>${row.mtime}</td></tr>\n`;
           }
           html += "</tbody><tfoot></tfoot></table>\n";
           $('#s3results').html(html);

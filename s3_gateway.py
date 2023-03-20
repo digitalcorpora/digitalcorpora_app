@@ -23,6 +23,7 @@ from os.path import dirname
 import boto3
 import botocore
 import botocore.exceptions
+import mistune
 
 from botocore import UNSIGNED
 from botocore.client import Config
@@ -32,6 +33,9 @@ from bottle import request, response, redirect
 
 from lib.ctools.dbfile import DBMySQL
 from paths import TEMPLATE_DIR
+
+README_NAMES = ['README.txt', 'README.md']
+README_TXT_HEADER = "<h3> README </h3>"
 
 DESCRIPTION="""
 This is the testing program for the gateway that
@@ -50,8 +54,8 @@ def get_template( basename ):
     with open( filename, "r") as f:
         return bottle.SimpleTemplate( f.read() )
 
-S3_INDEX  = get_template( "s3_index.html" )
-ERROR_404 = get_template( "error_404.html" )
+INDEX_S3  = 'index_s3.html'
+ERROR_404 = 'error_404.html'
 
 def annotate_s3files(auth, objs):
     """Given a dbreader and a set of objects, see if we can find their hash codes in the database"""
@@ -80,12 +84,11 @@ def s3_get_dirs_files(bucket_name, prefix):
     Makes an unauthenticated call
     :param bucket_name: bucket to read
     :param prefix: prefix to examine
-    :return: (prefixes,keys) -  a list of prefixes under `prefix`, and keys under `prefix`.
+    :return: (dirs, files) -  a list of prefix objects under `dirs`, and s3 objects under `files`.
     """
     s3client = boto3.client('s3', config=Config(signature_version=UNSIGNED))
     paginator = s3client.get_paginator('list_objects_v2')
-    pages = paginator.paginate(
-        Bucket=bucket_name, Prefix=prefix, Delimiter='/')
+    pages = paginator.paginate( Bucket=bucket_name, Prefix=prefix, Delimiter='/' )
     dirs = []
     files = []
     for page in pages:
@@ -96,6 +99,24 @@ def s3_get_dirs_files(bucket_name, prefix):
     if (not dirs) and (not files):
         raise FileNotFoundError(prefix)
     return (dirs, files)
+
+def get_readme(bucket_name, s3_files):
+    for name in README_NAMES:
+        for obj in s3_files:
+            if name.lower() == os.path.basename(obj['Key']).lower():
+                o2 = boto3.client('s3', config=Config( signature_version=UNSIGNED)).get_object(Bucket=bucket_name,
+                                                                                               Key=obj['Key'])
+                if (not o2) or 'Body' not in o2:
+                    continue
+
+                if name.lower().endswith(".txt"):
+                    return README_TXT_HEADER + "<pre id='readme'>\n" + o2['Body'].read().decode('utf-8','ignore') + "\n<pre>\n"
+
+                if name.lower().endswith(".md"):
+                    return mistune.html("<div id='readme'>" + o2['Body'].read().decode('utf-8','ignore') + "</div>")
+
+
+    return ""
 
 def s3_to_link(url, obj):
     """Given a s3 object, return a link to it"""
@@ -136,15 +157,19 @@ def s3_list_prefix(bucket_name, prefix, auth=None):
               'basename': os.path.basename(obj['Key']),
               'size': "{:,}".format(obj['Size']),
               'ETag': obj['ETag'],
-              'LastModified': obj['LastModified'],
+              'LastModified': str(obj['LastModified']).replace("+00:00","Z"),
               'sha2_256': obj.get('sha2_256','n/a'),
               'sha3_256': obj.get('sha3_256','n/a') } for obj in s3_files]
 
-    return bottle.jinja2_template('s3_index.html',
+    # Look for a readme file
+    readme_html = get_readme(bucket_name, s3_files)
+
+    return bottle.jinja2_template(INDEX_S3,
                                   {'prefix':prefix,
                                    'paths':paths,
                                    'files':files,
                                    'dirs':dirs,
+                                   'readme_html':readme_html,
                                    'sys_version':sys.version},template_lookup=[TEMPLATE_DIR])
 
 
@@ -156,7 +181,10 @@ def s3_app(*, bucket, quoted_prefix, auth=None):
     :param auth:   - Database authenticator
     """
     prefix = urllib.parse.unquote(quoted_prefix)
-    logging.warning("s3_gateway.py::s3_app s3_appbucket=%s prefix=%s", bucket, prefix)
+    if 'dev.digitalcorpora' in bottle.request.url:
+        logging.info("s3_gateway.py:s3_app url=%s s3_appbucket=%s prefix=%s", bottle.request.url, bucket, prefix)
+    else:
+        logging.warning("s3_gateway.py:s3_app url=%s s3_appbucket=%s prefix=%s", bottle.request.url, bucket, prefix)
 
     if prefix.endswith("/"):
         try:
@@ -164,7 +192,7 @@ def s3_app(*, bucket, quoted_prefix, auth=None):
         except FileNotFoundError as e:
             logging.warning("e:%s", e)
             response.status = 404
-            return bottle.jinja2_template('error_404.html',bucket=bucket,prefix=prefix,template_lookup=[TEMPLATE_DIR])
+            return bottle.jinja2_template(ERROR_404,bucket=bucket,prefix=prefix,template_lookup=[TEMPLATE_DIR])
 
     # If the prefix does not end with a '/' and there is object there, see if it is a prefix
     try:
