@@ -9,3 +9,4 @@ markdown
 pymysql
 coverage
 boddle
+mistune

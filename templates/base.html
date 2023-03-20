@@ -7,17 +7,41 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <link rel="stylesheet" id="ultra-style-css"  href="https://digitalcorpora.org/wp-content/themes/ultra/style.css?ver=1.6.4" type="text/css" media="all">
-    <link rel="stylesheet" id="font-awesome-css" href="https://digitalcorpora.org/wp-content/themes/ultra/font-awesome/css/font-awesome.min.css?ver=4.7.0" type="text/css" media="all">
 
     <style type="text/css" media="screen">@import url( https://digitalcorpora.org/wp-content/themes/digitalcorpora/style.css );</style>
     <script type="text/javascript" charset="utf8" src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.13.1/js/jquery.dataTables.js"></script>
 
+    <script>
+    var hashes_hidden = 1;
+    function toggle_hashes(c) {
+      if (hashes_hidden) {
+        $(".hash").show();
+        hashes_hidden = 0;
+        $("#hash_button").text("Hide File Hashes");
+      } else {
+        $(".hash").hide();
+        hashes_hidden = 1;
+        $("#hash_button").text("Show File Hashes");
+      }
+    }
+
+    $(document).ready( function() {
+      $(".hash").hide();         // hide the hashes
+      $("#hash_button").on('click', toggle_hashes );
+    });
+    </script>
+
     {% block head %}{% endblock %}
     {% block script %}{% endblock %}
 
     <style type="text/css">
-      body {padding-left: 50pt; color:black}
+      body {
+             padding-left: 50pt;
+             color:black;
+             width: fit-content;
+             min-width: 900pt;
+             }
       a:visited {color:blue;}
       a:link {color:blue;}
       a:hover {color:pink;}
@@ -26,20 +50,30 @@
       h3 { padding: 0 0 0 0; margin:0 0 0 0; font-size: 12pt; line-height:normal;}
       ul { padding: 20pt 0 20pt 20pt; margin:0 0 0 0; line-height:normal;}
       li { padding: 0 0 0 0; margin:0 0 0 0; line-height:normal;}
+      table { width: fit-content;}            // overrides table {width:100%} in digitalcorpora/style.css
+      pre { width: fit-content;}            // overrides table {width:100%} in digitalcorpora/style.css
+
+      #readme { max-width: 850px;}
+      #results { padding-top: 30px;}
       #files th { padding: 0 5pt 0 5pt; }
       #files td { padding: 0 5pt 0 5pt; }
-      #files td.name { text-align: left; width:200px; }
+      #files td.dirname { text-align: left; }
+      #files td.filename { text-align: left;}
       #files td.size  { text-align: right; width:100px}
       #files td.mtime { text-align: left; width:200px; }
       #files td.hash { text-align: left; word-break: break-all; font-size: 9pt; font-family: monospace; width: 44em;}
       #files li.subdir { font-size: 12pt;}
       #files { color:black; }
+      #masthead { width: 600px;}
+      #masthead:before { width: 600px;}
+      #masthead:after  { width: 900px;}      // the line in the header
+      #footer { width: 900px}
     </style>
   </head>
 
   <body lang='en-US' style='background:white'
         class='home page-template-default page page-id-2 logged-in admin-bar full group-blog sidebar tagline no-touch page-layout-default resp customize-support'  >
-    <header id="masthead" class="site-header sticky-header scale responsive-menu" style="position: relative; left: auto; width: 100%;">
+    <header id="masthead" class="site-header sticky-header scale responsive-menu" style="position: relative; left: auto; ">
       <div class="container">
 	<div class="site-branding-container">
 	  <div class="site-branding">
@@ -80,6 +114,7 @@
     <div id='navigation'>
       <a href='/corpora/'>Corpora</a>
         | <a href='/reports'> Reports</a>
+        | <a href='/index.tsv'> File Dump </a>
         | <a href='https://digitalcorpora.org/about-digitalcorpora/'>About</a>
     </div>
 
