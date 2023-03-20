@@ -1,1 +1,2 @@
-Python version {{version}}
+App version: {{__version__}}
+Python version: {{sys_version}}

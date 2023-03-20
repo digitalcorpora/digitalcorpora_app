@@ -26,9 +26,8 @@ import s3_reports
 
 assert os.path.exists(TEMPLATE_DIR)
 
-VERSION_TEMPLATE="""
-Python version {{version}}
-"""
+__version__='1.0.0'
+VERSION_TEMPLATE='version.txt'
 
 @functools.cache
 def get_dbreader():
@@ -38,9 +37,10 @@ def get_dbreader():
         return None
 
 @bottle.route('/ver')
+@view('version.txt')
 def func_ver():
     """Demo for reporting python version. Allows us to validate we are using Python3"""
-    return bottle.jinja2_template(VERSION_TEMPLATE, version=sys.version)
+    return {'__version__':__version__,'sys_version':sys.version}
 
 ### Local Static
 @bottle.get('/static/<path:path>')
