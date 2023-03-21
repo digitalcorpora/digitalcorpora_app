@@ -18,7 +18,7 @@ import csv
 import io
 
 
-def test_sv_nulls(delimiter: str, expected: str) -> None:
+def _test_sv_nulls(delimiter: str, expected: str) -> None:
     """
     Confirm expected content form of TSV output with null records.
 
