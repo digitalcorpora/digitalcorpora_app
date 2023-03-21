@@ -8,4 +8,6 @@ pytest-flask
 markdown
 pymysql
 coverage
+boddle
 mistune
+WebTest

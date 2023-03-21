@@ -1,6 +1,8 @@
 """
 WSGI file used for bottle interface.
 
+The goal is to only have the bottle code in this file and nowhere else.
+
 Debug:
 (cd ~/apps.digitalcorpora.org/;make touch)
 https://downloads.digitalcorpora.org/
@@ -27,9 +29,8 @@ import s3_reports
 
 assert os.path.exists(TEMPLATE_DIR)
 
-VERSION_TEMPLATE="""
-Python version {{version}}
-"""
+__version__='1.0.0'
+VERSION_TEMPLATE='version.txt'
 
 @functools.cache
 def get_dbreader():
@@ -39,9 +40,10 @@ def get_dbreader():
         return None
 
 @bottle.route('/ver')
+@view('version.txt')
 def func_ver():
     """Demo for reporting python version. Allows us to validate we are using Python3"""
-    return bottle.jinja2_template(VERSION_TEMPLATE, version=sys.version)
+    return {'__version__':__version__,'sys_version':sys.version}
 
 ### Local Static
 @bottle.get('/static/<path:path>')
@@ -108,8 +110,6 @@ def search_api():
                                   WHERE s3key LIKE %s AND present=1 ORDER BY s3key LIMIT 1000
                                """, (q,), asDicts=True)
     return json.dumps(rows,indent=4, sort_keys=True, default=str)
-
-
 
 def app():
     """The application"""
