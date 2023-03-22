@@ -10,7 +10,7 @@ import s3_reports
 import test_dbreader
 
 def test_report_count():
-    assert s3_reports.report_count = len(s3_reports.REPORTS)
+    assert s3_reports.report_count == len(s3_reports.REPORTS)
 
 def test_reports_generate():
     dbreader = bottle_app.get_dbreader()
