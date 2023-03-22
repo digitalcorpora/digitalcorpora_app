@@ -41,5 +41,7 @@ jobs:
           pip install pytest
           make coverage
 
-      - name: Upload coverage
-        uses: codecov/codecov-action@v1
+      - name: Upload to codecov.io
+        uses: codecov/codecov-action@v3    # https://github.com/codecov/codecov-action
+          with:
+            verbose: true
