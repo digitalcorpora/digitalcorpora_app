@@ -7,4 +7,4 @@ sys.path.append( dirname(dirname(abspath(__file__))))
 import passenger_wsgi
 
 def passenger_test():
-    assert passenger_wsgi.HOME = os.getenv('HOME')
+    assert passenger_wsgi.HOME == os.getenv('HOME')
