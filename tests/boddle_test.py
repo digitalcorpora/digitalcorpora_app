@@ -2,6 +2,7 @@ import pytest
 import sys
 import os
 import bottle
+import warnings
 
 from os.path import abspath,dirname
 
@@ -15,6 +16,7 @@ sys.path.append( dirname(dirname(abspath(__file__))))
 import bottle_app
 
 def test_app_boddle():
+    warnings.filterwarnings("ignore","DeprecationWarning")
     with boddle(params={}):
         res = bottle_app.func_ver()
         assert bottle_app.__version__ in res
