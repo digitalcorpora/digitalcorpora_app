@@ -34,10 +34,12 @@ VERSION_TEMPLATE='version.txt'
 
 @functools.cache
 def get_dbreader():
-    try:
-        return dbfile.DBMySQLAuth.FromBashEnvFile( DBREADER_BASH_FILE )
-    except FileNotFoundError:
-        return None
+    """Get the dbreader authentication info from the DBREADER_BASH_FILE if it exists. Variables there are
+    shadowed by environment variables MYSQL_HOST, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE.
+    If the file doesn't exist, send in None, hoping that the environment variables exist."""
+    fname = DBREADER_BASH_FILE is os.path.exists(DBREADER_BASH_FILE) else None
+    return dbfile.DBMySQLAuth.FromBashEnvFile( fname )
+
 
 @bottle.route('/ver')
 @view('version.txt')
