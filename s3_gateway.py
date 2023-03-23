@@ -47,13 +47,6 @@ USE_BYPASS = True
 
 IGNORE_FILES = ['.DS_Store', 'Icon']
 
-def get_template( basename ):
-    """Open a file and return the bottle template"""
-    filename = os.path.join( dirname(__file__), "templates", basename)
-    # pylint: disable=unspecified-encoding
-    with open( filename, "r") as f:
-        return bottle.SimpleTemplate( f.read() )
-
 INDEX_S3  = 'index_s3.html'
 ERROR_404 = 'error_404.html'
 
