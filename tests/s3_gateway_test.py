@@ -5,6 +5,7 @@ import os
 from os.path import abspath,dirname
 
 sys.path.append( dirname(dirname(abspath(__file__))))
+
 from s3_gateway import *
 
 def test_s3_gateway_files():
@@ -40,3 +41,11 @@ def test_annotate_s3files():
     objs = []
     annotate_s3files(None,objs)
     assert objs==[]
+
+TEST_PATHS = ['corpora/files/CC-MAIN-2021-31-PDF-UNTRUNCATED/',
+              'corpora/files/CC-MAIN-2021-31-PDF-UNTRUNCATED'
+              ]
+def test_s3_list_prefixes():
+    """ Right now we are just checking to make sure it doesn't crash """
+    for path in TEST_PATHS:
+        ret = s3_list_prefix(DEFAULT_BUCKET, path)

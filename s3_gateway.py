@@ -106,9 +106,7 @@ def get_readme(bucket_name, s3_files):
                     return README_TXT_HEADER + "<pre id='readme'>\n" + o2['Body'].read().decode('utf-8','ignore') + "\n<pre>\n"
 
                 if name.lower().endswith(".md"):
-                    return mistune.html("<div id='readme'>" + o2['Body'].read().decode('utf-8','ignore') + "</div>")
-
-
+                    return "<div id='readme'>" + mistune.html(o2['Body'].read().decode('utf-8','ignore')) + "</div>"
     return ""
 
 def s3_to_link(url, obj):
