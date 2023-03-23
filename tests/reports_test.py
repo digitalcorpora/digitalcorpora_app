@@ -23,7 +23,7 @@ def test_reports_json():
         assert 'sql' in ret
         assert 'column_names' in ret
         assert 'rows' in ret
-        ret = s3_reports.report_json(auth=dbreader, num=i)
+        ret = s3_reports.reports_json(auth=dbreader, num=i)
 
 def test_reports_html():
     dbreader = bottle_app.get_dbreader()
