@@ -7,7 +7,7 @@ from os.path import abspath,dirname
 sys.path.append( dirname(dirname(abspath(__file__))))
 
 import s3_reports
-import test_dbreader
+import bottle_app
 
 def test_report_count():
     assert s3_reports.report_count == len(s3_reports.REPORTS)
