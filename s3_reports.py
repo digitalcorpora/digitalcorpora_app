@@ -78,7 +78,7 @@ def report_generate(*, auth, num):
             'column_names':column_names,
             'rows': rows}
 
-def reports_json(*, num, auth):
+def reports_json(*, auth, num):
     rdict = report_generate(auth=auth, num=num)
     try:
         colnum = rdict['column_names'].index('s3key')
