@@ -166,7 +166,7 @@ def s3_list_prefix(bucket_name, prefix, auth=None):
                                    'sys_version':sys.version},template_lookup=[TEMPLATE_DIR])
 
 
-def s3_app(*, bucket, quoted_prefix, auth=None):
+def s3_app(*, bucket, quoted_prefix, url, auth=None):
     """
     Fetching a file. Called from bottle.
     :param bucket: - the bucket that we are serving from
@@ -174,10 +174,10 @@ def s3_app(*, bucket, quoted_prefix, auth=None):
     :param auth:   - Database authenticator
     """
     prefix = urllib.parse.unquote(quoted_prefix)
-    if 'dev.digitalcorpora' in bottle.request.url:
-        logging.info("s3_gateway.py:s3_app url=%s s3_appbucket=%s prefix=%s", bottle.request.url, bucket, prefix)
+    if 'dev.digitalcorpora' in url:
+        logging.info("s3_gateway.py:s3_app url=%s s3_appbucket=%s prefix=%s", url, bucket, prefix)
     else:
-        logging.warning("s3_gateway.py:s3_app url=%s s3_appbucket=%s prefix=%s", bottle.request.url, bucket, prefix)
+        logging.warning("s3_gateway.py:s3_app url=%s s3_appbucket=%s prefix=%s", url, bucket, prefix)
 
     if prefix.endswith("/"):
         try:
