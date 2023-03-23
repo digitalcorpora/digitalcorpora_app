@@ -7,6 +7,7 @@ from os.path import abspath,dirname
 sys.path.append( dirname(dirname(abspath(__file__))))
 
 from s3_gateway import *
+import bottle_app
 
 def test_s3_gateway_files():
     assert INDEX_S3 is not None
@@ -47,5 +48,8 @@ TEST_PATHS = ['corpora/files/CC-MAIN-2021-31-PDF-UNTRUNCATED/',
               ]
 def test_s3_list_prefixes():
     """ Right now we are just checking to make sure it doesn't crash """
+    dbreader = bottle_app.get_dbreader()
     for path in TEST_PATHS:
         ret = s3_list_prefix(DEFAULT_BUCKET, path)
+        url = f'https://downloads.digitalcorpora.org/{path}'
+        ret = s3_app(bucket=DEFAULT_BUCKET, quoted_prefix=urllib.parse.quote(path), url=url, auth=dbreader)
