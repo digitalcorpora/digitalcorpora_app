@@ -30,5 +30,8 @@ def test_reports_html():
     with boddle(params={'report':'0'}):
         res = s3_reports.reports_html(auth=dbreader)
 
+    with boddle(params={'report':'invalid'}):
+        res = s3_reports.reports_html(auth=dbreader)
+
     with boddle(params={}):
         res = s3_reports.reports_html(auth=dbreader)
