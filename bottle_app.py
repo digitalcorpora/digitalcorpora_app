@@ -56,7 +56,7 @@ def static_path(path):
 @bottle.route('/robots.txt')
 def func_robots():
     """Route https://downloads.digitalcorpora.org/robots.txt which asks Google not to index this."""
-    return s3_gateway.s3_app(bucket='digitalcorpora', quoted_prefix='robots.txt')
+    return s3_gateway.s3_app(bucket='digitalcorpora', quoted_prefix='robots.txt', url=bottle.request.url)
 
 ## TEMPLATE VIEWS
 @bottle.route('/')
@@ -71,13 +71,13 @@ def func_root():
 @bottle.route('/corpora/<path:path>')
 def func_corpora_path(path=''):
     """Route https://downloads.digitalcorpora.org/corpora/path"""
-    return s3_gateway.s3_app(bucket='digitalcorpora', quoted_prefix='corpora/' + path, auth=get_dbreader())
+    return s3_gateway.s3_app(bucket='digitalcorpora', quoted_prefix='corpora/' + path, auth=get_dbreader(), url=bottle.request.url)
 
 @bottle.route('/downloads/')
 @bottle.route('/downloads/<path:path>')
 def func_downloads_path(path=''):
     """Route https://downloads.digitalcorpora.org/downloads/path"""
-    return s3_gateway.s3_app(bucket='digitalcorpora', quoted_prefix='downloads/' + path, auth=get_dbreader())
+    return s3_gateway.s3_app(bucket='digitalcorpora', quoted_prefix='downloads/' + path, auth=get_dbreader(), url=bottle.request.url)
 
 @bottle.route('/reports')
 def reports():

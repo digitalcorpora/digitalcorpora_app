@@ -47,13 +47,6 @@ USE_BYPASS = True
 
 IGNORE_FILES = ['.DS_Store', 'Icon']
 
-def get_template( basename ):
-    """Open a file and return the bottle template"""
-    filename = os.path.join( dirname(__file__), "templates", basename)
-    # pylint: disable=unspecified-encoding
-    with open( filename, "r") as f:
-        return bottle.SimpleTemplate( f.read() )
-
 INDEX_S3  = 'index_s3.html'
 ERROR_404 = 'error_404.html'
 
@@ -113,9 +106,7 @@ def get_readme(bucket_name, s3_files):
                     return README_TXT_HEADER + "<pre id='readme'>\n" + o2['Body'].read().decode('utf-8','ignore') + "\n<pre>\n"
 
                 if name.lower().endswith(".md"):
-                    return mistune.html("<div id='readme'>" + o2['Body'].read().decode('utf-8','ignore') + "</div>")
-
-
+                    return "<div id='readme'>" + mistune.html(o2['Body'].read().decode('utf-8','ignore')) + "</div>"
     return ""
 
 def s3_to_link(url, obj):
@@ -173,7 +164,7 @@ def s3_list_prefix(bucket_name, prefix, auth=None):
                                    'sys_version':sys.version},template_lookup=[TEMPLATE_DIR])
 
 
-def s3_app(*, bucket, quoted_prefix, auth=None):
+def s3_app(*, bucket, quoted_prefix, url, auth=None):
     """
     Fetching a file. Called from bottle.
     :param bucket: - the bucket that we are serving from
@@ -181,10 +172,10 @@ def s3_app(*, bucket, quoted_prefix, auth=None):
     :param auth:   - Database authenticator
     """
     prefix = urllib.parse.unquote(quoted_prefix)
-    if 'dev.digitalcorpora' in bottle.request.url:
-        logging.info("s3_gateway.py:s3_app url=%s s3_appbucket=%s prefix=%s", bottle.request.url, bucket, prefix)
+    if 'dev.digitalcorpora' in url:
+        logging.info("s3_gateway.py:s3_app url=%s s3_appbucket=%s prefix=%s", url, bucket, prefix)
     else:
-        logging.warning("s3_gateway.py:s3_app url=%s s3_appbucket=%s prefix=%s", bottle.request.url, bucket, prefix)
+        logging.warning("s3_gateway.py:s3_app url=%s s3_appbucket=%s prefix=%s", url, bucket, prefix)
 
     if prefix.endswith("/"):
         try:
