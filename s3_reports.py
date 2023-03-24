@@ -97,7 +97,7 @@ def reports_html(*, auth):
     """If reports with a get, just return the report rendered"""
     try:
         num =  int(bottle.request.params['report'])
-    except (TypeError,KeyError):
+    except (TypeError,KeyError,ValueError):
         num = None
     if num is not None:
         rdict = reports_json(num=num, auth=auth)
