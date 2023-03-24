@@ -11,4 +11,4 @@ coverage
 boddle
 mistune
 WebTest
-libmagic
+python-magic
