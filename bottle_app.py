@@ -94,8 +94,14 @@ def search():
 
 @bottle.route('/index.tsv')
 def index_tsf():
-    row_count = int(bottle.request.params.get('row_count',DEFAULT_ROW_COUNT))
-    offset = int(bottle.request.params.get('offset',DEFAULT_OFFSET))
+    try:
+        row_count = int(bottle.request.params['row_count'])
+    except (ValueError,KeyError):
+        row_count = DEFAULT_ROW_COUNT
+    try:
+        offset = int(bottle.request.param['offset'])
+    except (ValueError,KeyError):
+        offset = DEFAULT_OFFSET
     with io.StringIO() as f:
         column_names = []
         rows = dbfile.DBMySQL.csfr(get_dbreader(),
@@ -112,8 +118,14 @@ def index_tsf():
 @bottle.route('/search/api')
 def search_api():
     q = '%' + bottle.request.params.get('q','') + '%'
-    search_row_count = int(bottle.request.params.get('row_count',DEFAULT_SEARCH_ROW_COUNT))
-    offset = int(bottle.request.params.get('offset',DEFAULT_OFFSET))
+    try:
+        search_row_count = int(bottle.request.params['row_count'])
+    except (ValueError,KeyError):
+        search_row_count = DEFAULT_SEARCH_ROW_COUNT
+    try:
+        offset = int(bottle.request.params['offset'])
+    except (ValueError,KeyError):
+        offset = DEFAULT_OFFSET
     rows = dbfile.DBMySQL.csfr(get_dbreader(),
                                """SELECT * from downloadable
                                   WHERE s3key LIKE %s AND present=1 ORDER BY s3key LIMIT %s, %s
