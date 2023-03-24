@@ -99,7 +99,7 @@ def index_tsf():
     except (ValueError,KeyError):
         row_count = DEFAULT_ROW_COUNT
     try:
-        offset = int(bottle.request.param['offset'])
+        offset = int(bottle.request.params['offset'])
     except (ValueError,KeyError):
         offset = DEFAULT_OFFSET
     with io.StringIO() as f:
