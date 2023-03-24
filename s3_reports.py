@@ -96,9 +96,7 @@ def reports_json(*, auth, num):
 def reports_html(*, auth):
     """If reports with a get, just return the report rendered"""
     try:
-        # pylint: disable=no-member
-        num =  int(bottle.request.query.get('report'))
-        # pylint: enable=no-member
+        num =  int(bottle.request.params['report'])
     except (TypeError,KeyError):
         num = None
     if num is not None:
