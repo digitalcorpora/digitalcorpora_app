@@ -208,16 +208,3 @@ def s3_app(*, bucket, quoted_prefix, url, auth=None):
     except (TypeError,ValueError,KeyError):
         response.content_type = 'application/octet-stream'
     return obj['Body']
-
-
-if __name__ == "__main__":
-    import argparse
-    parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-                                     description=DESCRIPTION)
-    parser.add_argument("--bucket", default=DEFAULT_BUCKET, help='which bucket to use.')
-    parser.add_argument('--prefix', help='specify prefix')
-
-    args = parser.parse_args()
-
-    if args.prefix:
-        print(s3_app(bucket=args.bucket, quoted_prefix=args.prefix))

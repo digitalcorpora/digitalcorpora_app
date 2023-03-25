@@ -44,7 +44,9 @@ def test_annotate_s3files():
     assert objs==[]
 
 TEST_PATHS = ['corpora/files/CC-MAIN-2021-31-PDF-UNTRUNCATED/',
-              'corpora/files/CC-MAIN-2021-31-PDF-UNTRUNCATED'
+              'corpora/files/CC-MAIN-2021-31-PDF-UNTRUNCATED',
+              'dir-not-found/'
+              'file-not-found'
               ]
 def test_s3_list_prefixes():
     """ Right now we are just checking to make sure it doesn't crash """
