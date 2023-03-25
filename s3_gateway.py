@@ -138,7 +138,11 @@ def s3_list_prefix(bucket_name, prefix, auth=None):
         path += part
         paths.append((path, part))
 
-    (s3_dirs, s3_files) = s3_get_dirs_files(bucket_name, prefix)
+    try:
+        (s3_dirs, s3_files) = s3_get_dirs_files(bucket_name, prefix)
+    except FileNotFoundError:
+        s3_dirs = []
+        s3_files = []
 
     dirs = [obj['Prefix'].split('/')[-2]+'/' for obj in s3_dirs]
     if auth is not None and s3_files:
