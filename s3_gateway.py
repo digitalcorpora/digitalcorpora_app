@@ -138,7 +138,11 @@ def s3_list_prefix(bucket_name, prefix, auth=None):
         path += part
         paths.append((path, part))
 
-    (s3_dirs, s3_files) = s3_get_dirs_files(bucket_name, prefix)
+    try:
+        (s3_dirs, s3_files) = s3_get_dirs_files(bucket_name, prefix)
+    except FileNotFoundError:
+        s3_dirs = []
+        s3_files = []
 
     dirs = [obj['Prefix'].split('/')[-2]+'/' for obj in s3_dirs]
     if auth is not None and s3_files:
@@ -208,16 +212,3 @@ def s3_app(*, bucket, quoted_prefix, url, auth=None):
     except (TypeError,ValueError,KeyError):
         response.content_type = 'application/octet-stream'
     return obj['Body']
-
-
-if __name__ == "__main__":
-    import argparse
-    parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-                                     description=DESCRIPTION)
-    parser.add_argument("--bucket", default=DEFAULT_BUCKET, help='which bucket to use.')
-    parser.add_argument('--prefix', help='specify prefix')
-
-    args = parser.parse_args()
-
-    if args.prefix:
-        print(s3_app(bucket=args.bucket, quoted_prefix=args.prefix))
