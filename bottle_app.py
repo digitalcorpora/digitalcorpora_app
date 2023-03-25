@@ -17,6 +17,7 @@ import sys
 import io
 import os
 import functools
+import magic
 from urllib.parse import urlparse
 
 import bottle
@@ -31,6 +32,10 @@ assert os.path.exists(TEMPLATE_DIR)
 
 __version__='1.0.0'
 VERSION_TEMPLATE='version.txt'
+
+DEFAULT_OFFSET = 0
+DEFAULT_ROW_COUNT = 1000000
+DEFAULT_SEARCH_ROW_COUNT = 1000
 
 @functools.cache
 def get_dbreader():
@@ -50,7 +55,7 @@ def func_ver():
 ### Local Static
 @bottle.get('/static/<path:path>')
 def static_path(path):
-    return bottle.static_file(path, root=STATIC_DIR)
+    return bottle.static_file(path, root=STATIC_DIR, mimetype=magic.from_file(os.path.join(STATIC_DIR,path)))
 
 ### S3 STATIC
 @bottle.route('/robots.txt')
@@ -89,11 +94,19 @@ def search():
 
 @bottle.route('/index.tsv')
 def index_tsf():
+    try:
+        row_count = int(bottle.request.params['row_count'])
+    except (ValueError,KeyError):
+        row_count = DEFAULT_ROW_COUNT
+    try:
+        offset = int(bottle.request.params['offset'])
+    except (ValueError,KeyError):
+        offset = DEFAULT_OFFSET
     with io.StringIO() as f:
         column_names = []
         rows = dbfile.DBMySQL.csfr(get_dbreader(),
-                                   """SELECT * from downloadable WHERE present=1 ORDER BY s3key""",
-                                   (), get_column_names=column_names,asDicts=True)
+                                   """SELECT * from downloadable WHERE present=1 ORDER BY s3key LIMIT %s, %s""",
+                                   (offset,row_count), get_column_names=column_names,asDicts=True)
         writer = csv.DictWriter(f, fieldnames=column_names, delimiter="\t")
         for row in rows:
             writer.writerow(row)
@@ -104,13 +117,19 @@ def index_tsf():
 
 @bottle.route('/search/api')
 def search_api():
-    # pylint: disable=no-member
-    q = '%' + bottle.request.query.get('q','') + '%'
-    # pylint: enable=no-member
+    q = '%' + bottle.request.params.get('q','') + '%'
+    try:
+        search_row_count = int(bottle.request.params['row_count'])
+    except (ValueError,KeyError):
+        search_row_count = DEFAULT_SEARCH_ROW_COUNT
+    try:
+        offset = int(bottle.request.params['offset'])
+    except (ValueError,KeyError):
+        offset = DEFAULT_OFFSET
     rows = dbfile.DBMySQL.csfr(get_dbreader(),
                                """SELECT * from downloadable
-                                  WHERE s3key LIKE %s AND present=1 ORDER BY s3key LIMIT 1000
-                               """, (q,), asDicts=True)
+                                  WHERE s3key LIKE %s AND present=1 ORDER BY s3key LIMIT %s, %s
+                               """, (q,offset, search_row_count), asDicts=True)
     return json.dumps(rows,indent=4, sort_keys=True, default=str)
 
 def app():
