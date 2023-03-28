@@ -43,7 +43,7 @@ def test_index_tsv():
     with boddle(params={'row_count':'5', 'offset':'0'}):
         res = bottle_app.index_tsf()
         lines = res.split('\n')
-        assert len(lines) == 6
+        assert len(lines) == 7
 
 def test_search_api():
     with boddle(params={'q':'dmg'}):
