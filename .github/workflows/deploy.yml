@@ -13,4 +13,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - run: |
+        ssh-add - <<< "$DCMANAGER_KEY"
+        ssh dcmanager@downloads.digitalcorpora.org hostname
         echo The PR was merged
