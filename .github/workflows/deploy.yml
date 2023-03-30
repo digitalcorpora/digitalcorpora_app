@@ -16,9 +16,10 @@ jobs:
         eval $(ssh-agent)
         ssh-add - <<< "${{ secrets.DCMANAGER_KEY }}"
         ssh-add -l
-        URL=https://raw.githubusercontent.com/${{ vars.GITHUB_REPOSITORY}}/bottle-main/etc/known_hosts
+        URL=https://raw.githubusercontent.com/digitalcorpora/digitalcorpora_app/bottle-main/etc/known_hosts
         echo "URL=$URL"
         curl  $URL > known_hosts
+        cat known_hosts
         ls -l
         ssh -v -o GlobalKnownHostsFile=known_hosts dcmanager@downloads.digitalcorpora.org hostname
         echo The PR was merged
