@@ -16,5 +16,6 @@ jobs:
         eval $(ssh-agent)
         ssh-add - <<< "${{ secrets.DCMANAGER_KEY }}"
         ssh-add -l
-        ssh -o GlobalKnownHostsFile=etc/known_hosts dcmanager@downloads.digitalcorpora.org hostname
+        cat etc/known_hosts
+        ssh -v -o GlobalKnownHostsFile=etc/known_hosts dcmanager@downloads.digitalcorpora.org hostname
         echo The PR was merged
