@@ -15,5 +15,6 @@ jobs:
     - run: |
         eval $(ssh-agent)
         ssh-add - <<< "$DCMANAGER_KEY"
+        ssh-add -l
         ssh dcmanager@downloads.digitalcorpora.org hostname
         echo The PR was merged
