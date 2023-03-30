@@ -18,3 +18,4 @@ jobs:
         ssh-add -l
         ssh dcmanager@downloads.digitalcorpora.org hostname
         echo The PR was merged
+
