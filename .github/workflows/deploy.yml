@@ -13,6 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - run: |
+        eval $(ssh-agent)
         ssh-add - <<< "$DCMANAGER_KEY"
         ssh dcmanager@downloads.digitalcorpora.org hostname
         echo The PR was merged
