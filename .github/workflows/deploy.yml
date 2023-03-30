@@ -16,6 +16,6 @@ jobs:
         eval $(ssh-agent)
         ssh-add - <<< "${{ secrets.DCMANAGER_KEY }}"
         ssh-add -l
-        ssh dcmanager@downloads.digitalcorpora.org hostname
+        ssh -o StrictHostKeyChecking=no dcmanager@downloads.digitalcorpora.org hostname
         echo The PR was merged
 
