@@ -10,7 +10,6 @@ check:
 	make pylint
 	make pytest
 
-
 touch:
 	touch tmp/restart.txt
 
