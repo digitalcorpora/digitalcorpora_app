@@ -4,7 +4,7 @@ name: Deploy
 
 concurrency: production
 
-on: 
+on:
   pull_request:
     types: [closed]
 jobs:
@@ -16,6 +16,5 @@ jobs:
         eval $(ssh-agent)
         ssh-add - <<< "${{ secrets.DCMANAGER_KEY }}"
         ssh-add -l
-        ssh -o StrictHostKeyChecking=no dcmanager@downloads.digitalcorpora.org hostname
+        ssh -o GlobalKnownHostsFile=etc/known_hosts dcmanager@downloads.digitalcorpora.org hostname
         echo The PR was merged
-
