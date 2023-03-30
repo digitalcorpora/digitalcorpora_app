@@ -1,0 +1,21 @@
+# See https://stackoverflow.com/questions/60710209/trigger-github-actions-only-when-pr-is-merged
+
+name: Deploy
+
+concurrency: production
+
+on: 
+  pull_request:
+    types: [closed]
+jobs:
+  if_merged:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+    - run: |
+        eval $(ssh-agent)
+        ssh-add - <<< "${{ secrets.DCMANAGER_KEY }}"
+        ssh-add -l
+        ssh -o StrictHostKeyChecking=no dcmanager@downloads.digitalcorpora.org hostname
+        echo The PR was merged
+
