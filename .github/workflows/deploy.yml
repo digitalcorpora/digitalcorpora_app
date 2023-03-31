@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - run: |
-        URL=https://raw.githubusercontent.com/digitalcorpora/digitalcorpora_app/bottle-main/etc/known_hosts
+        URL=https://raw.githubusercontent.com/digitalcorpora/digitalcorpora_app/etc/known_hosts
         DEST=dcmanager@downloads.digitalcorpora.org
         eval $(ssh-agent)
         ssh-add - <<< "${{ secrets.DCMANAGER_KEY }}"
