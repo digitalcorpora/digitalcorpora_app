@@ -14,10 +14,10 @@ jobs:
     steps:
     - run: |
         URL=https://raw.githubusercontent.com/digitalcorpora/digitalcorpora_app/etc/known_hosts
+        curl  $URL > known_hosts
         DEST=dcmanager@downloads.digitalcorpora.org
         eval $(ssh-agent)
         ssh-add - <<< "${{ secrets.DCMANAGER_KEY }}"
         ssh-add -l
-        curl  $URL > known_hosts
-        ssh -o GlobalKnownHostsFile=known_hosts $DEST hostname
+        ssh -o GlobalKnownHostsFile=etc/known_hosts dcmanager@downloads.digitalcorpora.org 'cd downloads.digitalcorpora.org/; git pull --recurse-submodules; make install-dependencies; make touch'
         echo The PR was merged
