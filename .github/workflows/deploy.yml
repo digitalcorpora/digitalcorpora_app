@@ -19,5 +19,5 @@ jobs:
         eval $(ssh-agent)
         ssh-add - <<< "${{ secrets.DCMANAGER_KEY }}"
         ssh-add -l
-        ssh -o GlobalKnownHostsFile=etc/known_hosts dcmanager@downloads.digitalcorpora.org 'cd downloads.digitalcorpora.org/; git pull --recurse-submodules; make install-dependencies; make touch'
+        ssh -o StrictHostKeyChecking=no dcmanager@downloads.digitalcorpora.org 'cd downloads.digitalcorpora.org/; git pull --recurse-submodules; make install-dependencies; make touch'
         echo The PR was merged
