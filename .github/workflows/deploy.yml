@@ -12,7 +12,11 @@ jobs:
     if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     steps:
-    - run: |
+      - name: Checkout
+        uses: actions/checkout@v3
+    
+      - name: "SSH and git pull"
+        run: |
         DEST=dcmanager@downloads.digitalcorpora.org
         eval $(ssh-agent)
         ssh-add - <<< "${{ secrets.DCMANAGER_KEY }}"
@@ -22,3 +26,5 @@ jobs:
             dcmanager@downloads.digitalcorpora.org \
             'cd downloads.digitalcorpora.org/; git pull --recurse-submodules; make install-dependencies; make touch'
         echo The PR was merged
+
+
