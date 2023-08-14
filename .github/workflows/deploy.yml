@@ -17,14 +17,14 @@ jobs:
     
       - name: "SSH and git pull"
         run: |
-        DEST=dcmanager@downloads.digitalcorpora.org
-        eval $(ssh-agent)
-        ssh-add - <<< "${{ secrets.DCMANAGER_KEY }}"
-        ssh-add -l
-        cat etc/known_hosts
-        ssh -o StrictHostKeyChecking=yes -o GlobalKnownHostsFile=etc/known_hosts\
-            dcmanager@downloads.digitalcorpora.org \
-            'cd downloads.digitalcorpora.org/; git pull --recurse-submodules; make install-dependencies; make touch'
-        echo The PR was merged
+          DEST=dcmanager@downloads.digitalcorpora.org
+          eval $(ssh-agent)
+          ssh-add - <<< "${{ secrets.DCMANAGER_KEY }}"
+          ssh-add -l
+          cat etc/known_hosts
+          ssh -o StrictHostKeyChecking=yes -o GlobalKnownHostsFile=etc/known_hosts\
+              dcmanager@downloads.digitalcorpora.org \
+              'cd downloads.digitalcorpora.org/; git pull --recurse-submodules; make install-dependencies; make touch'
+          echo The PR was merged
 
 
