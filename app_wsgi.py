@@ -3,9 +3,9 @@ WSGI file used for bottle interface.
 
 Debug:
 (cd ~/apps.digitalcorpora.org/;make touch)
-https://downloads.digitalcorpora.org/
-https://downloads.digitalcorpora.org/ver
-https://downloads.digitalcorpora.org/reports
+https://corp.digitalcorpora.org/
+https://corp.digitalcorpora.org/ver
+https://corp.digitalcorpora.org/reports
 
 """
 
@@ -52,7 +52,7 @@ def static_path(path):
 ### S3 STATIC
 @bottle.route('/robots.txt')
 def func_robots():
-    """Route https://downloads.digitalcorpora.org/robots.txt which asks Google not to index this."""
+    """Route https://corp.digitalcorpora.org/robots.txt which asks Google not to index this."""
     return s3_gateway.s3_app(bucket='digitalcorpora', quoted_prefix='robots.txt')
 
 ## TEMPLATE VIEWS
@@ -64,13 +64,13 @@ def func_root():
 @bottle.route('/corpora/')
 @bottle.route('/corpora/<path:path>')
 def func_corpora_path(path=''):
-    """Route https://downloads.digitalcorpora.org/corpora/path"""
+    """Route https://corp.digitalcorpora.org/corpora/path"""
     return s3_gateway.s3_app(bucket='digitalcorpora', quoted_prefix='corpora/' + path, auth=get_dbreader())
 
 @bottle.route('/downloads/')
 @bottle.route('/downloads/<path:path>')
 def func_downloads_path(path=''):
-    """Route https://downloads.digitalcorpora.org/downloads/path"""
+    """Route https://corp.digitalcorpora.org/downloads/path"""
     return s3_gateway.s3_app(bucket='digitalcorpora', quoted_prefix='downloads/' + path, auth=get_dbreader())
 
 @bottle.route('/reports')

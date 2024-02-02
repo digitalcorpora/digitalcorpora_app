@@ -20,7 +20,34 @@ REPORTS = [
         LIMIT 50
      """),
 
-    ('Downloads over past week',
+    ('DARPA SAFEDOCS and UNSAFEDOCS downloads over past 7 days ',
+     """SELECT substr(s3key,1,64) as s3_prefix,
+        round(sum(bytes_sent)/max(bytes)) as count, min(dtime) as first,max(dtime) as last
+        FROM downloads
+        LEFT JOIN downloadable ON downloads.did = downloadable.id
+        WHERE s3key like 'corpora/files/CC%%' and dtime > DATE_ADD(NOW(), INTERVAL -7 DAY)
+        GROUP BY s3_prefix HAVING count>=1 ORDER BY s3_prefix
+     """),
+
+    ('DARPA SAFEDOCS and UNSAFEDOCS downloads over past 30 days ',
+     """SELECT substr(s3key,1,64) as s3_prefix,
+        round(sum(bytes_sent)/max(bytes)) as count, min(dtime) as first,max(dtime) as last
+        FROM downloads
+        LEFT JOIN downloadable ON downloads.did = downloadable.id
+        WHERE s3key like 'corpora/files/CC%%' and dtime > DATE_ADD(NOW(), INTERVAL -90 DAY)
+        GROUP BY s3_prefix HAVING count>=1 ORDER BY s3_prefix
+     """),
+
+    ('DARPA SAFEDOCS and UNSAFEDOCS downloads over past 90 days ',
+     """SELECT substr(s3key,1,64) as s3_prefix,
+        round(sum(bytes_sent)/max(bytes)) as count, min(dtime) as first,max(dtime) as last
+        FROM downloads
+        LEFT JOIN downloadable ON downloads.did = downloadable.id
+        WHERE s3key like 'corpora/files/CC%%' and dtime > DATE_ADD(NOW(), INTERVAL -90 DAY)
+        GROUP BY s3_prefix HAVING count>=1 ORDER BY s3_prefix
+     """),
+
+    ('Downloads over past 7 days',
      """SELECT s3key, round(sum(bytes_sent)/max(bytes)) as count, min(dtime) as first,max(dtime) as last
         FROM downloads
         LEFT JOIN downloadable ON downloads.did = downloadable.id
