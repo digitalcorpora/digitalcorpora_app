@@ -32,7 +32,6 @@ jobs:
           make pylint
 
       - name: Test with pytest and a functioning database
-        env:
         run: |
           touch etc/credentials.ini
           echo "[dbreader] >> etc/credentials.ini
