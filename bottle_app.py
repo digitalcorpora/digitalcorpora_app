@@ -22,7 +22,7 @@ from urllib.parse import urlparse
 
 import bottle
 
-from paths import STATIC_DIR,TEMPLATE_DIR,DBREADER_BASH_FILE,view
+from paths import STATIC_DIR,TEMPLATE_DIR,CREDENTIALS_FILE,view
 from lib.ctools import dbfile
 
 import s3_gateway
@@ -39,11 +39,8 @@ DEFAULT_SEARCH_ROW_COUNT = 1000
 
 @functools.cache
 def get_dbreader():
-    """Get the dbreader authentication info from the DBREADER_BASH_FILE if it exists. Variables there are
-    shadowed by environment variables MYSQL_HOST, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE.
-    If the file doesn't exist, send in None, hoping that the environment variables exist."""
-    fname = DBREADER_BASH_FILE if os.path.exists(DBREADER_BASH_FILE) else None
-    return dbfile.DBMySQLAuth.FromBashEnvFile( fname )
+    """Get the dbreader authentication info from etc/credentials.ini"""
+    return dbfile.DBMySQLAuth.FromConfigFile( CREDENTIALS_FILE, 'dbreader' )
 
 
 @bottle.route('/ver')

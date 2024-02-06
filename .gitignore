@@ -4,3 +4,4 @@ coverage.xml
 .coverage
 pytestdebug.log
 .venv
+etc/credentials.ini
