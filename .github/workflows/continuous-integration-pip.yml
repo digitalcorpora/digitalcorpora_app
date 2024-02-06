@@ -23,9 +23,7 @@ jobs:
 
       - name: Update GITHUB_PATH and install dependencies
         run: |
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
           make install-ubuntu
-          find . -print
 
       - name: Lint with pylint
         run: |
