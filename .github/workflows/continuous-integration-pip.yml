@@ -24,7 +24,7 @@ jobs:
       - name: Update GITHUB_PATH and install dependencies
         run: |
           echo "$HOME/.local/bin" >> $GITHUB_PATH
-          make install-dependencies
+          make install-ubuntu
           find . -print
 
       - name: Lint with pylint
@@ -33,11 +33,17 @@ jobs:
 
       - name: Test with pytest and a functioning database
         env:
-          MYSQL_HOST:     ${{ secrets.MYSQL_HOST }}
-          MYSQL_DATABASE: ${{ secrets.MYSQL_DATABASE }}
-          MYSQL_USER:     ${{ secrets.MYSQL_USER }}
-          MYSQL_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
         run: |
+          cat > etc/credentials.ini << XXX
+[dbreader]
+MYSQL_HOST: ${{ secrets.MYSQL_HOST }}
+MYSQL_DATABASE: ${{ secrets.MYSQL_DATABASE }}
+MYSQL_USER: ${{ secrets.MYSQL_USER }}
+MYSQL_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
+XXX
+          echo === credentials.ini ===
+          cat etc/credentials.ini
+          echo =======================
           pip install pytest
           make coverage
 
