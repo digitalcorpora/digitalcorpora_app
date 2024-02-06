@@ -34,7 +34,7 @@ jobs:
       - name: Test with pytest and a functioning database
         run: |
           touch etc/credentials.ini
-          echo "[dbreader] >> etc/credentials.ini
+          echo "[dbreader]" >> etc/credentials.ini
           echo "MYSQL_HOST: ${{ secrets.MYSQL_HOST }}" >>  etc/credentials.ini
           echo "MYSQL_DATABASE: ${{ secrets.MYSQL_DATABASE }}" >> etc/credentials.ini
           echo "MYSQL_USER: ${{ secrets.MYSQL_USER }}" >> etc/credentials.ini
