@@ -5,9 +5,9 @@ The goal is to only have the bottle code in this file and nowhere else.
 
 Debug:
 (cd ~/apps.digitalcorpora.org/;make touch)
-https://downloads.digitalcorpora.org/
-https://downloads.digitalcorpora.org/ver
-https://downloads.digitalcorpora.org/reports
+https://corp.digitalcorpora.org/
+https://corp.digitalcorpora.org/ver
+https://corp.digitalcorpora.org/reports
 
 """
 
