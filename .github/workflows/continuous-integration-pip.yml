@@ -34,13 +34,12 @@ jobs:
       - name: Test with pytest and a functioning database
         env:
         run: |
-          cat > etc/credentials.ini << XXX
-[dbreader]
-MYSQL_HOST: ${{ secrets.MYSQL_HOST }}
-MYSQL_DATABASE: ${{ secrets.MYSQL_DATABASE }}
-MYSQL_USER: ${{ secrets.MYSQL_USER }}
-MYSQL_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
-XXX
+          touch etc/credentials.ini
+          echo "[dbreader] >> etc/credentials.ini
+          echo "MYSQL_HOST: ${{ secrets.MYSQL_HOST }}" >>  etc/credentials.ini
+          echo "MYSQL_DATABASE: ${{ secrets.MYSQL_DATABASE }}" >> etc/credentials.ini
+          echo "MYSQL_USER: ${{ secrets.MYSQL_USER }}" >> etc/credentials.ini
+          echo "MYSQL_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}" >> etc/credentials.ini
           echo === credentials.ini ===
           cat etc/credentials.ini
           echo =======================
