@@ -23,6 +23,7 @@ jobs:
 
       - name: Update GITHUB_PATH and install dependencies
         run: |
+          make venv
           make install-ubuntu
 
       - name: Lint with pylint
