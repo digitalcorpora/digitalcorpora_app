@@ -8,10 +8,10 @@ REQ = venv/pyvenv.cfg
 PYTHON=$(A) ; python3.9
 PIP_INSTALL=$(PYTHON) -m pip install --no-warn-script-location
 venv/pyvenv.cfg:
-	python3.11 -m venv venv
+	python3.9 -m venv venv
 
 venv:
-	python3.11 -m venv venv
+	python3.9 -m venv venv
 
 ################################################################
 #
