@@ -21,9 +21,10 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Update GITHUB_PATH and install dependencies
+      - name: Install dependencies
         run: |
           make venv
+          find venv -ls
           make install-ubuntu
 
       - name: Lint with pylint
