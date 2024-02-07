@@ -10,6 +10,6 @@
 <li><a href='/reports'>Reports</a> --- Download Reports</li>
 </ul>
 
-<p>Note: <b>{{ hostname }}</b> is a site hosted at Dreamhost, and runs a Python custom app that provides download statistics and web browsing of the Digital Corpora downloads, which are hosted in the Amazon S3 bucket s3://digitalcorpora/. Downloads are performed by HTTPS from Amazon S3. The downloads themselves are not hosted on Dreamhost and do not travel through Dreamhost.</p>
+<p>Note: <b>{{ hostname }}</b> is a hosted with a <a href='https://github.com/digitalcorpora/digitalcorpora_app/'>custom app</a> running in AWS Lambda that provides download statistics and web browsing of the Digital Corpora downloads, which are hosted in the Amazon S3 bucket s3://digitalcorpora/. Downloads are performed by HTTPS from Amazon S3. </p>
 
 {% endblock %}

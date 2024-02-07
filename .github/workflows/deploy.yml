@@ -1,6 +1,6 @@
 # See https://stackoverflow.com/questions/60710209/trigger-github-actions-only-when-pr-is-merged
 
-name: Deploy
+name: Deploy to AWS
 
 concurrency: production
 
@@ -14,10 +14,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-    
-      - name: "SSH and git pull"
+
+      - name: "FIXME"
         run: |
-          DEST=dcmanager@downloads.digitalcorpora.org
+          echo I do not think that we want our AWS credentials stored in DEST=dcmanager@downloads.digitalcorpora.org
           eval $(ssh-agent)
           ssh-add - <<< "${{ secrets.DCMANAGER_KEY }}"
           ssh-add -l
@@ -26,5 +26,3 @@ jobs:
               dcmanager@downloads.digitalcorpora.org \
               'cd downloads.digitalcorpora.org/; git pull --recurse-submodules; make install-dependencies; make touch'
           echo The PR was merged
-
-

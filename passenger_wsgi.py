@@ -47,4 +47,4 @@ if 'IN_PASSENGER' in os.environ:
     else:
         # If we get here, we are running under the DESIRED_PYTHON
         import bottle_app
-        application = bottle_app.app()
+        application = bottle_app.app

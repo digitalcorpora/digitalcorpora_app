@@ -21,23 +21,27 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Update GITHUB_PATH and install dependencies
+      - name: Install dependencies
         run: |
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
-          make install-dependencies
-          find . -print
+          make venv
+          find venv -ls
+          make install-ubuntu
 
       - name: Lint with pylint
         run: |
           make pylint
 
       - name: Test with pytest and a functioning database
-        env:
-          MYSQL_HOST:     ${{ secrets.MYSQL_HOST }}
-          MYSQL_DATABASE: ${{ secrets.MYSQL_DATABASE }}
-          MYSQL_USER:     ${{ secrets.MYSQL_USER }}
-          MYSQL_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
         run: |
+          touch etc/credentials.ini
+          echo "[dbreader]" >> etc/credentials.ini
+          echo "MYSQL_HOST: ${{ secrets.MYSQL_HOST }}" >>  etc/credentials.ini
+          echo "MYSQL_DATABASE: ${{ secrets.MYSQL_DATABASE }}" >> etc/credentials.ini
+          echo "MYSQL_USER: ${{ secrets.MYSQL_USER }}" >> etc/credentials.ini
+          echo "MYSQL_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}" >> etc/credentials.ini
+          echo === credentials.ini ===
+          cat etc/credentials.ini
+          echo =======================
           pip install pytest
           make coverage
 

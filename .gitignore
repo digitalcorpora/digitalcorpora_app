@@ -5,3 +5,6 @@ coverage.xml
 pytestdebug.log
 .venv
 etc/credentials.ini
+vnev
+activate
+venv

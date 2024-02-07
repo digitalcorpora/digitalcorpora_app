@@ -3,13 +3,15 @@ PYLINT_THRESHOLD=9.5
 
 ################################################################
 # Manage the virtual environment
-A   = . .venv/bin/activate
-REQ = .venv/pyvenv.cfg
-PYTHON=$(A) ; python3.11
+A   = . venv/bin/activate
+REQ = venv/pyvenv.cfg
+PYTHON=$(A) ; python3.9
 PIP_INSTALL=$(PYTHON) -m pip install --no-warn-script-location
-.venv/pyvenv.cfg:
-	$(PYTHON) -m venv .venv
+venv/pyvenv.cfg:
+	python3.9 -m venv venv
 
+venv:
+	python3.9 -m venv venv
 
 ################################################################
 #
@@ -39,6 +41,9 @@ coverage:
 	$(PYTHON) -m pytest -v --cov=. --cov-report=xml tests
 
 
+freeze:
+	$(PYTHON) -m pip freeze > requirements.txt
+
 ################################################################
 # Installations are used by the CI pipeline:
 # Generic:
@@ -49,7 +54,6 @@ install-python-dependencies: $(REQ)
 # Includes ubuntu dependencies
 install-ubuntu: $(REQ)
 	echo on GitHub, we use this action instead: https://github.com/marketplace/actions/setup-ffmpeg
-	which ffmpeg || sudo apt install ffmpeg
 	$(PYTHON) -m pip install --upgrade pip
 	if [ -r requirements-ubuntu.txt ]; then $(PIP_INSTALL) -r requirements-ubuntu.txt ; else echo no requirements-ubuntu.txt ; fi
 	if [ -r requirements.txt ];        then $(PIP_INSTALL) -r requirements.txt ; else echo no requirements.txt ; fi
