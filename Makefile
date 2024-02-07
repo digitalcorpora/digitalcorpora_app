@@ -41,6 +41,9 @@ coverage:
 	$(PYTHON) -m pytest -v --cov=. --cov-report=xml tests
 
 
+freeze:
+	$(PYTHON) -m pip freeze > requirements.txt
+
 ################################################################
 # Installations are used by the CI pipeline:
 # Generic:

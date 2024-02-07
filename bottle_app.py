@@ -17,11 +17,12 @@ import sys
 import io
 import os
 import functools
-import magic
+import filetype
 from urllib.parse import urlparse
 
 import bottle
 
+import paths
 from paths import STATIC_DIR,TEMPLATE_DIR,CREDENTIALS_FILE,view
 from lib.ctools import dbfile
 
@@ -37,10 +38,14 @@ DEFAULT_OFFSET = 0
 DEFAULT_ROW_COUNT = 1000000
 DEFAULT_SEARCH_ROW_COUNT = 1000
 
+app = bottle.default_app()
+
 @functools.cache
 def get_dbreader():
     """Get the dbreader authentication info from etc/credentials.ini"""
-    return dbfile.DBMySQLAuth.FromConfigFile( CREDENTIALS_FILE, 'dbreader' )
+    if 'AWS' in os.environ:
+        paths.CREDENTIALS_FILE = paths.CREDENTIALS_FILE.replace('credentials.ini','aws_creds.ini')
+    return dbfile.DBMySQLAuth.FromConfigFile( paths.CREDENTIALS_FILE, 'dbreader' )
 
 
 @bottle.route('/ver')
@@ -52,7 +57,8 @@ def func_ver():
 ### Local Static
 @bottle.get('/static/<path:path>')
 def static_path(path):
-    return bottle.static_file(path, root=STATIC_DIR, mimetype=magic.from_file(os.path.join(STATIC_DIR,path)))
+    kind = filetype.guess(os.path.join(STATIC_DIR,path))
+    return bottle.static_file(path, root=STATIC_DIR, mimetype=kind.mime if kind else 'text/plain')
 
 ### S3 STATIC
 @bottle.route('/robots.txt')
@@ -129,7 +135,3 @@ def search_api():
                                   WHERE s3key LIKE %s AND present=1 ORDER BY s3key LIMIT %s, %s
                                """, (q,offset, search_row_count), asDicts=True)
     return json.dumps(rows,indent=4, sort_keys=True, default=str)
-
-def app():
-    """The application"""
-    return bottle.default_app()
