@@ -46,3 +46,11 @@ Here is the policy:
   ]
 }
 ```
+
+
+# Other options
+# - aws challice - completely different thing. new decorators
+
+# Move to serverless:
+https://www.serverless.com/blog/serverless-api-gateway-domain
+https://www.serverless.com/examples/aws-python-flask-api
