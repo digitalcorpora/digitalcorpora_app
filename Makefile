@@ -69,7 +69,11 @@ freeze:
 ################################################################
 # Publish the S3 browser
 pub:
-	aws --profile=dcwriter s3 cp s3_browser.html s3://digitalcorpora/s3_browser.html
+	aws --profile=dcwriter s3 cp s3_browser.html s3://digitalcorpora/s3_browser.html \
+	  --cache-control "no-cache, no-store, must-revalidate" \
+	  --content-type text/html \
+	  --metadata-directive REPLACE
+
 
 
 
