@@ -1,2 +1,4 @@
-App version: {{__version__}}
+<pre>
+App gateway version: {{__version__}}
 Python version: {{sys_version}}
+</pre>
