@@ -38,6 +38,10 @@ DEFAULT_OFFSET = 0
 DEFAULT_ROW_COUNT = 1000000
 DEFAULT_SEARCH_ROW_COUNT = 1000
 
+# If PAGE_REDIRECT is set, then anything that is now a search or a report is redirected to that domain
+#
+PAGE_REDIRECT = os.environ.get('PAGE_REDIRECT',False)
+
 app = bottle.default_app()
 
 @functools.cache
@@ -62,6 +66,8 @@ def func_ver():
 ### Local Static
 @bottle.get('/static/<path:path>')
 def static_path(path):
+    if PAGE_REDIRECT:
+        bottle.redirect(PAGE_REDIRECT + "static/" + path)
     kind = filetype.guess(os.path.join(STATIC_DIR,path))
     mimetype = kind.mime if kind else 'text/plain'
     response = bottle.static_file( path, root=STATIC_DIR, mimetype=mimetype )
@@ -72,12 +78,16 @@ def static_path(path):
 @bottle.route('/robots.txt')
 def func_robots():
     """Route https://downloads.digitalcorpora.org/robots.txt which asks Google not to index this."""
+    if PAGE_REDIRECT:
+        bottle.redirect(PAGE_REDIRECT + "robots.txt")
     return s3_gateway.s3_app(bucket='digitalcorpora', quoted_prefix='robots.txt', url=bottle.request.url)
 
 ## TEMPLATE VIEWS
 @bottle.route('/')
 @view('index.html')
 def func_root():
+    if PAGE_REDIRECT:
+        bottle.redirect(PAGE_REDIRECT)
     o = urlparse(bottle.request.url)
     return {'title':'ROOT',
             'hostname':o.hostname,
@@ -88,6 +98,8 @@ def func_root():
 @bottle.route('/corpora/<path:path>')
 def func_corpora_path(path=''):
     """Route https://downloads.digitalcorpora.org/corpora/path"""
+    if PAGE_REDIRECT:
+        bottle.redirect(PAGE_REDIRECT + "corpora/" + path)
     return s3_gateway.s3_app(bucket='digitalcorpora',
                              quoted_prefix='corpora/' + path,
                              auth=get_dbreader(fail_gracefully=True), url=bottle.request.url)
@@ -96,6 +108,8 @@ def func_corpora_path(path=''):
 @bottle.route('/downloads/<path:path>')
 def func_downloads_path(path=''):
     """Route https://downloads.digitalcorpora.org/downloads/path"""
+    if PAGE_REDIRECT:
+        bottle.redirect(PAGE_REDIRECT + "downloads/" + path)
     return s3_gateway.s3_app(bucket='digitalcorpora',
                              quoted_prefix='downloads/' + path,
                              auth=get_dbreader(fail_gracefully=True), url=bottle.request.url)
