@@ -28,6 +28,7 @@ permissions and limitations under the License.
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="stylesheet" href="https://cdn.datatables.net/2.0.1/css/dataTables.bootstrap.min.css" integrity="sha512-VMR2J9d1Y/nEZh/4y/hpeGiyRmNpQFSFUgP9gqY3/2kLf3hFUdmdgkwfzazE3HllT7wa+pSH78lr4guyJXN9zQ==" crossorigin="anonymous">
     <!-- begin digitalcorpora -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <link rel="stylesheet" href="https://digitalcorpora.org/wp-content/themes/ultra/style.css?ver=1.6.4" type="text/css" media="all">
     <style type="text/css">@import url(https://digitalcorpora.org/wp-content/themes/digitalcorpora/style.css);</style>
     <!-- end digitalcorpora -->
@@ -69,24 +70,49 @@ permissions and limitations under the License.
             padding: 3px 6px;
         }
     </style>
+<!-- begin digitalcorpora -->
     <style type="text/css" add='digitalcorpora'>
-        a {
-            color: #1B4060;
-	}
+body {
+     max-width: 1200px;
+     padding-left: 15px;
+     padding-right: 15px;
+
+     }
+
+     #readme-content {
+     padding-left: 15px;
+     padding-right: 15px;
+       }
+
+     #searchbox-website {
+       padding-top: 10px;
+     }
+
+     a {
+       color: #1B4060;
+     }
      table.dataTable tbody th,
      table.dataTable tbody td {
          padding-top: 2px !important;
          padding-bottom: 2px !important;
          font-size: 14px;
      }
-     </style>
+    #folder-bucket-radio-group {
+      display: none;
+    }
+    #bucket-chooser {
+      display: none;
+    }
     </style>
+
+
+<!-- end digitalcorpora -->
 </head>
 
 <!-- DEBUG: Enable this for red outline on all elements -->
 <!-- <style media="screen" type="text/css"> * { outline: 1px red solid; } </style> -->
 
-<!-- remove for digital corpora: <body> -->
+<!-- remove for digitalcorpora: <body> -->
 <!-- begin digitalcorpora -->
 <body lang="en-US" style="background:white"
   class="home page-template-default page page-id-2 logged-in admin-bar full group-blog sidebar tagline no-touch page-layout-default resp customize-support">
@@ -103,6 +129,32 @@ permissions and limitations under the License.
     </div>
   </div>
 </header>
+
+    <div id="searchbox-website">
+      <form action="https://digitalcorpora.org" method="get">
+	<div class="content">
+	  <input type="text" class="textfield" name="s" size="24" placeholder="Wordpress search term" />
+	  <input type="submit" class="button" value="Search Wordpress Site" />
+	</div>
+      </form>
+    </div>
+
+    <div id='searchbox-corpus'>
+    <form action="https://app.digitalcorpora.org" method="get">
+       <div class='content'>
+         <input type="text" class="textfield" name="q" size="24" id="q" placeholder="Corpus filename search" />
+          <input type='submit' class='button' value='Search Corpus'/>
+       </div>
+       </form>
+    </div>
+
+
+<!-- README display section -->
+<div id="readme" style="max-width: 850px; padding: 20px 0;">
+  <div id="readme-content" style="font-family: monospace; white-space: pre-wrap; word-break: break-word;"></div>
+</div>
+
+
 <!-- end digitalcorpora -->
 
     <div id="page-wrapper">
@@ -137,8 +189,8 @@ permissions and limitations under the License.
                                             <span id="hide-folders-text">Hide folders?</span>
                                     </label>
                                 </div>
-                                <!-- Folder/Bucket radio group -->
-                                <div class="btn-group" data-toggle="buttons">
+                                <!-- Folder/Bucket radio group (digitalcorpora add id) -->
+                                <div id="folder-bucket-radio-group" class="btn-group" data-toggle="buttons">
                                     <label class="btn btn-primary active" id="folder-objects" title="View all objects in folder">
                                         <i class="fa fa-angle-double-up"></i>
                                         <input type="radio" name="optionsdepth" value="folder" id="optionfolder" checked>&nbsp;<span id="folder-text">Folder</span>
@@ -219,9 +271,9 @@ permissions and limitations under the License.
 <script src="https://cdn.datatables.net/2.0.1/js/dataTables.bootstrap.min.js" integrity="sha512-VA6ybNLYE2gJREhDvihaesx+djpqYnqOIq8eOVEZPF/lb/Ylur3kIHp46mOVBcyEn6gMPPDGNREsmEnviczMlg==" crossorigin="anonymous"></script>
 
 <script type="text/javascript">
-    var HIDE_INDEX = true;
+  var HIDE_INDEX = true;
     // CloudFront Support
-    var HIDE_S3_ID = true;
+    var HIDE_S3_ID = false;
     var s3exp_config = {
         Region: 'us-west-2',
         Bucket: 'digitalcorpora',
@@ -237,8 +289,66 @@ permissions and limitations under the License.
         size: 4
     };
 
+
     AWS.config.region = 'us-east-1';
     console.log('Region: ' + AWS.config.region);
+
+ <!--begin digital corpora -->
+async function fetchS3ObjectViaHttp(bucket, key) {
+  const region = AWS.config.region === 'us-east-1' ? '' : `-${AWS.config.region}`;
+  const encodedKey = key.split('/').map(encodeURIComponent).join('/');
+  const url = `https://${bucket}.s3${region}.amazonaws.com/${encodedKey}`;
+
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch ${key}: ${response.status}`);
+  }
+  return await response.text();
+}
+
+
+async function renderReadmes(bucket) {
+  console.log("render readmes");
+  const table = $('#tb-s3objects').DataTable();
+  const rows = table.rows().data().toArray();
+  const readmes = rows.filter(row => row.Key.match(/(^|\/)readme.*\.(txt|md|html)$/i));
+
+  const container = document.getElementById('readme-content');
+  container.innerHTML = '';
+
+  for (const file of readmes) {
+    const heading = document.createElement('h1');
+    heading.textContent = file.Key;
+    container.appendChild(heading);
+
+    try {
+      const text = await fetchS3ObjectViaHttp(bucket, file.Key);
+      const div = document.createElement('div');
+
+      if (/\.md$/i.test(file.Key)) {
+        div.innerHTML = marked.parse(text);
+      } else if (/\.html$/i.test(file.Key)) {
+        const match = text.match(/<body[^>]*>((.|[\r\n])*)<\/body>/i);
+        div.innerHTML = match ? match[1] : "(Could not extract <body>)";
+      } else {
+        div.style.fontFamily = "monospace";
+        div.style.whiteSpace = "pre-wrap";
+        div.style.wordBreak = "break-word";
+        div.textContent = text;
+      }
+
+      container.appendChild(div);
+    } catch (err) {
+      console.error(`Error loading ${file.Key}:`, err);
+      const errDiv = document.createElement('div');
+      errDiv.textContent = `Error loading ${file.Key}`;
+      container.appendChild(errDiv);
+    }
+  }
+}
+
+ <!--end digital corpora -->
+
 
     // Initialize S3 SDK and the moment library (for time formatting utilities)
     var s3 = new AWS.S3();
@@ -351,7 +461,9 @@ permissions and limitations under the License.
 
         if (data.params.Prefix && data.params.Prefix.length > 0) {
             console.log('Set hash: ' + data.params.Prefix);
-            window.location.hash = data.params.Prefix;
+          // OLD  window.location.hash = data.params.Prefix;
+          history.pushState(null, "", "#" + data.params.Prefix);  // new.
+
         } else {
             console.log('Remove hash');
             removeHash();
@@ -373,8 +485,9 @@ permissions and limitations under the License.
         // Empty the current breadcrumb list
         $('#breadcrumb li').remove();
 
-        // Now build the new breadcrumb list
+        // Now build the new breadcrumb list and list the bucket
         var buildprefix = '';
+
         $.each(parts, function(ii, part) {
             var ipart;
 
@@ -436,6 +549,11 @@ permissions and limitations under the License.
 
         // Add S3 objects to DataTable
         $('#tb-s3objects').DataTable().rows.add(data.Contents).draw();
+
+        <!-- begin digitalcorpora -->
+        renderReadmes(data.params.Bucket); // check for readme.
+        <!-- end digitalcorpora -->
+
     }
 
     function s3list(config, completecb) {
@@ -569,6 +687,17 @@ permissions and limitations under the License.
         $('input[name="optionsdepth"][value="bucket"]').parent().removeClass('active');
         $('input[name="optionsdepth"][value="folder"]').parent().addClass('active');
     }
+
+ <!-- begin digitalcorpora -->
+function handleHashChange() {
+   console.log("handleHashChange");
+  const prefix = decodeURIComponent(window.location.hash.substring(1) || '');
+  s3exp_config.Prefix = prefix;
+  (s3exp_lister = s3list(s3exp_config, s3draw)).go();
+}
+
+ <!-- end digitalcorpora -->
+
 
     $(document).ready(function() {
         console.log('ready');
@@ -787,6 +916,16 @@ permissions and limitations under the License.
         // derive the initial bucket from the document URL (useful if index.html was
         // launched directly from within a bucket), else prompt the user.
         if (s3exp_config.Bucket) {
+
+          <!-- start digitalcorpora -->
+          console.log("*****************");
+          if (window.location.hash && window.location.hash.length > 1) {
+            s3exp_config.Prefix = decodeURIComponent(window.location.hash.substring(1));
+            console.log("s3exp_config set to",s3exp_config);
+          }
+          <!-- end digitalcorpora -->
+
+
             (s3exp_lister = s3list(s3exp_config, s3draw)).go();
         } else if (parser.hostname.endsWith('cloudfront.net') && s3_location) {
             var s3_url;
@@ -927,6 +1066,12 @@ permissions and limitations under the License.
         } else {
             promptForBucketInput();
         }
+
+ <!-- begin digitalcorpora ready function adds-->
+          window.addEventListener('hashchange', handleHashChange);
+ <!-- end digitalcorpora -->
+
+
     });
 
   // Translation dictionary
