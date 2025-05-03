@@ -1,3 +1,6 @@
 [submodule "ctools"]
 	path = lib/ctools
 	url = https://github.com/simsong/ctools.git
+[submodule "aws-js-s3-explorer"]
+	path = aws-js-s3-explorer
+	url = https://github.com/digitalcorpora/aws-js-s3-explorer

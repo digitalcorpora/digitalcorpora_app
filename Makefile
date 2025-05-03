@@ -1,11 +1,33 @@
+# Makefile for local development and testing
+
+REGION=us-west-2
+BUCKET=digitalcorpora
+PORT=8000
+LOCAL_URL=http://localhost:$(PORT)/s3_browser.html
 PYLINT_FILES=$(shell /bin/ls *.py  | grep -v bottle.py | grep -v app_wsgi.py)
 PYLINT_THRESHOLD=9.5
 
 ################################################################
-# Manage the virtual environment
-A   = . venv/bin/activate
+# Local javascript browser
+install:
+	npm install -g live-server
+	pip3 install -r requirements.txt
+
+dev:
+	live-server --port=$(PORT) & \
+	sleep 2 && open $(LOCAL_URL)
+
+test-local:
+	pytest test_s3_listing.py --base-url=$(LOCAL_URL)
+
+test-prod:
+	pytest test_s3_listing.py --base-url=https://$(BUCKET).s3-website-$(REGION).amazonaws.com/
+
+
+################################################################
+# Manage the Pythn virtual environment
 REQ = venv/pyvenv.cfg
-PYTHON=$(A) ; python3.9
+PYTHON=venv/bin/python3.9
 PIP_INSTALL=$(PYTHON) -m pip install --no-warn-script-location
 venv/pyvenv.cfg:
 	python3.9 -m venv venv
@@ -45,6 +67,13 @@ freeze:
 	$(PYTHON) -m pip freeze > requirements.txt
 
 ################################################################
+# Publish the S3 browser
+pub:
+	aws --profile=dcwriter s3 cp s3_browser.html s3://digitalcorpora/s3_browser.html
+
+
+
+################################################################
 # Installations are used by the CI pipeline:
 # Generic:
 install-python-dependencies: $(REQ)
@@ -73,3 +102,4 @@ install-macos: $(REQ)
 
 clean:
 	find . -name '*~' -exec rm {} \;
+	rm -rf __pycache__ .pytest_cache
