@@ -24,15 +24,29 @@ permissions and limitations under the License.
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="shortcut icon" href="https://aws.amazon.com/favicon.ico">
+
+    <!-- 1. jQuery FIRST -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+    <!-- 2. DataTables core and Bootstrap integration -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/2.0.1/css/dataTables.bootstrap.min.css">
+    <script src="https://cdn.datatables.net/2.0.1/js/dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/2.0.1/js/dataTables.bootstrap.min.js"></script>
+
+    <!-- 3. DataTables ColReorder -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/colreorder/2.0.2/css/colReorder.bootstrap.min.css">
+    <script src="https://cdn.datatables.net/colreorder/2.0.2/js/dataTables.colReorder.min.js"></script>
+
+    <!-- 4. colResizable (classic UMD build) -->
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/colresizable/1.6/colResizable-1.6.min.js"></script> -->
+
+    <!-- 5. Other styles/scripts -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/css/bootstrap.min.css" integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/css/bootstrap-theme.min.css" integrity="sha384-6pzBo3FDv/PJ8r2KRkGHifhEocL+1X2rVCTTkUfGk7/0pbek5mMa1upzvWbrUbOZ" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <link rel="stylesheet" href="https://cdn.datatables.net/2.0.1/css/dataTables.bootstrap.min.css" integrity="sha512-VMR2J9d1Y/nEZh/4y/hpeGiyRmNpQFSFUgP9gqY3/2kLf3hFUdmdgkwfzazE3HllT7wa+pSH78lr4guyJXN9zQ==" crossorigin="anonymous">
-    <!-- begin digitalcorpora -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <link rel="stylesheet" href="https://digitalcorpora.org/wp-content/themes/ultra/style.css?ver=1.6.4" type="text/css" media="all">
     <style type="text/css">@import url(https://digitalcorpora.org/wp-content/themes/digitalcorpora/style.css);</style>
-    <!-- end digitalcorpora -->
     <style type="text/css">
         #wrapper {
             padding-left: 0;
@@ -70,7 +84,28 @@ permissions and limitations under the License.
         #navbuttons .btn {
             padding: 3px 6px;
         }
+
+        /* --- Add these lines for the Object column --- */
+        #tb-s3objects td:first-child, 
+        #tb-s3objects th:first-child {
+            white-space: nowrap;
+            width: auto;
+            min-width: 250px;
+            max-width: 1000px;
+        }
+        /* Optionally, allow horizontal scrolling if the name is extremely long */
+        #tb-s3objects td:first-child {
+            overflow-x: auto;
+        }
+        /* --------------------------------------------- */
+
+        .JColResizer .JCLRgrip {
+            background-color: #ccc;
+            width: 5px;
+            cursor: col-resize;
+        }
     </style>
+
 <!-- begin digitalcorpora -->
     <style type="text/css" add='digitalcorpora'>
 body {
@@ -107,6 +142,9 @@ body {
     </style>
 
 
+<link rel="stylesheet" href="https://cdn.datatables.net/colreorder/2.0.2/css/colReorder.bootstrap.min.css">
+<script src="https://cdn.datatables.net/colreorder/2.0.2/js/dataTables.colReorder.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/colresizable@1.6.0/colResizable-1.6.min.js"></script>
 <!-- end digitalcorpora -->
 </head>
 
@@ -460,16 +498,6 @@ async function renderReadmes(bucket) {
         console.log('Bucket: ' + data.params.Bucket);
         console.log('Prefix: ' + data.params.Prefix);
 
-        if (data.params.Prefix && data.params.Prefix.length > 0) {
-            console.log('Set hash: ' + data.params.Prefix);
-          // OLD  window.location.hash = data.params.Prefix;
-          history.pushState(null, "", "#" + data.params.Prefix);  // new.
-
-        } else {
-            console.log('Remove hash');
-            removeHash();
-        }
-
         // The parts array will contain the bucket name followed by all the
         // segments of the prefix, exploded out as separate strings.
         var parts = [data.params.Bucket];
@@ -701,11 +729,11 @@ function handleHashChange() {
     s3exp_config.Prefix = rawPrefix;
     console.log("Treating as prefix:", rawPrefix);
     (s3exp_lister = s3list(s3exp_config, s3draw)).go();
-  } else {
-    // Treat as object and redirect to S3 download
-    const region = AWS.config.region === 'us-east-1' ? '' : '-' + AWS.config.region;
+  } else if (rawPrefix.length > 0) {
+    // Use the bucket from config for the redirect
+    const bucket = s3exp_config.Bucket;
     const encodedKey = rawPrefix.split('/').map(encodeURIComponent).join('/');
-    const url = `https://${s3exp_config.Bucket}.s3${region}.amazonaws.com/${encodedKey}`;
+    const url = `https://${bucket}.s3.amazonaws.com/${encodedKey}`;
     console.log("Redirecting to object:", url);
     window.location.href = url;
   }
@@ -835,6 +863,7 @@ function handleHashChange() {
                 [1, 'asc'],
                 [0, 'asc']
             ],
+            colReorder: true,
             aoColumnDefs: [{
                 "aTargets": [0],
                 "mData": "Key",
@@ -868,6 +897,13 @@ function handleHashChange() {
             }, ]
         });
 
+        // Make columns resizable after DataTable is initialized
+        // $('#tb-s3objects').colResizable({
+        //     liveDrag: true,
+        //     minWidth: 40,
+        //     resizeMode: 'flex'
+        // });
+
         $('#tb-s3objects').DataTable().column(s3exp_columns.key).visible(false);
         console.log("jQuery version=" + $.fn.jquery);
 
@@ -894,23 +930,31 @@ function handleHashChange() {
         // because the object/folder rows are added dynamically and we do not want
         // to have to assign click handlers to each and every row.
         $('#tb-s3objects').on('click', 'a', function(event) {
-            event.preventDefault();
-            var target = event.target;
-            console.log("target href=" + target.href);
-            console.log("target dataset=" + JSON.stringify(target.dataset));
+          event.preventDefault();
+          var target = event.target;
+          console.log("target href=" + target.href);
+          console.log("target dataset=" + JSON.stringify(target.dataset));
 
-            // If the user has clicked on a folder then navigate into that folder
-            if (target.dataset.s3 === "folder") {
-                resetDepth();
-                delete s3exp_config.ContinuationToken;
-                s3exp_config.Prefix = target.dataset.prefix;
-                s3exp_config.Delimiter = $("input[name='optionsdepth']:checked").val() == "folder" ? "/" : "";
-                (s3exp_lister = s3list(s3exp_config, s3draw)).go();
-                // Else user has clicked on an object so download it in new window/tab
-            } else {
-                window.open(target.href, '_blank', 'noopener,noreferrer');
-            }
+          // if the user has clicked on an object, then follow the  click
+          if (target.dataset.s3 === "object") {
+            // Temporarily remove hashchange listener
+            //window.removeEventListener('hashchange', handleHashChange);
+            window.open(target.href, '_blank', 'noopener,noreferrer');
             return false;
+          }
+
+          // If the user has clicked on a folder then navigate into that folder
+          if (target.dataset.s3 === "folder") {
+            resetDepth();
+            delete s3exp_config.ContinuationToken;
+            s3exp_config.Prefix = target.dataset.prefix;
+            s3exp_config.Delimiter = $("input[name='optionsdepth']:checked").val() == "folder" ? "/" : "";
+            (s3exp_lister = s3list(s3exp_config, s3draw)).go();
+            // Else user has clicked on an object so download it in new window/tab
+          } else {
+            window.open(target.href, '_blank', 'noopener,noreferrer');
+          }
+          return false;
         });
 
         // Document URL typically looks like this for path-style URLs:
