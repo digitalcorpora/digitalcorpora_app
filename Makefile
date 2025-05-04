@@ -73,6 +73,8 @@ pub:
 	  --cache-control "no-cache, no-store, must-revalidate" \
 	  --content-type text/html \
 	  --metadata-directive REPLACE
+	scp s3_browser.html dcorp_wordpress@digitalcorpora.org:digitalcorpora.org/s3_browser.html
+
 
 
 
