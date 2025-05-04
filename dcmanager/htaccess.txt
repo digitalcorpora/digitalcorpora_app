@@ -1,0 +1,21 @@
+# should be in .htaccess
+RewriteEngine On
+
+RewriteCond %{REQUEST_URI} ^/search(/.*)?$
+RewriteRule ^search(/.*)?$ https://search.digitalcorpora.org/search/%1 [R=302,L]
+
+
+# Combined redirect for /reports and /search
+RewriteCond %{REQUEST_URI} ^/(reports|search)(/.*)?$
+RewriteRule ^(reports|search)(/.*)?$ https://search.digitalcorpora.org/%1%2 [R=302,L]
+
+# Redirect /index.tsv
+RewriteCond %{REQUEST_URI} ^/index\.tsv$
+RewriteRule ^index\.tsv$ https://search.digitalcorpora.org/index.tsv [R=302,L]
+
+# Catch-all redirect to S3 browser (if no real file or dir)
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+# Rewrite everything to PHP redirect
+RewriteRule ^(.*)$ /redirect.php [L]

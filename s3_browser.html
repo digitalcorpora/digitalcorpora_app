@@ -294,7 +294,7 @@ body {
     AWS.config.region = 'us-east-1';
     console.log('Region: ' + AWS.config.region);
 
- <!--begin digital corpora -->
+// begin digitalcorpora
 async function fetchS3ObjectViaHttp(bucket, key) {
   const region = AWS.config.region === 'us-east-1' ? '' : `-${AWS.config.region}`;
   const encodedKey = key.split('/').map(encodeURIComponent).join('/');
@@ -348,7 +348,7 @@ async function renderReadmes(bucket) {
   }
 }
 
- <!--end digital corpora -->
+// end digitalcorpora
 
 
     // Initialize S3 SDK and the moment library (for time formatting utilities)
@@ -538,10 +538,12 @@ async function renderReadmes(bucket) {
     }
 
     function s3draw(data, complete) {
+        console.log('DRAW rows:', data.CommonPrefixes.length, 'prefixes and', data.Contents.length, 'contents');
         $('li.li-bucket').remove();
         folder2breadcrumbs(data);
 
         // Add each part of current path (S3 bucket plus folder hierarchy) into the breadcrumbs
+        $('#tb-s3objects').DataTable().clear();            // clear to be safe
         $.each(data.CommonPrefixes, function(i, prefix) {
             $('#tb-s3objects').DataTable().rows.add([{
                 Key: prefix.Prefix
@@ -551,9 +553,9 @@ async function renderReadmes(bucket) {
         // Add S3 objects to DataTable
         $('#tb-s3objects').DataTable().rows.add(data.Contents).draw();
 
-        <!-- begin digitalcorpora -->
-        renderReadmes(data.params.Bucket); // check for readme.
-        <!-- end digitalcorpora -->
+      // begin digitalcorpora
+      renderReadmes(data.params.Bucket); // check for readme.
+      // end digitalcorpora
 
     }
 
@@ -689,15 +691,52 @@ async function renderReadmes(bucket) {
         $('input[name="optionsdepth"][value="folder"]').parent().addClass('active');
     }
 
- <!-- begin digitalcorpora -->
+ //  begin digitalcorpora
 function handleHashChange() {
-   console.log("handleHashChange");
-  const prefix = decodeURIComponent(window.location.hash.substring(1) || '');
-  s3exp_config.Prefix = prefix;
-  (s3exp_lister = s3list(s3exp_config, s3draw)).go();
+  console.log("handleHashChange");
+  const rawPrefix = decodeURIComponent(window.location.hash.substring(1) || '');
+
+  if (rawPrefix.endsWith('/')) {
+    // Always treat ending in '/' as a prefix and list it
+    s3exp_config.Prefix = rawPrefix;
+    console.log("Treating as prefix:", rawPrefix);
+    (s3exp_lister = s3list(s3exp_config, s3draw)).go();
+  } else {
+    // Treat as object and redirect to S3 download
+    const region = AWS.config.region === 'us-east-1' ? '' : '-' + AWS.config.region;
+    const encodedKey = rawPrefix.split('/').map(encodeURIComponent).join('/');
+    const url = `https://${s3exp_config.Bucket}.s3${region}.amazonaws.com/${encodedKey}`;
+    console.log("Redirecting to object:", url);
+    window.location.href = url;
+  }
 }
 
- <!-- end digitalcorpora -->
+// WOULD BE NICE TO HANDLE IF A PREFIX EXISTS...
+//
+//  // Attempt to check if 'prefix/' exists
+//  const params = {
+//    Bucket: s3exp_config.Bucket,
+//    Prefix: s3prefix,
+//    Delimiter: '/',
+//    MaxKeys: 1
+//  };
+//
+//  s3.listObjectsV2(params, function(err, data) {
+//    if (!err && (data.Contents.length > 0 || data.CommonPrefixes.length > 0)) {
+//      // It's a folder prefix — load it
+//      s3exp_config.Prefix = s3prefix;
+//      console.log("Treating as folder:", s3prefix);
+//      (s3exp_lister = s3list(s3exp_config, s3draw)).go();
+//    } else {
+//      // It's not a folder — assume it's a file and redirect
+//      const region = AWS.config.region === 'us-east-1' ? '' : '-' + AWS.config.region;
+//      const encodedKey = rawPrefix.split('/').map(encodeURIComponent).join('/');
+//      const url = `https://${s3exp_config.Bucket}.s3${region}.amazonaws.com/${encodedKey}`;
+//      console.log("Redirecting to object:", url);
+//      window.location.href = url;
+//    }
+//  });
+//}
 
 
     $(document).ready(function() {
@@ -918,16 +957,14 @@ function handleHashChange() {
         // launched directly from within a bucket), else prompt the user.
         if (s3exp_config.Bucket) {
 
-          <!-- start digitalcorpora -->
+          // start digitalcorpora
           console.log("*****************");
           if (window.location.hash && window.location.hash.length > 1) {
-            s3exp_config.Prefix = decodeURIComponent(window.location.hash.substring(1));
-            console.log("s3exp_config set to",s3exp_config);
-          }
-          <!-- end digitalcorpora -->
-
-
+            handleHashChange();  // let it redirect or list folder
+          } else {
             (s3exp_lister = s3list(s3exp_config, s3draw)).go();
+          }
+          // end digitalcorpora
         } else if (parser.hostname.endsWith('cloudfront.net') && s3_location) {
             var s3_url;
             var bucket;
@@ -1068,9 +1105,9 @@ function handleHashChange() {
             promptForBucketInput();
         }
 
- <!-- begin digitalcorpora ready function adds-->
-          window.addEventListener('hashchange', handleHashChange);
- <!-- end digitalcorpora -->
+        // begin digitalcorpora ready function adds
+      window.addEventListener('hashchange', handleHashChange);
+      // end digitalcorpora
 
 
     });
