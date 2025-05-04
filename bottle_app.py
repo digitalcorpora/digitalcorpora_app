@@ -120,6 +120,7 @@ def reports():
     return s3_reports.reports_html(auth=get_dbreader(),root=os.path.dirname(o.path))
 
 @bottle.route('/search')
+@bottle.route('/search/')       # work with both /search?q=foo and /search/?q=foo
 def search():
     return bottle.jinja2_template('search.html', template_lookup=[TEMPLATE_DIR])
 
