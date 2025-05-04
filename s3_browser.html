@@ -1081,15 +1081,48 @@ permissions and limitations under the License.
             promptForBucketInput();
         }
 
-        window.addEventListener('hashchange', function() {
-            var newPrefix = window.location.hash ? window.location.hash.substring(1) : '';
-            // Only reload if the prefix actually changed
-            if (s3exp_config.Prefix !== newPrefix) {
-                s3exp_config.Prefix = newPrefix;
-                s3exp_config.Delimiter = $("input[name='optionsdepth']:checked").val() == "folder" ? "/" : "";
-                delete s3exp_config.ContinuationToken;
-                (s3exp_lister = s3list(s3exp_config, s3draw)).go();
+        // After S3 config is set up and before the initial listing, handle file hash
+        function handleHashForFile(openInNewTab) {
+            var hash = window.location.hash ? window.location.hash.substring(1) : '';
+            if (hash && !hash.endsWith('/')) {
+                if (s3exp_config && s3exp_config.Bucket) {
+                    var url = object2hrefvirt(s3exp_config.Bucket, hash);
+                    if (openInNewTab) {
+                        window.open(url, '_blank', 'noopener,noreferrer');
+                    } else {
+                        window.location = url;
+                    }
+                    return true;
+                }
             }
+            return false;
+        }
+
+        // After S3 config is set up and before the initial listing:
+        if (handleHashForFile(false)) {
+            // If a file was opened, do not load the explorer
+            return;
+        }
+
+        // If the hash is a folder, set Prefix accordingly
+        var hash = window.location.hash ? window.location.hash.substring(1) : '';
+        if (hash && hash.endsWith('/')) {
+            s3exp_config.Prefix = hash;
+        }
+
+        // Now do the initial listing
+        (s3exp_lister = s3list(s3exp_config, s3draw)).go();
+
+        // Restore the hashchange event listener
+        window.addEventListener('hashchange', function() {
+            if (handleHashForFile(false)) {
+                return;
+            }
+            var newPrefix = window.location.hash ? window.location.hash.substring(1) : '';
+            s3exp_config.Prefix = newPrefix;
+            s3exp_config.Delimiter = $("input[name='optionsdepth']:checked").val() == "folder" ? "/" : "";
+            delete s3exp_config.ContinuationToken;
+            (s3exp_lister = s3list(s3exp_config, s3draw)).go();
         });
     });
 
