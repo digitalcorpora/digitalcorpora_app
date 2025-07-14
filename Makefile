@@ -27,13 +27,13 @@ test-prod:
 ################################################################
 # Manage the Pythn virtual environment
 REQ = venv/pyvenv.cfg
-PYTHON=venv/bin/python3.9
+PYTHON=venv/bin/python3.11
 PIP_INSTALL=$(PYTHON) -m pip install --no-warn-script-location
 venv/pyvenv.cfg:
-	python3.9 -m venv venv
+	python3.11 -m venv venv
 
 venv:
-	python3.9 -m venv venv
+	python3.11 -m venv venv
 
 ################################################################
 #
