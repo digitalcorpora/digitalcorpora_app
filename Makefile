@@ -2,10 +2,11 @@
 
 REGION=us-west-2
 BUCKET=digitalcorpora
-PORT=8000
-LOCAL_URL=http://localhost:$(PORT)/s3_browser.html
-PYLINT_FILES=$(shell /bin/ls *.py  | grep -v bottle.py | grep -v app_wsgi.py)
-PYLINT_THRESHOLD=9.5
+PORT:=8000
+LOCAL_URL:=http://localhost:$(PORT)/s3_browser.html
+PYLINT_FILES:=$(shell /bin/ls *.py  | grep -v bottle.py | grep -v app_wsgi.py)
+PYLINT_THRESHOLD:=9.5
+PYTHON:=python3
 
 ################################################################
 # Local javascript browser
@@ -27,13 +28,12 @@ test-prod:
 ################################################################
 # Manage the Pythn virtual environment
 REQ = venv/pyvenv.cfg
-PYTHON=venv/bin/python3.11
 PIP_INSTALL=$(PYTHON) -m pip install --no-warn-script-location
 venv/pyvenv.cfg:
-	python3.11 -m venv venv
+	python3 -m venv venv
 
 venv:
-	python3.11 -m venv venv
+	python3 -m venv venv
 
 ################################################################
 #
