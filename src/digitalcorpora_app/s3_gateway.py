@@ -167,7 +167,7 @@ def s3_list_prefix(bucket_name, prefix, auth=None):
                           sys_version=sys.version)
 
 
-def s3_app(*, bucket, quoted_prefix, url, auth=None):
+def s3_view(*, bucket, quoted_prefix, url, auth=None):
     """
     Fetching a file. Called from Flask.
     :param bucket: - the bucket that we are serving from

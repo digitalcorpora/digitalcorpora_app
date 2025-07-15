@@ -110,7 +110,7 @@ def static_path(path):
 @app.route('/robots.txt')
 def func_robots():
     """Route https://downloads.digitalcorpora.org/robots.txt which asks Google not to index this."""
-    return s3_gateway.s3_app(bucket='digitalcorpora', quoted_prefix='robots.txt', url=request.url)
+    return s3_gateway.s3_view(bucket='digitalcorpora', quoted_prefix='robots.txt', url=request.url)
 
 ## TEMPLATE VIEWS
 @app.route('/')
@@ -126,7 +126,7 @@ def func_root():
 @app.route('/corpora/<path:path>')
 def func_corpora_path(path=''):
     """Route https://downloads.digitalcorpora.org/corpora/path"""
-    return s3_gateway.s3_app(bucket='digitalcorpora',
+    return s3_gateway.s3_view(bucket='digitalcorpora',
                              quoted_prefix='corpora/' + path,
                              auth=get_dbreader(fail_gracefully=True), url=request.url)
 
@@ -134,7 +134,7 @@ def func_corpora_path(path=''):
 @app.route('/downloads/<path:path>')
 def func_downloads_path(path=''):
     """Route https://downloads.digitalcorpora.org/downloads/path"""
-    return s3_gateway.s3_app(bucket='digitalcorpora',
+    return s3_gateway.s3_view(bucket='digitalcorpora',
                              quoted_prefix='downloads/' + path,
                              auth=get_dbreader(fail_gracefully=True), url=request.url)
 
