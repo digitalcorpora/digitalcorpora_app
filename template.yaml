@@ -1,0 +1,82 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Digital Corpora Flask Application
+
+Globals:
+  Function:
+    Timeout: 300
+    Runtime: python3.13
+    Environment:
+      Variables:
+        AWS: "YES"
+
+Parameters:
+  DomainName:
+    Type: String
+    Default: "corp.digitalcorpora.org"
+    Description: "Domain name for the application"
+  
+  CertificateArn:
+    Type: String
+    Default: "arn:aws:acm:us-east-1:376778049323:certificate/f705638d-a61f-430d-b32e-3bf0d2cbcd5a"
+    Description: "ARN of the SSL certificate"
+
+Resources:
+  DigitalCorporaFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/
+      Handler: digitalcorpora_app.main.app
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /{proxy+}
+            Method: ANY
+        RootEvent:
+          Type: Api
+          Properties:
+            Path: /
+            Method: ANY
+      Environment:
+        Variables:
+          AWS: "YES"
+      Policies:
+        - S3ReadPolicy:
+            BucketName: "digitalcorpora"
+        - SecretsManagerReadWrite:
+            SecretArn: !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:digitalcorpora-*"
+
+  DigitalCorporaApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: prod
+      Domain:
+        DomainName: !Ref DomainName
+        CertificateArn: !Ref CertificateArn
+        EndpointConfiguration:
+          Type: REGIONAL
+        SecurityPolicy: TLS_1_2
+
+  DigitalCorporaBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: digitalcorpora-sam-deployments
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+
+Outputs:
+  DigitalCorporaApi:
+    Description: "API Gateway endpoint URL for Prod stage for Digital Corpora function"
+    Value: !Sub "https://${DigitalCorporaApi}.execute-api.${AWS::Region}.amazonaws.com/prod/"
+  
+  DigitalCorporaFunction:
+    Description: "Digital Corpora Lambda Function ARN"
+    Value: !GetAtt DigitalCorporaFunction.Arn
+  
+  DigitalCorporaFunctionRole:
+    Description: "Implicit IAM Role created for Digital Corpora function"
+    Value: !GetAtt DigitalCorporaFunctionRole.Arn 

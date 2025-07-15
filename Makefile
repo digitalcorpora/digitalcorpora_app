@@ -4,39 +4,33 @@ REGION=us-west-2
 BUCKET=digitalcorpora
 PORT=8000
 LOCAL_URL=http://localhost:$(PORT)/s3_browser.html
-PYLINT_FILES=$(shell /bin/ls *.py  | grep -v bottle.py | grep -v app_wsgi.py)
+PYLINT_FILES=$(shell find src/ -name "*.py" -not -name "__init__.py")
 PYLINT_THRESHOLD=9.5
+LOG_LEVEL?=INFO
+TEST_CREDENTIALS:=$(CURDIR)/test_credentials.json
 
 ################################################################
-# Local javascript browser
+# Local development
 install:
-	npm install -g live-server
-	pip3 install -r requirements.txt
+	poetry config virtualenvs.in-project true
+	poetry install
 
 dev:
-	live-server --port=$(PORT) & \
-	sleep 2 && open $(LOCAL_URL)
+	cd src && poetry run python -m digitalcorpora_app.main
 
 test-local:
-	pytest test_s3_listing.py --base-url=$(LOCAL_URL)
+	pytest tests/test_s3_listing.py --base-url=$(LOCAL_URL)
 
 test-prod:
-	pytest test_s3_listing.py --base-url=https://$(BUCKET).s3-website-$(REGION).amazonaws.com/
-
-
-################################################################
-# Manage the Pythn virtual environment
-REQ = venv/pyvenv.cfg
-PYTHON=venv/bin/python3.9
-PIP_INSTALL=$(PYTHON) -m pip install --no-warn-script-location
-venv/pyvenv.cfg:
-	python3.9 -m venv venv
-
-venv:
-	python3.9 -m venv venv
+	pytest tests/test_s3_listing.py --base-url=https://$(BUCKET).s3-website-$(REGION).amazonaws.com/
 
 ################################################################
-#
+# Poetry dependency management
+requirements.txt: pyproject.toml
+	poetry export -f requirements.txt --output requirements.txt --without-hashes
+
+################################################################
+# Testing and quality checks
 all:
 	@echo verify syntax and then restart
 	make pylint
@@ -49,57 +43,54 @@ check:
 touch:
 	touch tmp/restart.txt
 
-pylint: $(REQ)
-	$(PYTHON) -m pylint --rcfile .pylintrc --fail-under=$(PYLINT_THRESHOLD) --verbose $(PYLINT_FILES)
+pylint:
+	poetry run pylint --rcfile .pylintrc --fail-under=$(PYLINT_THRESHOLD) --verbose $(PYLINT_FILES)
 
-pytest: $(REQ)
-	$(PYTHON) -m pytest .
+pytest:
+	LOG_LEVEL=$(LOG_LEVEL) TEST_CREDENTIALS=$(TEST_CREDENTIALS) poetry run pytest tests/
 
-pytest-debug: $(REQ)
-	$(PYTHON) -m pytest -v --log-cli-level=DEBUG
+pytest-debug:
+	LOG_LEVEL=$(LOG_LEVEL) TEST_CREDENTIALS=$(TEST_CREDENTIALS) poetry run pytest -v --log-cli-level=DEBUG tests/
 
 coverage:
-	$(PYTHON) -m pip install pytest pytest_cov
-	$(PYTHON) -m pytest -v --cov=. --cov-report=xml tests
+	LOG_LEVEL=$(LOG_LEVEL) TEST_CREDENTIALS=$(TEST_CREDENTIALS) poetry run pytest -v --cov=src/digitalcorpora_app --cov-report=xml --cov-report=html tests/
 
+coverage-open:
+	open htmlcov/index.html
 
-freeze:
-	$(PYTHON) -m pip freeze > requirements.txt
+################################################################
+# AWS SAM deployment
+sam-build:
+	sam build
+
+sam-deploy:
+	sam deploy
+
+sam-deploy-dev:
+	sam deploy --config-env dev --parameter-overrides DomainName=dev.digitalcorpora.org
+
+sam-deploy-app:
+	sam deploy --config-env app --parameter-overrides DomainName=app.digitalcorpora.org
+
+sam-deploy-search:
+	sam deploy --config-env search --parameter-overrides DomainName=search.digitalcorpora.org
+
+sam-local:
+	sam local start-api
+
+sam-local-lambda:
+	sam local start-lambda
 
 ################################################################
 # Publish the S3 browser
 pub:
 	aws --profile=dcwriter s3 cp s3_browser.html s3://digitalcorpora/s3_browser.html
 
-
-
 ################################################################
-# Installations are used by the CI pipeline:
-# Generic:
-install-python-dependencies: $(REQ)
-	$(PYTHON) -m pip install --upgrade pip
-	if [ -r requirements.txt ]; then $(PIP_INSTALL) -r requirements.txt ; else echo no requirements.txt ; fi
-
-# Includes ubuntu dependencies
-install-ubuntu: $(REQ)
-	echo on GitHub, we use this action instead: https://github.com/marketplace/actions/setup-ffmpeg
-	$(PYTHON) -m pip install --upgrade pip
-	if [ -r requirements-ubuntu.txt ]; then $(PIP_INSTALL) -r requirements-ubuntu.txt ; else echo no requirements-ubuntu.txt ; fi
-	if [ -r requirements.txt ];        then $(PIP_INSTALL) -r requirements.txt ; else echo no requirements.txt ; fi
-
-install-macos-python: $(REQ)
-	brew update
-	brew upgrade
-	brew install python3
-
-# Includes MacOS dependencies managed through Brew
-install-macos: $(REQ)
-	brew update
-	brew upgrade
-	$(PYTHON) -m pip install --upgrade pip
-	if [ -r requirements-macos.txt ]; then $(PIP_INSTALL) -r requirements-macos.txt ; else echo no requirements-ubuntu.txt ; fi
-	if [ -r requirements.txt ];       then $(PIP_INSTALL) -r requirements.txt ; else echo no requirements.txt ; fi
-
+# Clean up
 clean:
 	find . -name '*~' -exec rm {} \;
-	rm -rf __pycache__ .pytest_cache
+	find . -name '__pycache__' -type d -exec rm -rf {} +
+	find . -name '.pytest_cache' -type d -exec rm -rf {} +
+	rm -rf .aws-sam
+	rm -rf .venv

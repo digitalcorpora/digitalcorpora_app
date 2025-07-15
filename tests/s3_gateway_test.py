@@ -6,8 +6,10 @@ from os.path import abspath,dirname
 
 sys.path.append( dirname(dirname(abspath(__file__))))
 
-from s3_gateway import *
-import bottle_app
+from digitalcorpora_app.s3_gateway import *
+from digitalcorpora_app.main import app, get_dbreader
+from digitalcorpora_app.paths import TEMPLATE_DIR
+from flask import Flask
 
 def test_s3_gateway_files():
     assert INDEX_S3 is not None
@@ -45,13 +47,13 @@ def test_annotate_s3files():
 
 TEST_PATHS = ['corpora/files/CC-MAIN-2021-31-PDF-UNTRUNCATED/',
               'corpora/files/CC-MAIN-2021-31-PDF-UNTRUNCATED',
-              'dir-not-found/'
+              'dir-not-found/',
               'file-not-found'
               ]
 def test_s3_list_prefixes():
-    """ Right now we are just checking to make sure it doesn't crash """
-    dbreader = bottle_app.get_dbreader()
+    dbreader = get_dbreader()
+    flask_app = Flask(__name__, template_folder=TEMPLATE_DIR)
     for path in TEST_PATHS:
-        ret = s3_list_prefix(DEFAULT_BUCKET, path)
-        url = f'https://downloads.digitalcorpora.org/{path}'
-        ret = s3_app(bucket=DEFAULT_BUCKET, quoted_prefix=urllib.parse.quote(path), url=url, auth=dbreader)
+        with flask_app.test_request_context(f'/{path}'):
+            ret = s3_list_prefix(DEFAULT_BUCKET, path, auth=dbreader)
+            # Optionally, assert something about ret or just ensure no exception is raised

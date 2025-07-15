@@ -3,7 +3,7 @@
 
 """
 s3_gateway:
-bottle/boto3 interface to view an s3 bucket in a web browser.
+Flask/boto3 interface to view an s3 bucket in a web browser.
 
 2021-02-15 slg - updated to use anonymous s3 requests,
                  per https://stackoverflow.com/questions/34865927/can-i-use-boto3-anonymously
@@ -28,11 +28,10 @@ import mistune
 from botocore import UNSIGNED
 from botocore.client import Config
 
-import bottle
-from bottle import request, response, redirect
+from flask import request, redirect, render_template, Response
 
 from lib.ctools.dbfile import DBMySQL
-from paths import TEMPLATE_DIR
+from digitalcorpora_app.paths import TEMPLATE_DIR
 
 README_NAMES = ['README.txt', 'README.md']
 README_TXT_HEADER = "<h3> README </h3>"
@@ -121,7 +120,7 @@ def s3_to_link(url, obj):
         raise RuntimeError("obj: "+json.dumps(obj, default=str))
 
 def s3_list_prefix(bucket_name, prefix, auth=None):
-    """The revised s3_list_prefix implementation: uses the Bottle
+    """The revised s3_list_prefix implementation: uses the Flask
     template system to generate HTML. Get a list of the sub-prefixes
     (dirs) and the objects with this prefix (files), and then construct
     the dirs[] and files[] arrays. Elements of dirs are strings (one for
@@ -159,18 +158,18 @@ def s3_list_prefix(bucket_name, prefix, auth=None):
     # Look for a readme file
     readme_html = get_readme(bucket_name, s3_files)
 
-    return bottle.jinja2_template(INDEX_S3,
-                                  {'prefix':prefix,
-                                   'paths':paths,
-                                   'files':files,
-                                   'dirs':dirs,
-                                   'readme_html':readme_html,
-                                   'sys_version':sys.version},template_lookup=[TEMPLATE_DIR])
+    return render_template(INDEX_S3,
+                          prefix=prefix,
+                          paths=paths,
+                          files=files,
+                          dirs=dirs,
+                          readme_html=readme_html,
+                          sys_version=sys.version)
 
 
 def s3_app(*, bucket, quoted_prefix, url, auth=None):
     """
-    Fetching a file. Called from bottle.
+    Fetching a file. Called from Flask.
     :param bucket: - the bucket that we are serving from
     :param quoted_prefix:   - the path to display.
     :param auth:   - Database authenticator
@@ -186,8 +185,8 @@ def s3_app(*, bucket, quoted_prefix, url, auth=None):
             return s3_list_prefix(bucket, prefix, auth=auth)
         except FileNotFoundError as e:
             logging.warning("e:%s", e)
-            response.status = 404
-            return bottle.jinja2_template(ERROR_404,bucket=bucket,prefix=prefix,template_lookup=[TEMPLATE_DIR])
+            response.status_code = 404
+            return render_template(ERROR_404, bucket=bucket, prefix=prefix)
 
     # If the prefix does not end with a '/' and there is object there, see if it is a prefix
     try:
@@ -197,18 +196,19 @@ def s3_app(*, bucket, quoted_prefix, url, auth=None):
             return s3_list_prefix(bucket, prefix+"/", auth=auth)
         except FileNotFoundError:
             # No object and not a prefix
-            response.status = 404
-            return bottle.jinja2_template('error_404.html',bucket=bucket,prefix=prefix,template_lookup=[TEMPLATE_DIR])
+            response.status_code = 404
+            return render_template('error_404.html', bucket=bucket, prefix=prefix)
 
     # If we are using the bypass, redirect
 
     if USE_BYPASS:
         logging.info("redirect to %s", BYPASS_URL + prefix)
-        redirect(BYPASS_URL + prefix)
+        return redirect(BYPASS_URL + prefix)
 
     # Otherwise download directly
     try:
-        response.content_type = mimetypes.guess_type(prefix)[0]
+        content_type = mimetypes.guess_type(prefix)[0]
     except (TypeError,ValueError,KeyError):
-        response.content_type = 'application/octet-stream'
-    return obj['Body']
+        content_type = 'application/octet-stream'
+    
+    return Response(obj['Body'], mimetype=content_type)
