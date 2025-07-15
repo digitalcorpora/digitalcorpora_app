@@ -14,6 +14,7 @@ TEST_CREDENTIALS:=$(CURDIR)/test_credentials.json
 install:
 	poetry config virtualenvs.in-project true
 	poetry install
+	npm install -g live-server
 
 dev:
 	cd src && poetry run python -m digitalcorpora_app.main
