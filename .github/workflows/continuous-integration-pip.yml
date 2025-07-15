@@ -23,7 +23,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          make venv
+          make venv/pyvenv.cfg
           find venv -ls
           make install-ubuntu
 
