@@ -189,4 +189,5 @@ def search_api():
     return jsonify(rows)
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=8000)
+    debug_mode = os.environ.get('DEBUG', 'false').lower() == 'true'
+    app.run(debug=debug_mode, host='0.0.0.0', port=8000)

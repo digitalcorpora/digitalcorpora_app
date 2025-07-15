@@ -41,6 +41,7 @@ Resources:
       Environment:
         Variables:
           AWS: "YES"
+          DEBUG: "false"
       Policies:
         - S3ReadPolicy:
             BucketName: "digitalcorpora"

@@ -76,7 +76,7 @@ sam-deploy-search:
 	sam deploy --config-env search --parameter-overrides DomainName=search.digitalcorpora.org
 
 sam-local:
-	sam local start-api
+	DEBUG=true sam local start-api
 
 sam-local-lambda:
 	sam local start-lambda
