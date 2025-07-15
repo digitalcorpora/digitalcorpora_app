@@ -7,12 +7,13 @@ LOCAL_URL:=http://localhost:$(PORT)/s3_browser.html
 PYLINT_FILES:=$(shell /bin/ls *.py  | grep -v bottle.py | grep -v app_wsgi.py)
 PYLINT_THRESHOLD:=9.5
 PYTHON:=python3
+LOCAL_URL=http://localhost:$(PORT)/s3_browser.html
 
 ################################################################
 # Local javascript browser
 install:
 	npm install -g live-server
-	pip3 install -r requirements.txt
+	venv/bin/pip3 install -r requirements.txt
 
 dev:
 	live-server --port=$(PORT) & \
@@ -30,10 +31,8 @@ test-prod:
 REQ = venv/pyvenv.cfg
 PIP_INSTALL=$(PYTHON) -m pip install --no-warn-script-location
 venv/pyvenv.cfg:
-	python3 -m venv venv
+	$(PYTHON) -m venv venv
 
-venv:
-	python3 -m venv venv
 
 ################################################################
 #
