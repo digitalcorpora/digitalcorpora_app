@@ -1,14 +1,21 @@
-# See https://docs.github.com/en/actions/guides/building-and-testing-python
-# 2020-02-20 slg - For Dreamhost, we are now using Python 3.9 and Ubuntu-18.04
-name: CI (pip)
-on: [push, pull_request]
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+permissions:
+  contents: read
+  security-events: write
 
 jobs:
   build:
     strategy:
       matrix:
-        os: ['ubuntu-latest']
-        python-version: [3.9]   # installed version on Dreamhost
+        os: [ubuntu-latest, macos-latest]
+        python-version: [3.13]
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout
@@ -21,17 +28,18 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Install dependencies
+      - name: Install Poetry
         run: |
-          make venv
-          find venv -ls
-          make install-ubuntu
+          curl -sSL https://install.python-poetry.org | python3 -
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Install dependencies
+        run: poetry install
 
       - name: Lint with pylint
-        run: |
-          make pylint
+        run: poetry run pylint src/digitalcorpora_app
 
-      - name: Test with pytest and a functioning database
+      - name: Prepare test credentials
         run: |
           touch etc/credentials.ini
           echo "[dbreader]" >> etc/credentials.ini
@@ -39,11 +47,9 @@ jobs:
           echo "MYSQL_DATABASE: ${{ secrets.MYSQL_DATABASE }}" >> etc/credentials.ini
           echo "MYSQL_USER: ${{ secrets.MYSQL_USER }}" >> etc/credentials.ini
           echo "MYSQL_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}" >> etc/credentials.ini
-          echo === credentials.ini ===
-          cat etc/credentials.ini
-          echo =======================
-          pip install pytest
-          make coverage
+
+      - name: Test with pytest and coverage
+        run: poetry run pytest --cov --cov-report=term-missing --cov-report=html
 
       - name: Upload to codecov.io
         uses: codecov/codecov-action@v4

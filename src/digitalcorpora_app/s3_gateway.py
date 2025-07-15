@@ -3,7 +3,7 @@
 
 """
 s3_gateway:
-bottle/boto3 interface to view an s3 bucket in a web browser.
+Flask/boto3 interface to view an s3 bucket in a web browser.
 
 2021-02-15 slg - updated to use anonymous s3 requests,
                  per https://stackoverflow.com/questions/34865927/can-i-use-boto3-anonymously
@@ -18,7 +18,6 @@ import mimetypes
 import os
 import sys
 import urllib.parse
-from os.path import dirname
 
 import boto3
 import botocore
@@ -28,11 +27,9 @@ import mistune
 from botocore import UNSIGNED
 from botocore.client import Config
 
-import bottle
-from bottle import request, response, redirect
+from flask import request, redirect, render_template, Response
 
 from lib.ctools.dbfile import DBMySQL
-from paths import TEMPLATE_DIR
 
 README_NAMES = ['README.txt', 'README.md']
 README_TXT_HEADER = "<h3> README </h3>"
@@ -120,8 +117,8 @@ def s3_to_link(url, obj):
     else:
         raise RuntimeError("obj: "+json.dumps(obj, default=str))
 
-def s3_list_prefix(bucket_name, prefix, auth=None):
-    """The revised s3_list_prefix implementation: uses the Bottle
+def s3_list_prefix(bucket_name, prefix, auth=None, request_url=None):
+    """The revised s3_list_prefix implementation: uses the Flask
     template system to generate HTML. Get a list of the sub-prefixes
     (dirs) and the objects with this prefix (files), and then construct
     the dirs[] and files[] arrays. Elements of dirs are strings (one for
@@ -148,7 +145,16 @@ def s3_list_prefix(bucket_name, prefix, auth=None):
     if auth is not None and s3_files:
         annotate_s3files(auth, s3_files)
     # pylint: disable=consider-using-f-string
-    files = [{'a': s3_to_link(request.url, obj),
+    # Use provided URL or fall back to request.url if available
+    url = request_url
+    if url is None:
+        try:
+            url = request.url
+        except RuntimeError:
+            # If no Flask context, use a default URL
+            url = f"https://{bucket_name}.s3.amazonaws.com/"
+
+    files = [{'a': s3_to_link(url, obj),
               'basename': os.path.basename(obj['Key']),
               'size': "{:,}".format(obj['Size']),
               'ETag': obj['ETag'],
@@ -159,56 +165,60 @@ def s3_list_prefix(bucket_name, prefix, auth=None):
     # Look for a readme file
     readme_html = get_readme(bucket_name, s3_files)
 
-    return bottle.jinja2_template(INDEX_S3,
-                                  {'prefix':prefix,
-                                   'paths':paths,
-                                   'files':files,
-                                   'dirs':dirs,
-                                   'readme_html':readme_html,
-                                   'sys_version':sys.version},template_lookup=[TEMPLATE_DIR])
+    return render_template(INDEX_S3,
+                          prefix=prefix,
+                          paths=paths,
+                          files=files,
+                          dirs=dirs,
+                          readme_html=readme_html,
+                          sys_version=sys.version)
 
 
-def s3_app(*, bucket, quoted_prefix, url, auth=None):
+# pylint: disable=too-many-return-statements
+def s3_view(*, bucket, quoted_prefix, url, auth=None):
     """
-    Fetching a file. Called from bottle.
+    Fetching a file. Called from Flask.
     :param bucket: - the bucket that we are serving from
     :param quoted_prefix:   - the path to display.
     :param auth:   - Database authenticator
     """
     prefix = urllib.parse.unquote(quoted_prefix)
     if 'dev.digitalcorpora' in url:
-        logging.info("s3_gateway.py:s3_app url=%s s3_appbucket=%s prefix=%s", url, bucket, prefix)
+        logging.info("s3_gateway.py:s3_app url=%s s3_appbucket=%s prefix=%s",url,bucket,prefix)
     else:
-        logging.warning("s3_gateway.py:s3_app url=%s s3_appbucket=%s prefix=%s", url, bucket, prefix)
+        logging.warning("s3_gateway.py:s3_app url=%s s3_appbucket=%s prefix=%s",url,bucket,prefix)
 
     if prefix.endswith("/"):
         try:
-            return s3_list_prefix(bucket, prefix, auth=auth)
+            return s3_list_prefix(bucket, prefix, auth=auth, request_url=url)
         except FileNotFoundError as e:
-            logging.warning("e:%s", e)
-            response.status = 404
-            return bottle.jinja2_template(ERROR_404,bucket=bucket,prefix=prefix,template_lookup=[TEMPLATE_DIR])
+            logging.warning("e:%s",e)
+            return render_template(ERROR_404, bucket=bucket, prefix=prefix), 404
 
     # If the prefix does not end with a '/' and there is object there, see if it is a prefix
     try:
         obj = boto3.client('s3', config=Config( signature_version=UNSIGNED)).get_object(Bucket=bucket, Key=prefix)
     except botocore.exceptions.ClientError:
         try:
-            return s3_list_prefix(bucket, prefix+"/", auth=auth)
+            return s3_list_prefix(bucket, prefix+"/", auth=auth, request_url=url)
         except FileNotFoundError:
             # No object and not a prefix
-            response.status = 404
-            return bottle.jinja2_template('error_404.html',bucket=bucket,prefix=prefix,template_lookup=[TEMPLATE_DIR])
+            return render_template('error_404.html', bucket=bucket, prefix=prefix), 404
 
     # If we are using the bypass, redirect
 
     if USE_BYPASS:
-        logging.info("redirect to %s", BYPASS_URL + prefix)
-        redirect(BYPASS_URL + prefix)
+        logging.info("redirect to %s",BYPASS_URL + prefix)
+        try:
+            return redirect(BYPASS_URL + prefix)
+        except RuntimeError:
+            # Handle case where Flask context is not available (e.g., in Lambda)
+            return Response('', status=302, headers={'Location': BYPASS_URL + prefix})
 
     # Otherwise download directly
     try:
-        response.content_type = mimetypes.guess_type(prefix)[0]
+        content_type = mimetypes.guess_type(prefix)[0]
     except (TypeError,ValueError,KeyError):
-        response.content_type = 'application/octet-stream'
-    return obj['Body']
+        content_type = 'application/octet-stream'
+
+    return Response(obj['Body'], mimetype=content_type)

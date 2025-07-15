@@ -1,12 +1,12 @@
-## BOTTLE VERSION
+## FLASK VERSION
 
 """
 Generate reports.
 """
 
 import sys
-import bottle
-from paths import view
+from flask import request
+from digitalcorpora_app.paths import view
 from lib.ctools.dbfile import DBMySQL
 
 REPORT_TEMPLATE_FILENAME  = "reports.html"
@@ -123,7 +123,7 @@ def reports_json(*, auth, num):
 def reports_html(*, auth, root=''):
     """If reports with a get, just return the report rendered"""
     try:
-        num =  int(bottle.request.params['report'])
+        num =  int(request.args.get('report'))
     except (TypeError,KeyError,ValueError):
         num = None
     if num is not None:

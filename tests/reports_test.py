@@ -6,33 +6,35 @@ from os.path import abspath,dirname
 
 sys.path.append( dirname(dirname(abspath(__file__))))
 
-from boddle import boddle
-
-import s3_reports
-import bottle_app
+from digitalcorpora_app.s3_reports import *
+from digitalcorpora_app.main import get_dbreader
+from digitalcorpora_app.paths import TEMPLATE_DIR
 
 def test_report_count():
-    assert s3_reports.report_count() == len(s3_reports.REPORTS)
+    assert report_count() == len(REPORTS)
 
 @pytest.mark.skip(reason='not working')
 def test_reports_json():
-    dbreader = bottle_app.get_dbreader()
+    dbreader = get_dbreader()
     # Make sure each report works without error
-    for i in range(s3_reports.report_count()):
-        ret = s3_reports.report_generate(auth=dbreader, num=i)
+    for i in range(report_count()):
+        ret = report_generate(auth=dbreader, num=i)
         assert 'title' in ret
         assert 'sql' in ret
         assert 'column_names' in ret
         assert 'rows' in ret
-        ret = s3_reports.reports_json(auth=dbreader, num=i)
+        ret = reports_json(auth=dbreader, num=i)
 
 def test_reports_html():
-    dbreader = bottle_app.get_dbreader()
-    with boddle(params={'report':'0'}):
-        res = s3_reports.reports_html(auth=dbreader)
-
-    with boddle(params={'report':'invalid'}):
-        res = s3_reports.reports_html(auth=dbreader)
-
-    with boddle(params={}):
-        res = s3_reports.reports_html(auth=dbreader)
+    dbreader = get_dbreader()
+    from flask import Flask
+    app = Flask(__name__, template_folder=TEMPLATE_DIR)
+    # Test with valid report number
+    with app.test_request_context('/reports?report=0'):
+        res = reports_html(auth=dbreader)
+    # Test with invalid report number
+    with app.test_request_context('/reports?report=invalid'):
+        res = reports_html(auth=dbreader)
+    # Test with no report parameter
+    with app.test_request_context('/reports'):
+        res = reports_html(auth=dbreader)

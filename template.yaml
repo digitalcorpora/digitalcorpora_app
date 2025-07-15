@@ -1,0 +1,98 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: DigitalCorpora App - SAM Template for Testing
+
+Parameters:
+  DomainName:
+    Type: String
+    Default: test.digitalcorpora.org
+    Description: Domain name for the application
+
+Globals:
+  Function:
+    Timeout: 30
+    Runtime: python3.11
+    MemorySize: 512
+    Environment:
+      Variables:
+        PYTHONPATH: /var/task
+        TEMPLATE_DIR: /var/task/templates
+        STATIC_DIR: /var/task/static
+
+Resources:
+  DigitalCorporaFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: .
+      Handler: lambda_handler.lambda_handler
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /{proxy+}
+            Method: ANY
+        RootEvent:
+          Type: Api
+          Properties:
+            Path: /
+            Method: ANY
+      Policies:
+        - S3ReadPolicy:
+            BucketName: digitalcorpora
+        - Statement:
+            - Effect: Allow
+              Action:
+                - logs:CreateLogGroup
+                - logs:CreateLogStream
+                - logs:PutLogEvents
+              Resource: '*'
+
+  # Custom domain configuration for testing
+  ApiGatewayDomainName:
+    Type: AWS::ApiGateway::DomainName
+    Properties:
+      DomainName: !Ref DomainName
+      RegionalCertificateArn: !Ref CertificateArn
+      EndpointConfiguration:
+        Type: REGIONAL
+
+  ApiGatewayBasePathMapping:
+    Type: AWS::ApiGateway::BasePathMapping
+    Properties:
+      DomainName: !Ref ApiGatewayDomainName
+      RestApiId: !Ref ServerlessRestApi
+      Stage: !Ref ServerlessRestApiProdStage
+
+  # Route53 record for the custom domain
+  ApiGatewayDNSRecord:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      HostedZoneId: !Ref HostedZoneId
+      Name: !Ref DomainName
+      Type: A
+      AliasTarget:
+        DNSName: !GetAtt ApiGatewayDomainName.RegionalDomainName
+        HostedZoneId: !GetAtt ApiGatewayDomainName.RegionalHostedZoneId
+
+  CertificateArn:
+    Type: String
+    Description: ARN of the SSL certificate for the custom domain
+    Default: "arn:aws:acm:us-west-2:123456789012:certificate/your-certificate-id"
+
+  HostedZoneId:
+    Type: String
+    Description: Route53 hosted zone ID for the domain
+    Default: "Z1234567890ABCDEF"
+
+Outputs:
+  DigitalCorporaApi:
+    Description: "API Gateway endpoint URL for the DigitalCorpora function"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/"
+
+  DigitalCorporaFunction:
+    Description: "DigitalCorpora Lambda Function ARN"
+    Value: !GetAtt DigitalCorporaFunction.Arn
+
+  DigitalCorporaFunctionRole:
+    Description: "Implicit IAM Role created for DigitalCorpora function"
+    Value: !GetAtt DigitalCorporaFunctionRole.Arn
