@@ -17,4 +17,4 @@ jobs:
 
       - name: "FIXME"
         run: |
-          echo at some point in the future, this should deploy to Zappa...
+          echo at some point in the future, this should deploy to AWS SAM
