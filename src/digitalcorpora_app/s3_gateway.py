@@ -18,7 +18,6 @@ import mimetypes
 import os
 import sys
 import urllib.parse
-from os.path import dirname
 
 import boto3
 import botocore
@@ -31,7 +30,6 @@ from botocore.client import Config
 from flask import request, redirect, render_template, Response
 
 from lib.ctools.dbfile import DBMySQL
-from digitalcorpora_app.paths import TEMPLATE_DIR
 
 README_NAMES = ['README.txt', 'README.md']
 README_TXT_HEADER = "<h3> README </h3>"
@@ -119,7 +117,7 @@ def s3_to_link(url, obj):
     else:
         raise RuntimeError("obj: "+json.dumps(obj, default=str))
 
-def s3_list_prefix(bucket_name, prefix, auth=None):
+def s3_list_prefix(bucket_name, prefix, auth=None, request_url=None):
     """The revised s3_list_prefix implementation: uses the Flask
     template system to generate HTML. Get a list of the sub-prefixes
     (dirs) and the objects with this prefix (files), and then construct
@@ -147,7 +145,16 @@ def s3_list_prefix(bucket_name, prefix, auth=None):
     if auth is not None and s3_files:
         annotate_s3files(auth, s3_files)
     # pylint: disable=consider-using-f-string
-    files = [{'a': s3_to_link(request.url, obj),
+    # Use provided URL or fall back to request.url if available
+    url = request_url
+    if url is None:
+        try:
+            url = request.url
+        except RuntimeError:
+            # If no Flask context, use a default URL
+            url = f"https://{bucket_name}.s3.amazonaws.com/"
+
+    files = [{'a': s3_to_link(url, obj),
               'basename': os.path.basename(obj['Key']),
               'size': "{:,}".format(obj['Size']),
               'ETag': obj['ETag'],
@@ -167,6 +174,7 @@ def s3_list_prefix(bucket_name, prefix, auth=None):
                           sys_version=sys.version)
 
 
+# pylint: disable=too-many-return-statements
 def s3_view(*, bucket, quoted_prefix, url, auth=None):
     """
     Fetching a file. Called from Flask.
@@ -176,39 +184,41 @@ def s3_view(*, bucket, quoted_prefix, url, auth=None):
     """
     prefix = urllib.parse.unquote(quoted_prefix)
     if 'dev.digitalcorpora' in url:
-        logging.info("s3_gateway.py:s3_app url=%s s3_appbucket=%s prefix=%s", url, bucket, prefix)
+        logging.info("s3_gateway.py:s3_app url=%s s3_appbucket=%s prefix=%s",url,bucket,prefix)
     else:
-        logging.warning("s3_gateway.py:s3_app url=%s s3_appbucket=%s prefix=%s", url, bucket, prefix)
+        logging.warning("s3_gateway.py:s3_app url=%s s3_appbucket=%s prefix=%s",url,bucket,prefix)
 
     if prefix.endswith("/"):
         try:
-            return s3_list_prefix(bucket, prefix, auth=auth)
+            return s3_list_prefix(bucket, prefix, auth=auth, request_url=url)
         except FileNotFoundError as e:
-            logging.warning("e:%s", e)
-            response.status_code = 404
-            return render_template(ERROR_404, bucket=bucket, prefix=prefix)
+            logging.warning("e:%s",e)
+            return render_template(ERROR_404, bucket=bucket, prefix=prefix), 404
 
     # If the prefix does not end with a '/' and there is object there, see if it is a prefix
     try:
         obj = boto3.client('s3', config=Config( signature_version=UNSIGNED)).get_object(Bucket=bucket, Key=prefix)
     except botocore.exceptions.ClientError:
         try:
-            return s3_list_prefix(bucket, prefix+"/", auth=auth)
+            return s3_list_prefix(bucket, prefix+"/", auth=auth, request_url=url)
         except FileNotFoundError:
             # No object and not a prefix
-            response.status_code = 404
-            return render_template('error_404.html', bucket=bucket, prefix=prefix)
+            return render_template('error_404.html', bucket=bucket, prefix=prefix), 404
 
     # If we are using the bypass, redirect
 
     if USE_BYPASS:
-        logging.info("redirect to %s", BYPASS_URL + prefix)
-        return redirect(BYPASS_URL + prefix)
+        logging.info("redirect to %s",BYPASS_URL + prefix)
+        try:
+            return redirect(BYPASS_URL + prefix)
+        except RuntimeError:
+            # Handle case where Flask context is not available (e.g., in Lambda)
+            return Response('', status=302, headers={'Location': BYPASS_URL + prefix})
 
     # Otherwise download directly
     try:
         content_type = mimetypes.guess_type(prefix)[0]
     except (TypeError,ValueError,KeyError):
         content_type = 'application/octet-stream'
-    
+
     return Response(obj['Body'], mimetype=content_type)

@@ -1,32 +1,30 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
-Description: Digital Corpora Flask Application
-
-Globals:
-  Function:
-    Timeout: 300
-    Runtime: python3.13
-    Environment:
-      Variables:
-        AWS: "YES"
+Description: DigitalCorpora App - SAM Template for Testing
 
 Parameters:
   DomainName:
     Type: String
-    Default: "corp.digitalcorpora.org"
-    Description: "Domain name for the application"
-  
-  CertificateArn:
-    Type: String
-    Default: "arn:aws:acm:us-east-1:376778049323:certificate/f705638d-a61f-430d-b32e-3bf0d2cbcd5a"
-    Description: "ARN of the SSL certificate"
+    Default: test.digitalcorpora.org
+    Description: Domain name for the application
+
+Globals:
+  Function:
+    Timeout: 30
+    Runtime: python3.11
+    MemorySize: 512
+    Environment:
+      Variables:
+        PYTHONPATH: /var/task
+        TEMPLATE_DIR: /var/task/templates
+        STATIC_DIR: /var/task/static
 
 Resources:
   DigitalCorporaFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: src/
-      Handler: digitalcorpora_app.main.app
+      CodeUri: .
+      Handler: lambda_handler.lambda_handler
       Events:
         ApiEvent:
           Type: Api
@@ -38,46 +36,63 @@ Resources:
           Properties:
             Path: /
             Method: ANY
-      Environment:
-        Variables:
-          AWS: "YES"
-          DEBUG: "false"
       Policies:
         - S3ReadPolicy:
-            BucketName: "digitalcorpora"
-        - SecretsManagerReadWrite:
-            SecretArn: !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:digitalcorpora-*"
+            BucketName: digitalcorpora
+        - Statement:
+            - Effect: Allow
+              Action:
+                - logs:CreateLogGroup
+                - logs:CreateLogStream
+                - logs:PutLogEvents
+              Resource: '*'
 
-  DigitalCorporaApi:
-    Type: AWS::Serverless::Api
+  # Custom domain configuration for testing
+  ApiGatewayDomainName:
+    Type: AWS::ApiGateway::DomainName
     Properties:
-      StageName: prod
-      Domain:
-        DomainName: !Ref DomainName
-        CertificateArn: !Ref CertificateArn
-        EndpointConfiguration:
-          Type: REGIONAL
-        SecurityPolicy: TLS_1_2
+      DomainName: !Ref DomainName
+      RegionalCertificateArn: !Ref CertificateArn
+      EndpointConfiguration:
+        Type: REGIONAL
 
-  DigitalCorporaBucket:
-    Type: AWS::S3::Bucket
+  ApiGatewayBasePathMapping:
+    Type: AWS::ApiGateway::BasePathMapping
     Properties:
-      BucketName: digitalcorpora-sam-deployments
-      PublicAccessBlockConfiguration:
-        BlockPublicAcls: true
-        BlockPublicPolicy: true
-        IgnorePublicAcls: true
-        RestrictPublicBuckets: true
+      DomainName: !Ref ApiGatewayDomainName
+      RestApiId: !Ref ServerlessRestApi
+      Stage: !Ref ServerlessRestApiProdStage
+
+  # Route53 record for the custom domain
+  ApiGatewayDNSRecord:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      HostedZoneId: !Ref HostedZoneId
+      Name: !Ref DomainName
+      Type: A
+      AliasTarget:
+        DNSName: !GetAtt ApiGatewayDomainName.RegionalDomainName
+        HostedZoneId: !GetAtt ApiGatewayDomainName.RegionalHostedZoneId
+
+  CertificateArn:
+    Type: String
+    Description: ARN of the SSL certificate for the custom domain
+    Default: "arn:aws:acm:us-west-2:123456789012:certificate/your-certificate-id"
+
+  HostedZoneId:
+    Type: String
+    Description: Route53 hosted zone ID for the domain
+    Default: "Z1234567890ABCDEF"
 
 Outputs:
   DigitalCorporaApi:
-    Description: "API Gateway endpoint URL for Prod stage for Digital Corpora function"
-    Value: !Sub "https://${DigitalCorporaApi}.execute-api.${AWS::Region}.amazonaws.com/prod/"
-  
+    Description: "API Gateway endpoint URL for the DigitalCorpora function"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/"
+
   DigitalCorporaFunction:
-    Description: "Digital Corpora Lambda Function ARN"
+    Description: "DigitalCorpora Lambda Function ARN"
     Value: !GetAtt DigitalCorporaFunction.Arn
-  
+
   DigitalCorporaFunctionRole:
-    Description: "Implicit IAM Role created for Digital Corpora function"
-    Value: !GetAtt DigitalCorporaFunctionRole.Arn 
+    Description: "Implicit IAM Role created for DigitalCorpora function"
+    Value: !GetAtt DigitalCorporaFunctionRole.Arn

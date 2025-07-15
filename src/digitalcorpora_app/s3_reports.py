@@ -5,7 +5,7 @@ Generate reports.
 """
 
 import sys
-from flask import request, render_template
+from flask import request
 from digitalcorpora_app.paths import view
 from lib.ctools.dbfile import DBMySQL
 

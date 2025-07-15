@@ -2,8 +2,7 @@
 Single handy place for paths.
 """
 
-import os
-from os.path import dirname, abspath, relpath, join
+from os.path import dirname, abspath, join
 import functools
 
 from flask import render_template

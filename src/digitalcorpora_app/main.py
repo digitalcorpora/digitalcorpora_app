@@ -17,21 +17,25 @@ import sys
 import io
 import os
 import functools
-import filetype
-from urllib.parse import urlparse
 import logging
+import tempfile
+import configparser
+from urllib.parse import urlparse
 
+import filetype
+
+from flask import Flask, request, send_from_directory, jsonify, render_template
+
+from digitalcorpora_app.paths import STATIC_DIR, TEMPLATE_DIR, CREDENTIALS_FILE, view
+from digitalcorpora_app import s3_gateway, s3_reports
+from lib.ctools import dbfile
+
+
+# pylint: disable=unspecified-encoding
 # Set up logging level from LOG_LEVEL environment variable (default WARNING)
 log_level = os.environ.get("LOG_LEVEL", "WARNING").upper()
 logging.basicConfig(level=getattr(logging, log_level, logging.WARNING))
 
-from flask import Flask, request, send_from_directory, redirect, jsonify, render_template
-
-import digitalcorpora_app.paths as paths
-from digitalcorpora_app.paths import STATIC_DIR, TEMPLATE_DIR, CREDENTIALS_FILE, view
-from lib.ctools import dbfile
-
-from digitalcorpora_app import s3_gateway, s3_reports
 
 assert os.path.exists(TEMPLATE_DIR)
 
@@ -42,12 +46,12 @@ DEFAULT_OFFSET = 0
 DEFAULT_ROW_COUNT = 1000000
 DEFAULT_SEARCH_ROW_COUNT = 1000
 
-app = Flask(__name__, 
+app = Flask(__name__,
            template_folder=TEMPLATE_DIR,
            static_folder=STATIC_DIR)
 
 @functools.cache
-def get_dbreader(fail_gracefully=False):
+def get_dbreader():
     """Get the dbreader authentication info from TEST_CREDENTIALS, or etc/aws_creds.ini, or default credentials.ini"""
     credentials_path = os.environ.get('TEST_CREDENTIALS')
     if credentials_path:
@@ -55,7 +59,6 @@ def get_dbreader(fail_gracefully=False):
             raise FileNotFoundError(f"TEST_CREDENTIALS is set to {credentials_path}, but the file does not exist.")
         try:
             if credentials_path.endswith('.json'):
-                import json
                 with open(credentials_path, 'r') as f:
                     creds = json.load(f)
                 # Map Amazon-style keys to MYSQL_* keys
@@ -67,27 +70,25 @@ def get_dbreader(fail_gracefully=False):
                     'port': 'MYSQL_PORT',
                 }
                 mapped_creds = {keymap.get(k, k): v for k, v in creds.items() if k in keymap}
-                import tempfile
-                import configparser
                 with tempfile.NamedTemporaryFile('w+', delete=False, suffix='.ini') as tmpini:
                     config = configparser.ConfigParser()
                     config['dbreader'] = mapped_creds
                     config.write(tmpini)
                     tmpini.flush()
-                    logging.info(f"Using TEST_CREDENTIALS from {credentials_path} via temp ini {tmpini.name}")
+                    logging.info("Using TEST_CREDENTIALS from %s  via temp ini %s",credentials_path,tmpini.name)
                     return dbfile.DBMySQLAuth.FromConfigFile(tmpini.name, 'dbreader')
             else:
                 # Assume ini format
-                logging.info(f"Using TEST_CREDENTIALS from {credentials_path} (ini format)")
+                logging.info("Using TEST_CREDENTIALS from %s (ini format)",credentials_path)
                 return dbfile.DBMySQLAuth.FromConfigFile(credentials_path, 'dbreader')
         except Exception as e:
-            raise RuntimeError(f"Failed to load TEST_CREDENTIALS from {credentials_path}: {e}")
+            raise RuntimeError(f"Failed to load TEST_CREDENTIALS from {credentials_path}:{e}") from e
     elif os.path.exists(os.path.join(os.path.dirname(__file__), 'etc/aws_creds.ini')):
         aws_creds_path = os.path.join(os.path.dirname(__file__), 'etc/aws_creds.ini')
-        logging.info(f"Using AWS creds from {aws_creds_path}")
+        logging.info("Using AWS creds from %s",aws_creds_path)
         return dbfile.DBMySQLAuth.FromConfigFile(aws_creds_path, 'dbreader')
     else:
-        logging.info(f"Using default credentials file {CREDENTIALS_FILE}")
+        logging.info("Using default credentials file %s",CREDENTIALS_FILE)
         return dbfile.DBMySQLAuth.FromConfigFile(CREDENTIALS_FILE, 'dbreader')
 
 
@@ -128,7 +129,8 @@ def func_corpora_path(path=''):
     """Route https://downloads.digitalcorpora.org/corpora/path"""
     return s3_gateway.s3_view(bucket='digitalcorpora',
                              quoted_prefix='corpora/' + path,
-                             auth=get_dbreader(fail_gracefully=True), url=request.url)
+                             auth=get_dbreader(),
+                             url=request.url)
 
 @app.route('/downloads/')
 @app.route('/downloads/<path:path>')
@@ -136,7 +138,7 @@ def func_downloads_path(path=''):
     """Route https://downloads.digitalcorpora.org/downloads/path"""
     return s3_gateway.s3_view(bucket='digitalcorpora',
                              quoted_prefix='downloads/' + path,
-                             auth=get_dbreader(fail_gracefully=True), url=request.url)
+                             auth=get_dbreader(), url=request.url)
 
 @app.route('/reports')
 def reports():
