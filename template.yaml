@@ -20,10 +20,6 @@ Resources:
     Properties:
       CodeUri: .
       Handler: lambda_handler.lambda_handler
-      Metadata:
-        BuildMethod: python3.13
-        BuildProperties:
-          UseRequirements: false
       Events:
         ApiEvent:
           Type: Api

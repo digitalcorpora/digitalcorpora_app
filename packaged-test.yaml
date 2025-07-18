@@ -1,0 +1,67 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: DigitalCorpora App - SAM Template for Testing
+Globals:
+  Function:
+    Timeout: 30
+    Runtime: python3.13
+    MemorySize: 512
+    Environment:
+      Variables:
+        PYTHONPATH: /var/task/src
+        TEMPLATE_DIR: /var/task/src/digitalcorpora_app/templates
+        STATIC_DIR: /var/task/src/digitalcorpora_app/static
+        LOG_LEVEL: INFO
+Resources:
+  DigitalCorporaFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: s3://digitalcorpora-deployments/07e1ced2b28c2d74a7e6dd9cfd7eff84
+      Handler: lambda_handler.lambda_handler
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /{proxy+}
+            Method: ANY
+        RootEvent:
+          Type: Api
+          Properties:
+            Path: /
+            Method: ANY
+      Policies:
+      - S3ReadPolicy:
+          BucketName: digitalcorpora
+      - Statement:
+        - Effect: Allow
+          Action:
+          - logs:CreateLogGroup
+          - logs:CreateLogStream
+          - logs:PutLogEvents
+          Resource: '*'
+      - Statement:
+        - Effect: Allow
+          Action:
+          - secretsmanager:GetSecretValue
+          - secretsmanager:DescribeSecret
+          Resource:
+            Fn::Sub: arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:digitalcorpora-*
+    Metadata:
+      SamResourceId: DigitalCorporaFunction
+Outputs:
+  DigitalCorporaApi:
+    Description: API Gateway endpoint URL for the DigitalCorpora function
+    Value:
+      Fn::Sub: https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/
+  DigitalCorporaFunction:
+    Description: DigitalCorpora Lambda Function ARN
+    Value:
+      Fn::GetAtt:
+      - DigitalCorporaFunction
+      - Arn
+  DigitalCorporaFunctionRole:
+    Description: Implicit IAM Role created for DigitalCorpora function
+    Value:
+      Fn::GetAtt:
+      - DigitalCorporaFunctionRole
+      - Arn

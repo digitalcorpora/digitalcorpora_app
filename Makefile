@@ -77,7 +77,9 @@ sam-deploy:
 	sam deploy
 
 sam-deploy-test:
-	sam deploy --config-env test
+	sam build --config-env test
+	sam package --template-file .aws-sam/build/template.yaml --output-template-file packaged-test.yaml --s3-bucket digitalcorpora-deployments
+	sam deploy --template-file packaged-test.yaml --stack-name digitalcorpora-app-test --capabilities CAPABILITY_IAM --region us-west-2
 
 sam-deploy-dev:
 	sam deploy --config-env dev --parameter-overrides DomainName=dev.digitalcorpora.org
@@ -110,3 +112,4 @@ clean:
 	find . -name '.pytest_cache' -type d -exec rm -rf {} +
 	rm -rf .aws-sam
 	rm -rf .venv
+	rm -f packaged-*.yaml
