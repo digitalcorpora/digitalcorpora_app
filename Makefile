@@ -61,11 +61,23 @@ coverage-open:
 
 ################################################################
 # AWS SAM deployment
+sam-validate:
+	sam validate
+
+sam-validate-lint:
+	sam validate --lint
+
 sam-build:
 	sam build
 
+sam-build-test:
+	sam build --config-env test
+
 sam-deploy:
 	sam deploy
+
+sam-deploy-test:
+	sam deploy --config-env test
 
 sam-deploy-dev:
 	sam deploy --config-env dev --parameter-overrides DomainName=dev.digitalcorpora.org
@@ -78,6 +90,9 @@ sam-deploy-search:
 
 sam-local:
 	DEBUG=true sam local start-api
+
+sam-local-test:
+	sam local start-api --config-env test
 
 sam-local-lambda:
 	sam local start-lambda

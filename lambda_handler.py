@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Lambda handler for the DigitalCorpora application.
+Lambda handler for the DigitalCorpora Flask application.
 This file serves as the entry point for AWS Lambda.
 """
 
@@ -9,14 +9,11 @@ import os
 import sys
 from urllib.parse import urlparse
 
-# Add the current directory to Python path
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+# Add the src directory to Python path
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), 'src'))
 
-import bottle
-from bottle import request, response
-
-# Import your application
-from app_wsgi import app
+from flask import request as flask_request
+from digitalcorpora_app.main import app
 
 def lambda_handler(event, context):
     """
@@ -37,71 +34,35 @@ def lambda_handler(event, context):
     headers = event.get('headers', {}) or {}
     body = event.get('body', '')
 
-    # Set up Bottle request
-    request.environ = {
-        'REQUEST_METHOD': http_method,
-        'PATH_INFO': path,
-        'QUERY_STRING': '&'.join([f"{k}={v}" for k, v in query_string.items()]),
-        'HTTP_HOST': headers.get('Host', 'localhost'),
-        'HTTP_USER_AGENT': headers.get('User-Agent', ''),
-        'HTTP_ACCEPT': headers.get('Accept', '*/*'),
-        'HTTP_ACCEPT_ENCODING': headers.get('Accept-Encoding', ''),
-        'HTTP_ACCEPT_LANGUAGE': headers.get('Accept-Language', ''),
-        'HTTP_CONNECTION': headers.get('Connection', 'close'),
-        'HTTP_REFERER': headers.get('Referer', ''),
-        'HTTP_X_FORWARDED_FOR': headers.get('X-Forwarded-For', ''),
-        'HTTP_X_FORWARDED_PROTO': headers.get('X-Forwarded-Proto', 'https'),
-        'HTTP_X_FORWARDED_PORT': headers.get('X-Forwarded-Port', '443'),
-        'wsgi.input': type('obj', (object,), {
-            'read': lambda: body.encode('utf-8') if isinstance(body, str) else body
-        })(),
-        'wsgi.version': (1, 0),
-        'wsgi.url_scheme': 'https',
-        'wsgi.errors': sys.stderr,
-        'wsgi.multithread': False,
-        'wsgi.multiprocess': False,
-        'wsgi.run_once': True,
-    }
+    # Set up Flask request context
+    with app.test_request_context(
+        path=path,
+        method=http_method,
+        query_string=query_string,
+        headers=headers,
+        data=body
+    ):
+        try:
+            # Call the Flask application
+            response = app.full_dispatch_request()
 
-    # Set up response
-    response.status = 200
-    response.headers = {}
+            # Build API Gateway response
+            api_response = {
+                'statusCode': response.status_code,
+                'headers': dict(response.headers),
+                'body': response.get_data(as_text=True),
+                'isBase64Encoded': False
+            }
 
-    try:
-        # Call the Bottle application
-        result = app(request.environ, lambda status, headers: None)
+            return api_response
 
-        # Get the response content
-        if hasattr(result, '__iter__'):
-            content = b''.join(result)
-        else:
-            content = str(result).encode('utf-8')
-
-        # Build API Gateway response
-        api_response = {
-            'statusCode': response.status,
-            'headers': {
-                'Content-Type': response.headers.get('Content-Type', 'text/html'),
-                'Cache-Control': response.headers.get('Cache-Control', 'no-cache'),
-            },
-            'body': content.decode('utf-8') if isinstance(content, bytes) else str(content),
-            'isBase64Encoded': False
-        }
-
-        # Add any additional headers from Bottle response
-        for key, value in response.headers.items():
-            if key.lower() not in ['content-type', 'cache-control']:
-                api_response['headers'][key] = value
-
-        return api_response
-
-    except Exception as e:
-        # Handle errors
-        return {
-            'statusCode': 500,
-            'headers': {
-                'Content-Type': 'text/plain',
-            },
-            'body': f'Internal Server Error: {str(e)}',
-            'isBase64Encoded': False
-        }
+        except Exception as e:
+            # Handle errors
+            return {
+                'statusCode': 500,
+                'headers': {
+                    'Content-Type': 'text/plain',
+                },
+                'body': f'Internal Server Error: {str(e)}',
+                'isBase64Encoded': False
+            }

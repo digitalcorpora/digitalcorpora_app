@@ -184,15 +184,15 @@ def s3_view(*, bucket, quoted_prefix, url, auth=None):
     """
     prefix = urllib.parse.unquote(quoted_prefix)
     if 'dev.digitalcorpora' in url:
-        logging.info("s3_gateway.py:s3_app url=%s s3_appbucket=%s prefix=%s",url,bucket,prefix)
+        logging.info("s3_gateway.py:s3_app url=%s s3_appbucket=%s prefix=%s", url, bucket, prefix)
     else:
-        logging.warning("s3_gateway.py:s3_app url=%s s3_appbucket=%s prefix=%s",url,bucket,prefix)
+        logging.warning("s3_gateway.py:s3_app url=%s s3_appbucket=%s prefix=%s", url, bucket, prefix)
 
     if prefix.endswith("/"):
         try:
             return s3_list_prefix(bucket, prefix, auth=auth, request_url=url)
         except FileNotFoundError as e:
-            logging.warning("e:%s",e)
+            logging.warning("e:%s", e)
             return render_template(ERROR_404, bucket=bucket, prefix=prefix), 404
 
     # If the prefix does not end with a '/' and there is object there, see if it is a prefix
@@ -208,7 +208,7 @@ def s3_view(*, bucket, quoted_prefix, url, auth=None):
     # If we are using the bypass, redirect
 
     if USE_BYPASS:
-        logging.info("redirect to %s",BYPASS_URL + prefix)
+        logging.info("redirect to %s", BYPASS_URL + prefix)
         try:
             return redirect(BYPASS_URL + prefix)
         except RuntimeError:

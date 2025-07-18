@@ -2,22 +2,17 @@ AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description: DigitalCorpora App - SAM Template for Testing
 
-Parameters:
-  DomainName:
-    Type: String
-    Default: test.digitalcorpora.org
-    Description: Domain name for the application
-
 Globals:
   Function:
     Timeout: 30
-    Runtime: python3.11
+    Runtime: python3.13
     MemorySize: 512
     Environment:
       Variables:
-        PYTHONPATH: /var/task
-        TEMPLATE_DIR: /var/task/templates
-        STATIC_DIR: /var/task/static
+        PYTHONPATH: /var/task/src
+        TEMPLATE_DIR: /var/task/src/digitalcorpora_app/templates
+        STATIC_DIR: /var/task/src/digitalcorpora_app/static
+        LOG_LEVEL: INFO
 
 Resources:
   DigitalCorporaFunction:
@@ -25,6 +20,10 @@ Resources:
     Properties:
       CodeUri: .
       Handler: lambda_handler.lambda_handler
+      Metadata:
+        BuildMethod: python3.13
+        BuildProperties:
+          UseRequirements: false
       Events:
         ApiEvent:
           Type: Api
@@ -46,43 +45,12 @@ Resources:
                 - logs:CreateLogStream
                 - logs:PutLogEvents
               Resource: '*'
-
-  # Custom domain configuration for testing
-  ApiGatewayDomainName:
-    Type: AWS::ApiGateway::DomainName
-    Properties:
-      DomainName: !Ref DomainName
-      RegionalCertificateArn: !Ref CertificateArn
-      EndpointConfiguration:
-        Type: REGIONAL
-
-  ApiGatewayBasePathMapping:
-    Type: AWS::ApiGateway::BasePathMapping
-    Properties:
-      DomainName: !Ref ApiGatewayDomainName
-      RestApiId: !Ref ServerlessRestApi
-      Stage: !Ref ServerlessRestApiProdStage
-
-  # Route53 record for the custom domain
-  ApiGatewayDNSRecord:
-    Type: AWS::Route53::RecordSet
-    Properties:
-      HostedZoneId: !Ref HostedZoneId
-      Name: !Ref DomainName
-      Type: A
-      AliasTarget:
-        DNSName: !GetAtt ApiGatewayDomainName.RegionalDomainName
-        HostedZoneId: !GetAtt ApiGatewayDomainName.RegionalHostedZoneId
-
-  CertificateArn:
-    Type: String
-    Description: ARN of the SSL certificate for the custom domain
-    Default: "arn:aws:acm:us-west-2:123456789012:certificate/your-certificate-id"
-
-  HostedZoneId:
-    Type: String
-    Description: Route53 hosted zone ID for the domain
-    Default: "Z1234567890ABCDEF"
+        - Statement:
+            - Effect: Allow
+              Action:
+                - secretsmanager:GetSecretValue
+                - secretsmanager:DescribeSecret
+              Resource: !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:digitalcorpora-*"
 
 Outputs:
   DigitalCorporaApi:
