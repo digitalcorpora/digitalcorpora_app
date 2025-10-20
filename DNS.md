@@ -1,4 +1,4 @@
-Host: app   
+Host: app
 CNAME
 Value: hs24mmekne.execute-api.us-west-2.amazonaws.com
 
