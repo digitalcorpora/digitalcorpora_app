@@ -7,7 +7,6 @@ LOCAL_URL:=http://localhost:$(PORT)/s3_browser.html
 PYLINT_FILES:=$(shell /bin/ls *.py  | grep -v bottle.py | grep -v app_wsgi.py)
 PYLINT_THRESHOLD:=9.5
 PYTHON:=python3
-LOCAL_URL=http://localhost:$(PORT)/s3_browser.html
 
 ################################################################
 # Local javascript browser
