@@ -49,6 +49,10 @@ Resources:
     Metadata:
       SamResourceId: DigitalCorporaFunction
 Outputs:
+  CustomDomainUrl:
+    Description: Custom domain URL for the DigitalCorpora API
+    Value:
+      Fn::Sub: https://${DomainName}/
   DigitalCorporaApi:
     Description: API Gateway endpoint URL for the DigitalCorpora function
     Value:

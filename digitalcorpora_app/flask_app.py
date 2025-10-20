@@ -5,9 +5,9 @@ The goal is to only have the Flask code in this file and nowhere else.
 
 Debug:
 (cd ~/apps.digitalcorpora.org/;make touch)
-https://corp.digitalcorpora.org/
-https://corp.digitalcorpora.org/ver
-https://corp.digitalcorpora.org/reports
+https://api.digitalcorpora.org/
+https://api.digitalcorpora.org/ver
+https://api.digitalcorpora.org/reports
 
 """
 
@@ -110,7 +110,7 @@ def static_path(path):
 ### S3 STATIC
 @app.route('/robots.txt')
 def func_robots():
-    """Route https://downloads.digitalcorpora.org/robots.txt which asks Google not to index this."""
+    """Route https://api.digitalcorpora.org/robots.txt which asks Google not to index this."""
     return s3_gateway.s3_view(bucket='digitalcorpora', quoted_prefix='robots.txt', url=request.url)
 
 ## TEMPLATE VIEWS
@@ -126,7 +126,7 @@ def func_root():
 @app.route('/corpora/')
 @app.route('/corpora/<path:path>')
 def func_corpora_path(path=''):
-    """Route https://downloads.digitalcorpora.org/corpora/path"""
+    """Route https://api.digitalcorpora.org/corpora/path"""
     return s3_gateway.s3_view(bucket='digitalcorpora',
                              quoted_prefix='corpora/' + path,
                              auth=get_dbreader(),
@@ -135,7 +135,7 @@ def func_corpora_path(path=''):
 @app.route('/downloads/')
 @app.route('/downloads/<path:path>')
 def func_downloads_path(path=''):
-    """Route https://downloads.digitalcorpora.org/downloads/path"""
+    """Route https://api.digitalcorpora.org/downloads/path"""
     return s3_gateway.s3_view(bucket='digitalcorpora',
                              quoted_prefix='downloads/' + path,
                              auth=get_dbreader(), url=request.url)

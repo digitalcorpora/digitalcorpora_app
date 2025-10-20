@@ -19,10 +19,10 @@ install:
 dev:
 	cd src && poetry run python -m digitalcorpora_app.main
 
-test-local:
+test-local: requirements.txt
 	pytest tests/test_s3_listing.py --base-url=$(LOCAL_URL)
 
-test-prod:
+test-prod: requirements.txt
 	pytest tests/test_s3_listing.py --base-url=https://$(BUCKET).s3-website-$(REGION).amazonaws.com/
 
 ################################################################
@@ -61,42 +61,35 @@ coverage-open:
 
 ################################################################
 # AWS SAM deployment
-sam-validate:
+sam-validate: requirements.txt
 	sam validate
 
-sam-validate-lint:
+sam-validate-lint: requirements.txt
 	sam validate --lint
 
-sam-build:
+sam-build: requirements.txt
 	sam build
 
-sam-build-test:
+sam-build-test: requirements.txt
 	sam build --config-env test
 
-sam-deploy:
-	sam deploy
+sam-deploy: requirements.txt
+	sam deploy --parameter-overrides DomainName=api.digitalcorpora.org
 
-sam-deploy-test:
+sam-deploy-test: requirements.txt
 	sam build --config-env test
 	sam package --template-file .aws-sam/build/template.yaml --output-template-file packaged-test.yaml --s3-bucket digitalcorpora-deployments
-	sam deploy --template-file packaged-test.yaml --stack-name digitalcorpora-app-test --capabilities CAPABILITY_IAM --region us-west-2
+	sam deploy --template-file packaged-test.yaml --stack-name digitalcorpora-app-test --capabilities CAPABILITY_IAM --region us-west-2 --parameter-overrides DomainName=api.digitalcorpora.org
 
-sam-deploy-dev:
-	sam deploy --config-env dev --parameter-overrides DomainName=dev.digitalcorpora.org
+# The canonical deployment is now to api.digitalcorpora.org via AWS SAM. If you need to deploy to a different domain, override DomainName at deploy time.
 
-sam-deploy-app:
-	sam deploy --config-env app --parameter-overrides DomainName=app.digitalcorpora.org
-
-sam-deploy-search:
-	sam deploy --config-env search --parameter-overrides DomainName=search.digitalcorpora.org
-
-sam-local:
+sam-local: requirements.txt
 	DEBUG=true sam local start-api
 
-sam-local-test:
+sam-local-test: requirements.txt
 	sam local start-api --config-env test
 
-sam-local-lambda:
+sam-local-lambda: requirements.txt
 	sam local start-lambda
 
 ################################################################

@@ -4,8 +4,8 @@ AWS username: simsong@acm.org
 
 AWS Services:
 APIs
- - digitalcorpora-app (Zappa)
- - digitalcorpora-search (Zappa)
+ - digitalcorpora-app (AWS SAM)
+ - digitalcorpora-search (AWS SAM)
 Region:
  - us-west-2 (oregon)
 
@@ -14,7 +14,4 @@ Domains:
  knarta.org
  planttracer.org
 
-
-existing - zappa
-us-west-2
-account: digitalcorpora?
+digitalcorpora_app is now deployed via AWS SAM to api.digitalcorpora.org. All subdomains (e.g., search.digitalcorpora.org, app.digitalcorpora.org) can CNAME to api.digitalcorpora.org for a single deployment.

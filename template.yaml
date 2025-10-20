@@ -1,62 +1,67 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
-Description: DigitalCorpora App - SAM Template for Testing
+Description: >
+  Leaderboard application
+
+Parameters:
+  FQDN:
+    Type: String
+    Description: Fully qualified domain name (e.g., api.digitalcorpora.org)
 
 Globals:
   Function:
     Timeout: 30
-    Runtime: python3.13
-    MemorySize: 512
-    Environment:
-      Variables:
-        PYTHONPATH: /var/task/src
-        TEMPLATE_DIR: /var/task/src/digitalcorpora_app/templates
-        STATIC_DIR: /var/task/src/digitalcorpora_app/static
-        LOG_LEVEL: INFO
+  Api:
+    Cors:
+      AllowMethods: "'OPTIONS,GET,POST,PUT,DELETE'"
+      AllowHeaders: "'content-type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Forwarded-For'"
+      AllowOrigin: "'*'"
+      EnableSimpleResponses: true
 
 Resources:
-  DigitalCorporaFunction:
+  # Custom domain name using existing ACM cert
+  CustomDomainName:
+    Type: AWS::ApiGatewayV2::DomainName
+    Properties:
+      DomainName: !Ref FQDN
+      DomainNameConfigurations:
+        - CertificateArn: arn:aws:acm:us-east-1:376778049323:certificate/f705638d-a61f-430d-b32e-3bf0d2cbcd5a
+          EndpointType: REGIONAL
+
+  ApiMapping:
+    Type: AWS::ApiGatewayV2::ApiMapping
+    Properties:
+      ApiId: !Ref ServerlessHttpApi
+      DomainName: !Ref CustomDomainName
+      Stage: $default
+
+  FlaskFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: .
-      Handler: lambda_handler.lambda_handler
+      CodeUri: digitalcorpora_app/
+      Handler: run.sh
+      Runtime: python3.13
+      MemorySize: 512
+      Environment:
+        Variables:
+          AWS_LAMBDA_EXEC_WRAPPER: /opt/bootstrap
+          PORT: 8000
+      Layers:
+        - !Sub arn:aws:lambda:${AWS::Region}:753240598075:layer:LambdaAdapterLayerX86:23
       Events:
         ApiEvent:
-          Type: Api
-          Properties:
-            Path: /{proxy+}
-            Method: ANY
-        RootEvent:
-          Type: Api
-          Properties:
-            Path: /
-            Method: ANY
-      Policies:
-        - S3ReadPolicy:
-            BucketName: digitalcorpora
-        - Statement:
-            - Effect: Allow
-              Action:
-                - logs:CreateLogGroup
-                - logs:CreateLogStream
-                - logs:PutLogEvents
-              Resource: '*'
-        - Statement:
-            - Effect: Allow
-              Action:
-                - secretsmanager:GetSecretValue
-                - secretsmanager:DescribeSecret
-              Resource: !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:digitalcorpora-*"
+          Type: HttpApi
 
 Outputs:
-  DigitalCorporaApi:
-    Description: "API Gateway endpoint URL for the DigitalCorpora function"
-    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/"
-
-  DigitalCorporaFunction:
-    Description: "DigitalCorpora Lambda Function ARN"
-    Value: !GetAtt DigitalCorporaFunction.Arn
-
-  DigitalCorporaFunctionRole:
-    Description: "Implicit IAM Role created for DigitalCorpora function"
-    Value: !GetAtt DigitalCorporaFunctionRole.Arn
+  ApiUrl:
+    Description: "Custom Domain URL"
+    Value: !Sub "https://${FQDN}"
+  FlaskApi:
+    Description: "API Gateway endpoint URL for Flask function"
+    Value: !Sub "https://${ServerlessHttpApi}.execute-api.${AWS::Region}.${AWS::URLSuffix}/"
+  FlaskFunction:
+    Description: "Flask Lambda Function ARN"
+    Value: !GetAtt FlaskFunction.Arn
+  FlaskIamRole:
+    Description: "Implicit IAM Role created for Flask function"
+    Value: !GetAtt FlaskFunctionRole.Arn
