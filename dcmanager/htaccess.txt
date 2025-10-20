@@ -9,7 +9,7 @@ RewriteRule ^search(/.*)?$ https://search.digitalcorpora.org/search/%1 [R=302,L]
 
 # /reports -> external redirect
 RewriteCond %{REQUEST_URI} ^/reports(/.*)?$
-RewriteRule ^search(/.*)?$ https://search.digitalcorpora.org/reports/%1 [R=302,L]
+RewriteRule ^reports(/.*)?$ https://search.digitalcorpora.org/reports/%1 [R=302,L]
 
 # /index.tsv -> external redirect
 RewriteCond %{REQUEST_URI} ^/index\.tsv$
