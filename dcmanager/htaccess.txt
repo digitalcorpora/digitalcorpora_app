@@ -17,7 +17,7 @@ RewriteRule ^index\.tsv$ https://search.digitalcorpora.org/index.tsv [R=302,L]
 
 # Files not ending with / -> redirect to S3
 RewriteCond %{REQUEST_URI} ^(.*[^/])$
-RewriteRule ^(.*[^/])$ https://digitalcorpora.s3.amazonaws.com%1 [R=302,L]
+RewriteRule ^(.*[^/])$ https://digitalcorpora.s3.amazonaws.com/%1 [R=302,L]
 
 # Catch-all for non-existing files or dirs
 RewriteCond %{REQUEST_FILENAME} !-f
