@@ -4,7 +4,7 @@ REGION=us-west-2
 BUCKET=digitalcorpora
 PORT=8000
 LOCAL_URL=http://localhost:$(PORT)/s3_browser.html
-PYTHON=venv/bin/python
+PYTHON?=$(shell which python3.9 2>/dev/null || which python3)
 PYLINT_FILES=$(shell /bin/ls *.py  | grep -v bottle.py | grep -v app_wsgi.py)
 PYLINT_THRESHOLD=9.5
 
