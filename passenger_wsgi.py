@@ -12,9 +12,9 @@ import sys
 import os
 import os.path
 
-DESIRED_PYTHON = 'python3.9'
+DESIRED_PYTHON = 'python3.10'
 HOME = os.getenv('HOME')
-DREAMHOST_PYTHON_BINDIR = os.path.join( HOME, 'opt/python-3.9.2/bin')
+DREAMHOST_PYTHON_BINDIR = os.path.join( HOME, 'opt/python-3.10/bin')
 DUMP_VARS = False
 
 def dump_vars(f):
