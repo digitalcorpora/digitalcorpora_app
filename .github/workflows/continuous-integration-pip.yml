@@ -8,7 +8,7 @@ jobs:
     strategy:
       matrix:
         os: ['ubuntu-latest']
-        python-version: [3.10]   # installed version on Dreamhost
+        python-version: ['3.10']   # installed version on Dreamhost
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout
