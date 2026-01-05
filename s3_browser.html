@@ -839,13 +839,6 @@ permissions and limitations under the License.
             }, ]
         });
 
-        // Make columns resizable after DataTable is initialized
-        // $('#tb-s3objects').colResizable({
-        //     liveDrag: true,
-        //     minWidth: 40,
-        //     resizeMode: 'flex'
-        // });
-
         $('#tb-s3objects').DataTable().column(s3exp_columns.key).visible(false);
         console.log("jQuery version=" + $.fn.jquery);
 
