@@ -31,6 +31,7 @@ REQ = venv/pyvenv.cfg
 PIP_INSTALL=$(PYTHON) -m pip install --no-warn-script-location
 
 venv: $(REQ)
+	@echo "Virtual environment ready in venv/"
 
 venv/pyvenv.cfg:
 	$(PYTHON) -m venv venv
