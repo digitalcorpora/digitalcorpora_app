@@ -29,6 +29,9 @@ test-prod:
 # Manage the Pythn virtual environment
 REQ = venv/pyvenv.cfg
 PIP_INSTALL=$(PYTHON) -m pip install --no-warn-script-location
+
+venv: $(REQ)
+
 venv/pyvenv.cfg:
 	$(PYTHON) -m venv venv
 
