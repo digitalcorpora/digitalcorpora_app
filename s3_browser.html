@@ -783,12 +783,20 @@ permissions and limitations under the License.
         console.log("hash    : " + parser.hash); // => "#topic"
         console.log("host    : " + parser.host); // => "example.com:3000"
 
+        // Utility function to validate CloudFront domains
+        function isValidCloudFrontDomain(hostname) {
+            const allowedDomains = ['cloudfront.net'];
+            return allowedDomains.some(domain => 
+                hostname === domain || hostname.endsWith(`.${domain}`)
+            );
+        }
+
         // If initial bucket has been hard-coded above then use it, else try to
         // derive the initial bucket from the document URL (useful if index.html was
         // launched directly from within a bucket), else prompt the user.
         if (s3exp_config.Bucket) {
             (s3exp_lister = s3list(s3exp_config, s3draw)).go();
-        } else if (parser.hostname.endsWith('cloudfront.net') && s3_location) {
+        } else if (isValidCloudFrontDomain(parser.hostname) && s3_location) {
             var s3_url;
             var bucket;
             var region;
