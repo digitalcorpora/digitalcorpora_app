@@ -2,11 +2,11 @@
 
 REGION=us-west-2
 BUCKET=digitalcorpora
-PORT:=8000
-LOCAL_URL:=http://localhost:$(PORT)/s3_browser.html
-PYLINT_FILES:=$(shell /bin/ls *.py  | grep -v bottle.py | grep -v app_wsgi.py)
-PYLINT_THRESHOLD:=9.5
-PYTHON:=python3
+PORT=8000
+LOCAL_URL=http://localhost:$(PORT)/s3_browser.html
+PYTHON?=$(shell which python3.10 2>/dev/null || which python3)
+PYLINT_FILES=$(shell /bin/ls *.py  | grep -v bottle.py | grep -v app_wsgi.py)
+PYLINT_THRESHOLD=10.0
 
 ################################################################
 # Local javascript browser
