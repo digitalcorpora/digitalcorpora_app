@@ -61,4 +61,4 @@ WebTest==3.0.0
 Werkzeug==3.1.5
 zappa==0.58.0
 zipp==3.19.1
-wheel>=0.38.0 # not directly required, pinned by Snyk to avoid a vulnerability
+wheel>=0.46.2 # not directly required, pinned by Snyk to avoid a vulnerability
