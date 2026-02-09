@@ -6,7 +6,7 @@ PORT=8000
 LOCAL_URL=http://localhost:$(PORT)/s3_browser.html
 PYTHON?=$(shell which python3.10 2>/dev/null || which python3)
 PYLINT_FILES=$(shell /bin/ls *.py  | grep -v bottle.py | grep -v app_wsgi.py)
-PYLINT_THRESHOLD=9.5
+PYLINT_THRESHOLD=10.0
 
 ################################################################
 # Local javascript browser
@@ -26,14 +26,16 @@ test-prod:
 
 
 ################################################################
-# Manage the Pythn virtual environment
+# Manage the Python virtual environment
 REQ = venv/pyvenv.cfg
 PIP_INSTALL=$(PYTHON) -m pip install --no-warn-script-location
+
+venv: $(REQ)
+	@echo "Virtual environment ready in venv/"
+
 venv/pyvenv.cfg:
 	$(PYTHON) -m venv venv
 
-venv:
-	$(PYTHON) -m venv venv
 
 ################################################################
 #
@@ -69,7 +71,13 @@ freeze:
 ################################################################
 # Publish the S3 browser
 pub:
-	aws --profile=dcwriter s3 cp s3_browser.html s3://digitalcorpora/s3_browser.html
+	aws --profile=dcwriter s3 cp s3_browser.html s3://digitalcorpora/s3_browser.html \
+	  --cache-control "no-cache, no-store, must-revalidate" \
+	  --content-type text/html \
+	  --metadata-directive REPLACE
+	scp s3_browser.html dcorp_wordpress@digitalcorpora.org:digitalcorpora.org/s3_browser.html
+
+
 
 
 

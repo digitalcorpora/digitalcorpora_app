@@ -1,0 +1,25 @@
+RewriteEngine On
+
+# Do not apply any rewrites to redirect.php
+RewriteRule ^redirect\.php$ - [L]
+
+# /search -> external redirect
+RewriteCond %{REQUEST_URI} ^/search(/.*)?$
+RewriteRule ^search(/.*)?$ https://search.digitalcorpora.org/search/%1 [R=302,L]
+
+# /reports -> external redirect
+RewriteCond %{REQUEST_URI} ^/reports(/.*)?$
+RewriteRule ^reports(/.*)?$ https://search.digitalcorpora.org/reports/%1 [R=302,L]
+
+# /index.tsv -> external redirect
+RewriteCond %{REQUEST_URI} ^/index\.tsv$
+RewriteRule ^index\.tsv$ https://search.digitalcorpora.org/index.tsv [R=302,L]
+
+# Files not ending with / -> redirect to S3
+RewriteCond %{REQUEST_URI} ^(.*[^/])$
+RewriteRule ^(.*[^/])$ https://digitalcorpora.s3.amazonaws.com/%1 [R=302,L]
+
+# Catch-all for non-existing files or dirs
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ /redirect.php [L]

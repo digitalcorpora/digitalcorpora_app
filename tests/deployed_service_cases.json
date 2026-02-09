@@ -1,0 +1,38 @@
+[
+    {
+        "url": "http://downloads.digitalcorpora.org/corpora/files/govdocs1/zipfilelist-md5.txt",
+        "expect": {
+            "type": "file",
+            "length": 76800,
+            "mime": "text/plain",
+            "direct": false
+        }
+    },
+    {
+        "url": "https://corp.digitalcorpora.org/robots.txt",
+        "expect": {
+            "type": "file",
+            "length": 107,
+            "mime": "text/plain",
+            "direct": false
+        }
+    },
+    {
+        "url": "https://corp.digitalcorpora.org/corpora/dfrws/",
+        "expect": {
+            "type": "file",
+            "length": 53199,
+            "mime": "text/html",
+            "direct": false
+        }
+    },
+    {
+        "url": "https://downloads.digitalcorpora.org/corpora/dfrws/",
+        "expect": {
+            "type": "file",
+            "length": 53199,
+            "mime": "text/html",
+            "direct": true
+        }
+    }
+]
