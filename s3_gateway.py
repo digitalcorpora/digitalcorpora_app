@@ -18,7 +18,6 @@ import mimetypes
 import os
 import sys
 import urllib.parse
-from os.path import dirname
 
 import boto3
 import botocore
