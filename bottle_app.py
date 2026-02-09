@@ -17,13 +17,14 @@ import sys
 import io
 import os
 import functools
-import filetype
 from urllib.parse import urlparse
+
+import filetype
 
 import bottle
 
 import paths
-from paths import STATIC_DIR,TEMPLATE_DIR,CREDENTIALS_FILE,view
+from paths import STATIC_DIR,TEMPLATE_DIR,view
 from lib.ctools import dbfile
 
 import s3_gateway
@@ -51,7 +52,7 @@ def get_dbreader(fail_gracefully=False):
         paths.CREDENTIALS_FILE = paths.CREDENTIALS_FILE.replace('credentials.ini','aws_creds.ini')
     try:
         return dbfile.DBMySQLAuth.FromConfigFile( paths.CREDENTIALS_FILE, 'dbreader' )
-    except dbfile.SecretsManagerError as e:
+    except dbfile.SecretsManagerError:
         if fail_gracefully:
             return None
         raise
@@ -150,7 +151,7 @@ def index_tsf():
 
 @bottle.route('/search/api')
 def search_api():
-    q = '%' + bottle.request.params.get('q','') + '%'
+    q = '%' + bottle.request.params.get('q','') + '%'  # pylint: disable=no-member
     try:
         search_row_count = int(bottle.request.params['row_count'])
     except (ValueError,KeyError):

@@ -2,7 +2,6 @@
 Single handy place for paths.
 """
 
-import os
 from os.path import dirname, abspath, relpath, join
 import functools
 
